@@ -11,6 +11,7 @@
 #define END_LOOP         L"exit"
 #define PRINT_DIRECTORY  L"dir"
 #define CHANGE_DIRECTORY L"cd"
+#define MAKE_DIRECTORY   L"md"
 #define BUFFER_SIZE      1028
 
 
@@ -39,9 +40,9 @@ int main(int argc, char** argv)
 	manager->get_RootFolder((IDispatch**)&currFolder);
 	
 	
-	while (wcscmp(command, END_LOOP) != 0) {
+	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
 		currFolder->get_Path(&currFolderPath);
-		printf("%ls>", (char *)currFolderPath);
+		printf("%%Feeds%%\\%ls>", (char *)currFolderPath);
 		
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
@@ -50,38 +51,53 @@ int main(int argc, char** argv)
 		param1  = wcstok(NULL,  L" \n\r");
 		
 		
-		if (wcscmp(command, END_LOOP) == 0) {
+		if (command == NULL) {
 			// do nothing
 			
-		} else if (wcsstr(command, PRINT_DIRECTORY) == input) {
+		} else if (wcscmp(command, END_LOOP) == 0) {
+			// do nothing
+				
+		} else if (wcsstr(command, PRINT_DIRECTORY) == command) {
 			printFolder(currFolder);
 			
-		} else if (wcsstr(command, CHANGE_DIRECTORY) == input) {
+		} else if (wcsstr(command, CHANGE_DIRECTORY) == command) {
 			if (param1 != NULL) {
 				currFolder = changeDirectory(currFolder, param1);
 			}
 			
 		}
-		
 	}
 }
 
 
 
 // cd
+// TODO: wcstok to allow "cd path\to\dir" to work
 IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path) {
 	IFeedFolder* result;
+	HRESULT error;
 	const wchar_t* UP_ONE_LEVEL = L"..";
 	
-	if (wcscmp(path, UP_ONE_LEVEL)) {
-		base->get_Parent((IDispatch**)&result);
+	if (wcscmp(path, UP_ONE_LEVEL) == 0) {	
+		error = base->get_Parent((IDispatch**)&result);
 	} else {
 		BSTR path_b = SysAllocString(path);
-		base->GetSubfolder(path_b, (IDispatch**)&result);
+		error = base->GetSubfolder(path_b, (IDispatch**)&result);
 		SysFreeString(path_b);
 	}
 	
-	return result;
+	if (error == 0x80070003) { // ERROR_PATH_NOT_FOUND
+		printf("No such directory\n");
+		return base;
+	} else if (error == 0x80070005) { // ERROR_ACCESS_DENIED; seems wider than 
+		printf("Access denied\n");
+		return base;
+	} else if (error) {
+		printf("Can't do that: %x\n", error);
+		return base;
+	} else {
+		return result;
+	}
 }
 
 

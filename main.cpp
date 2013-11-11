@@ -5,21 +5,30 @@
 #include <stdlib.h>
 #include <cstring>
 #include <string>
+#include <cwchar>
 #include <iostream>
+
+#define END_LOOP         L"exit"
+#define PRINT_DIRECTORY  L"dir"
+#define CHANGE_DIRECTORY L"cd"
+#define BUFFER_SIZE      1028
 
 
 // dir
 void printFolder(IFeedFolder* folder);
 
 // cd
-IFeedFolder* changeDirectory(IFeedFolder* base, BSTR path);
+IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path);
 
 int main(int argc, char** argv)
 {
 	IFeedsManager* manager;
 	IFeedFolder* currFolder;
+	BSTR  currFolderPath;
 	BSTR  name;
-	wchar_t* input = (wchar_t*) malloc(1028 /* * sizeof(wchar_t) */);
+	wchar_t* input = (wchar_t*) malloc(BUFFER_SIZE * 2/* sizeof(wchar_t) */);
+	wchar_t* command = L"";
+	wchar_t* param1;
 	
 	
 	CoInitializeEx(NULL, 2);
@@ -30,45 +39,46 @@ int main(int argc, char** argv)
 	manager->get_RootFolder((IDispatch**)&currFolder);
 	
 	
-	while (input
-	
-	
-	
-	currFolder->get_Path(&name);
-	printf("%ls>dir\n", (char *)name);
-	
-	printFolder(currFolder);
-	
-	
-	
-	
-	printf("%ls>cd %s\n", (char *)name, "Comics");
-	currFolder->GetSubfolder(SysAllocString(L"Comics"), (IDispatch**)&currFolder);
-	currFolder->get_Path(&name);
-	printf("%ls>dir\n", (char *)name);
-	
-	printFolder(currFolder);
-	
-	
-	printf(">");
-	fflush(stdout);
-	scanf("%ls", input);
-	printf("%ls\n", input);
-
+	while (wcscmp(command, END_LOOP) != 0) {
+		currFolder->get_Path(&currFolderPath);
+		printf("%ls>", (char *)currFolderPath);
+		
+		fflush(stdout);
+		fgetws(input, BUFFER_SIZE, stdin);
+		
+		command = wcstok(input, L" \n\r");
+		param1  = wcstok(NULL,  L" \n\r");
+		
+		
+		if (wcscmp(command, END_LOOP) == 0) {
+			// do nothing
+			
+		} else if (wcsstr(command, PRINT_DIRECTORY) == input) {
+			printFolder(currFolder);
+			
+		} else if (wcsstr(command, CHANGE_DIRECTORY) == input) {
+			if (param1 != NULL) {
+				currFolder = changeDirectory(currFolder, param1);
+			}
+			
+		}
+		
+	}
 }
 
 
 
 // cd
-IFeedFolder* changeDirectory(IFeedFolder* base, BSTR path) {
+IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path) {
 	IFeedFolder* result;
-	BSTR name;
-	const BSTR UP_ONE_LEVEL = SysAllocString(L"..");
+	const wchar_t* UP_ONE_LEVEL = L"..";
 	
-	if (path == UP_ONE_LEVEL) {
+	if (wcscmp(path, UP_ONE_LEVEL)) {
 		base->get_Parent((IDispatch**)&result);
 	} else {
-		base->GetSubfolder(path, (IDispatch**)&result);
+		BSTR path_b = SysAllocString(path);
+		base->GetSubfolder(path_b, (IDispatch**)&result);
+		SysFreeString(path_b);
 	}
 	
 	return result;
@@ -110,13 +120,3 @@ void printFolder(IFeedFolder* folder) {
 		printf("%ls (%ld)\n", (char *)name, unreadCount);
 	}
 }
-
-/* BSTR cstrToBstr(const char* orig) {
-	
-	size_t newsize = strlen(orig) + 1;
-	wchar_t* wcstring = new wchar_t[newsize];
-	size_t convertedChars = 0;
-	mbstowcs_s(&convertedChars, wcstring, newsize, orig, _TRUNCATE);
-	
-	return BSTR(wcstring);
-} */

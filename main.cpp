@@ -70,6 +70,19 @@ int main(int argc, char** argv)
 			
 			printFeed(currentFeed);
 			
+		} else if (wcsstr(command, L"markAsRead") == command) {
+			IFeed* currentFeed;
+			BSTR path_b = SysAllocString(paramv[1]);
+			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
+			SysFreeString(path_b);
+			
+			long int index = wcstol(paramv[2], NULL, 10);
+			
+			IFeedItem* currentItem;
+			currentFeed->GetItem((LONG) index, (IDispatch**)&currentItem);
+			
+			currentItem->put_IsRead(VARIANT_TRUE);
+			
 		} else if (wcsstr(command, L"echo") == command) {
 			for (int i = 0; i < paramc; i++) {
 				printf("\t%ls\n", paramv[i]);

@@ -15,7 +15,7 @@
 #define CHANGE_DIRECTORY L"cd"
 #define MAKE_DIRECTORY   L"md"
 #define FEED_INFO        L"info"
-#define BUFFER_SIZE      1028
+#define BUFFER_SIZE      (1028)
 
 
 int main(int argc, char** argv)

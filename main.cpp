@@ -12,6 +12,7 @@
 #define PRINT_DIRECTORY  L"dir"
 #define CHANGE_DIRECTORY L"cd"
 #define MAKE_DIRECTORY   L"md"
+#define FEED_INFO        L"info"
 #define BUFFER_SIZE      1028
 
 
@@ -29,7 +30,7 @@ int main(int argc, char** argv)
 	BSTR  name;
 	wchar_t* input = (wchar_t*) malloc(BUFFER_SIZE * 2/* sizeof(wchar_t) */);
 	wchar_t* command = L"";
-	wchar_t* param1;
+	wchar_t** paramv = (wchar_t**) malloc(32 * sizeof(wchar_t*));
 	
 	
 	CoInitializeEx(NULL, 2);
@@ -42,13 +43,17 @@ int main(int argc, char** argv)
 	
 	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
 		currFolder->get_Path(&currFolderPath);
-		printf("%%Feeds%%\\%ls>", (char *)currFolderPath);
+		printf("%%Feeds%%\\%ls> ", (char *)currFolderPath);
 		
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
 		
-		command = wcstok(input, L" \n\r");
-		param1  = wcstok(NULL,  L" \n\r");
+		paramv[0] = command = wcstok(input, L" \n\r");
+		int paramc = 0;
+		while(NULL != paramv[paramc]) {
+			paramc++;
+			paramv[paramc] = wcstok(NULL, L" \n\r");
+		}
 		
 		
 		if (command == NULL) {
@@ -56,15 +61,24 @@ int main(int argc, char** argv)
 			
 		} else if (wcscmp(command, END_LOOP) == 0) {
 			// do nothing
-				
+			
 		} else if (wcsstr(command, PRINT_DIRECTORY) == command) {
 			printFolder(currFolder);
 			
-		} else if (wcsstr(command, CHANGE_DIRECTORY) == command) {
-			if (param1 != NULL) {
-				currFolder = changeDirectory(currFolder, param1);
+		} else if (wcsstr(command, L"echo") == command) {
+			for (int i = 0; i < paramc; i++) {
+				printf("\t%ls\n", paramv[i]);
 			}
 			
+		} else if (wcsstr(command, CHANGE_DIRECTORY) == command) {
+			if (paramc >= 1) {
+				currFolder = changeDirectory(currFolder, paramv[1]);
+			} else {
+				printf("Needs a paramter; the directory to change to\n");
+			}
+			
+		} else {
+			printf("Unknown Command\n");
 		}
 	}
 }
@@ -73,6 +87,7 @@ int main(int argc, char** argv)
 
 // cd
 // TODO: wcstok to allow "cd path\to\dir" to work
+// TODO: cd into a feed(?)
 IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path) {
 	IFeedFolder* result;
 	HRESULT error;

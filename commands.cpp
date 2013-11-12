@@ -39,7 +39,6 @@ void printFolder(IFeedFolder* folder) {
 	BSTR name;
 	
 	
-	
 	// folders
 	folder->get_Subfolders((IDispatch**)&currentFeeds);
 	
@@ -67,4 +66,36 @@ void printFolder(IFeedFolder* folder) {
 		currentFeed->get_UnreadItemCount(&unreadCount);
 		printf("%ls (%ld)\n", (char *)name, unreadCount);
 	}
+}
+
+// print the contents of a feed
+void printFeed(IFeed* feed) {
+	IFeedsEnum* items;
+	BSTR name;
+	LONG localId;
+	DATE pubDate;
+	VARIANT_BOOL isRead;
+	
+	feed->get_Name(&name);
+	printf(" Feed: %ls\n", (char*) name);
+	
+	
+	// items
+	feed->get_Items((IDispatch**)&items);
+	
+	LONG feedCount;
+	items->get_Count(&feedCount);
+	for (int i = 0; i < feedCount; i++) {
+		IFeedItem* curItem;
+		items->Item(i, (IDispatch**)&curItem);
+		
+		curItem->get_Title(&name);
+		curItem->get_PubDate(&pubDate);
+		curItem->get_LocalId(&localId);
+		curItem->get_IsRead(&isRead);
+		char* isReadMessage = (isRead ? "" : "<NEW>");
+		
+		printf("%4ld %5s %ls\n", localId, isReadMessage, (char *)name);
+	}
+	
 }

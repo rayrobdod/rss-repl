@@ -11,6 +11,7 @@
 
 #define END_LOOP         L"exit"
 #define PRINT_DIRECTORY  L"dir"
+#define PRINT_FEED       L"printfeed"
 #define CHANGE_DIRECTORY L"cd"
 #define MAKE_DIRECTORY   L"md"
 #define FEED_INFO        L"info"
@@ -59,6 +60,15 @@ int main(int argc, char** argv)
 			
 		} else if (wcsstr(command, PRINT_DIRECTORY) == command) {
 			printFolder(currFolder);
+			
+		} else if (wcsstr(command, PRINT_FEED) == command) {
+			IFeed* currentFeed;
+			BSTR path_b = SysAllocString(paramv[1]);
+			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
+			SysFreeString(path_b);
+			
+			
+			printFeed(currentFeed);
 			
 		} else if (wcsstr(command, L"echo") == command) {
 			for (int i = 0; i < paramc; i++) {

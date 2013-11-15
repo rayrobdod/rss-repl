@@ -1,0 +1,15 @@
+
+== Interfaces ==
+http://msdn.microsoft.com/en-us/library/windows/desktop/gg427660(v=vs.85).aspx
+
+
+
+== Sample Use ==
+
+cd Dev
+printfeed Techdirt
+
+
+markAsRead Techdirt 7112
+printfeed Techdirt
+

@@ -18,7 +18,7 @@ struct AnyFeedThing {
 
 
 // dir Feed
-void printFeed(IFeed* base);
+void printFeed(IFeed* base, bool filterUnread);
 
 // dir Folder
 void printFolder(IFeedFolder* folder);

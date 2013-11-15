@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 			SysFreeString(path_b);
 			
 			
-			printFeed(currentFeed);
+			printFeed(currentFeed, true);
 			
 		} else if (wcsstr(command, L"markAsRead") == command) {
 			IFeed* currentFeed;

@@ -75,7 +75,7 @@ void printFolder(IFeedFolder* folder) {
 }
 
 // print the contents of a feed
-void printFeed(IFeed* feed) {
+void printFeed(IFeed* feed, bool filterUnread) {
 	IFeedsEnum* items;
 	BSTR name;
 	LONG localId;
@@ -94,14 +94,17 @@ void printFeed(IFeed* feed) {
 	for (int i = 0; i < feedCount; i++) {
 		IFeedItem* curItem;
 		items->Item(i, (IDispatch**)&curItem);
-		
-		curItem->get_Title(&name);
-		curItem->get_PubDate(&pubDate);
-		curItem->get_LocalId(&localId);
 		curItem->get_IsRead(&isRead);
-		char* isReadMessage = (isRead ? "" : "<NEW>");
 		
-		printf("%4ld %5s %ls\n", localId, isReadMessage, (char *)name);
+		if (!filterUnread || (isRead == VARIANT_FALSE)) {
+			
+			curItem->get_Title(&name);
+			curItem->get_PubDate(&pubDate);
+			curItem->get_LocalId(&localId);
+			char* isReadMessage = (isRead ? "" : "<NEW>");
+			
+			printf("%4ld %5s %ls\n", localId, isReadMessage, (char *)name);
+		}
 	}
 	
 }

@@ -105,6 +105,9 @@ void printFeed(IFeed* feed, bool filterUnread) {
 			
 			printf("%4ld %5s %ls\n", localId, isReadMessage, (char *)name);
 		}
+		
+		curItem->Release();
 	}
+	items->Release();
 	
 }

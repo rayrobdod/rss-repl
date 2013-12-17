@@ -16,9 +16,60 @@
 #define MAKE_DIRECTORY   L"md"
 #define FEED_INFO        L"info"
 #define BUFFER_SIZE      (1028)
+#define MAX_PARAM_COUNT  (10)
+
+
+/**
+ * 
+ * @note uses and modifies the input array
+ * @param input the line
+ * @param output indexies indicating the start of strings
+ * @return the length of the output array
+ */
+int tokenify(wchar_t* input, wchar_t** output)
+{
+	const int inputLen = wcslen(input);
+	int i;
+	int outputLen = 1;
+	bool quoteMode = false;
+	
+	output[0] = input;
+	
+	for (i = 0; i < inputLen; i++) {
+		if (outputLen >= MAX_PARAM_COUNT) break; 
+		
+		if (input[i] == L' ' && !quoteMode) {
+			input[i] = L'\0';
+			output[outputLen] = input + i + 1;
+			outputLen++;
+			
+		} else if (input[i] == L'"') {
+			quoteMode = !quoteMode;
+		} else {
+			// do nothing
+		}
+	}
+	
+	return outputLen;
+}
+
 
 
 int main(int argc, char** argv)
+{
+	wchar_t* input   = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
+	wchar_t** output = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
+	
+	wcscpy(input, L"Hello World");
+	
+	int count = tokenify(input, output);
+	
+	printf("%d %ls %ls", count, output[0], output[1]);
+	
+	return 0;
+}
+
+int main2(int argc, char** argv)
 {
 	IFeedsManager* manager;
 	IFeedFolder* currFolder;
@@ -99,6 +150,8 @@ int main(int argc, char** argv)
 			printf("Unknown Command\n");
 		}
 	}
+	
+	return 0;
 }
 
 

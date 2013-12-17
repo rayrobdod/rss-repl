@@ -1,4 +1,7 @@
 
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\cl" -I"C:\Program Files\Microsoft SDKs\Windows\v7.1\Include" -I"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include" main.cpp commands.cpp /link "C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64\*.lib" "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\amd64\*.lib"
+
+
 == Interfaces ==
 http://msdn.microsoft.com/en-us/library/windows/desktop/gg427660(v=vs.85).aspx
 

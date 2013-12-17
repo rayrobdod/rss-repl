@@ -33,6 +33,9 @@ int tokenify(wchar_t* input, wchar_t** output)
 	int outputLen = 0;
 	bool quoteMode = false;
 	bool outsideToken = true;
+	for (i = 0; i < MAX_PARAM_COUNT; i++) {
+		output[i] = L"\0";
+	}
 	
 	for (i = 0; i < inputLen; i++) {
 		if (outputLen >= MAX_PARAM_COUNT) break; 
@@ -109,19 +112,20 @@ int main(int argc, char** argv)
 		} else if (wcscmp(command, END_LOOP) == 0) {
 			// do nothing
 			
-		} else if (wcsstr(command, PRINT_DIRECTORY) == command) {
+		} else if (wcscmp(command, PRINT_DIRECTORY) == 0) {
 			printFolder(currFolder);
 			
-		} else if (wcsstr(command, PRINT_FEED) == command) {
+		} else if (wcscmp(command, PRINT_FEED) == 0) {
 			IFeed* currentFeed;
 			BSTR path_b = SysAllocString(paramv[1]);
 			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
 			SysFreeString(path_b);
 			
+			bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
-			printFeed(currentFeed, true);
+			printFeed(currentFeed, filterNew);
 			
-		} else if (wcsstr(command, L"markAsRead") == command) {
+		} else if (wcscmp(command, L"markAsRead") == 0) {
 			IFeed* currentFeed;
 			BSTR path_b = SysAllocString(paramv[1]);
 			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
@@ -134,17 +138,20 @@ int main(int argc, char** argv)
 			
 			currentItem->put_IsRead(VARIANT_TRUE);
 			
-		} else if (wcsstr(command, L"echo") == command) {
+		} else if (wcscmp(command, L"echo") == 0) {
 			for (int i = 0; i < paramc; i++) {
 				printf("\t%ls\n", paramv[i]);
 			}
 			
-		} else if (wcsstr(command, CHANGE_DIRECTORY) == command) {
+		} else if (wcscmp(command, CHANGE_DIRECTORY) == 0) {
 			if (paramc >= 1) {
 				currFolder = changeDirectory(currFolder, paramv[1]);
 			} else {
 				printf("Needs a paramter; the directory to change to\n");
 			}
+			
+		} else if (wcscmp(command, L"") == 0) {
+			// do nothing
 			
 		} else {
 			printf("Unknown Command\n");

@@ -35,25 +35,16 @@ int tokenify(wchar_t* input, wchar_t** output)
 	bool outsideToken = true;
 	
 	for (i = 0; i < inputLen; i++) {
-		printf("%d ", input[i]);
 		if (outputLen >= MAX_PARAM_COUNT) break; 
 		
 		if ((input[i] == ' ' || input[i] == '\n') && !quoteMode && !outsideToken) {
-			printf(" space:\n");
 			input[i] = L'\0';
 			outsideToken = true;
 			
 		} else if (input[i] == L'"') {
-			printf(" ifquot: %d\n", outsideToken);
 			quoteMode = !quoteMode;
-			
-			if (outsideToken) {
-				outsideToken = false;
-				output[outputLen] = input + i;
-				outputLen++;
-			}
+			input[i] = L'\0';
 		} else {
-			printf(" else: %d\n", outsideToken);
 			if (outsideToken) {
 				outsideToken = false;
 				output[outputLen] = input + i;
@@ -67,7 +58,7 @@ int tokenify(wchar_t* input, wchar_t** output)
 
 
 
-int main(int argc, char** argv)
+int tokenify_test(int argc, char** argv)
 {
 	wchar_t* input   = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
 	wchar_t** output = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
@@ -81,7 +72,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-int main2(int argc, char** argv)
+int main(int argc, char** argv)
 {
 	IFeedsManager* manager;
 	IFeedFolder* currFolder;
@@ -111,9 +102,6 @@ int main2(int argc, char** argv)
 		
 		paramc = tokenify(input, paramv);
 		command = paramv[0];
-		
-		printf("%d %d %d %d %d %d \n", command[0], command[1], command[2], command[3], command[4], command[5]);
-		printf("%d %d %d %d %d %d \n", END_LOOP[0], END_LOOP[1], END_LOOP[2], END_LOOP[3], END_LOOP[4], END_LOOP[5]);
 		
 		if (command == NULL) {
 			// do nothing

@@ -14,10 +14,6 @@ IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path) {
 		error = base->get_Parent((IDispatch**)&result);
 	} else if (wcscmp(path, L".") == 0) {
 		result = base;
-	} else if (wcscmp(path, L"Dev") == 0) {
-		BSTR path_b = SysAllocString(L"Dev Logs");
-		error = base->GetSubfolder(path_b, (IDispatch**)&result);
-		SysFreeString(path_b);
 	} else {
 		BSTR path_b = SysAllocString(path);
 		error = base->GetSubfolder(path_b, (IDispatch**)&result);

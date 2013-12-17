@@ -30,23 +30,35 @@ int tokenify(wchar_t* input, wchar_t** output)
 {
 	const int inputLen = wcslen(input);
 	int i;
-	int outputLen = 1;
+	int outputLen = 0;
 	bool quoteMode = false;
-	
-	output[0] = input;
+	bool outsideToken = true;
 	
 	for (i = 0; i < inputLen; i++) {
+		printf("%d ", input[i]);
 		if (outputLen >= MAX_PARAM_COUNT) break; 
 		
-		if (input[i] == L' ' && !quoteMode) {
+		if ((input[i] == ' ' || input[i] == '\n') && !quoteMode && !outsideToken) {
+			printf(" space:\n");
 			input[i] = L'\0';
-			output[outputLen] = input + i + 1;
-			outputLen++;
+			outsideToken = true;
 			
 		} else if (input[i] == L'"') {
+			printf(" ifquot: %d\n", outsideToken);
 			quoteMode = !quoteMode;
+			
+			if (outsideToken) {
+				outsideToken = false;
+				output[outputLen] = input + i;
+				outputLen++;
+			}
 		} else {
-			// do nothing
+			printf(" else: %d\n", outsideToken);
+			if (outsideToken) {
+				outsideToken = false;
+				output[outputLen] = input + i;
+				outputLen++;
+			}
 		}
 	}
 	
@@ -60,11 +72,11 @@ int main(int argc, char** argv)
 	wchar_t* input   = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
 	wchar_t** output = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
 	
-	wcscpy(input, L"Hello World");
+	wcscpy(input, L"Hello World \"Hello world\"");
 	
 	int count = tokenify(input, output);
 	
-	printf("%d %ls %ls", count, output[0], output[1]);
+	printf("%d %ls %ls %ls\n", count, output[0], output[1], output[2]);
 	
 	return 0;
 }
@@ -75,9 +87,11 @@ int main2(int argc, char** argv)
 	IFeedFolder* currFolder;
 	BSTR  currFolderPath;
 	BSTR  name;
-	wchar_t* input = (wchar_t*) malloc(BUFFER_SIZE * 2/* sizeof(wchar_t) */);
+	
+	wchar_t*  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
+	wchar_t** paramv = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
+	int paramc;
 	wchar_t* command = L"";
-	wchar_t** paramv = (wchar_t**) malloc(32 * sizeof(wchar_t*));
 	
 	
 	CoInitializeEx(NULL, 2);
@@ -95,13 +109,11 @@ int main2(int argc, char** argv)
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
 		
-		paramv[0] = command = wcstok(input, L" \n\r");
-		int paramc = 0;
-		while(NULL != paramv[paramc]) {
-			paramc++;
-			paramv[paramc] = wcstok(NULL, L" \n\r");
-		}
+		paramc = tokenify(input, paramv);
+		command = paramv[0];
 		
+		printf("%d %d %d %d %d %d \n", command[0], command[1], command[2], command[3], command[4], command[5]);
+		printf("%d %d %d %d %d %d \n", END_LOOP[0], END_LOOP[1], END_LOOP[2], END_LOOP[3], END_LOOP[4], END_LOOP[5]);
 		
 		if (command == NULL) {
 			// do nothing

@@ -1,0 +1,39 @@
+<project name="Feeds" basedir=".">
+	<description />
+	
+	<property name="version" value="a.0.0-SNAPSHOT" />
+	
+	
+	
+	<target name="init" />
+	
+	<target name="classes" description="Compile JNI stuff" >
+		<mkdir dir="target/Windows/classes" />
+		
+		<exec executable="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\cl"
+				dir="target\Windows\classes">
+			<arg line="-I&quot;C:\Program Files (x86)\Java\jdk1.7.0_07\include&quot;"/>
+			<arg line="-I&quot;C:\Program Files (x86)\Java\jdk1.7.0_07\include\win32&quot;"/>
+			<arg line="-I&quot;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include&quot;"/>
+			<arg line="-I&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include&quot;"/>
+			<arg line="&quot;..\..\..\src\main\cpp\*.cpp&quot;"/>
+			<arg line="/O1"/>
+			<arg line="/EHsc"/>
+			<arg line="/LD"/>
+			<arg line="/link"/>
+			<arg line="&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib\x64\*.lib&quot;"/>
+			<arg line="&quot;C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\lib\amd64\*.lib&quot;"/>
+			<arg line="/out:feeds.exe"/>
+		</exec>
+	</target>
+	
+	<target name="all" depends="classes" />
+	<!-- end making classes -->
+	
+	
+	<!-- clean -->
+	<target name="clean" description="remove built files">
+		<delete dir="target"/>
+	</target>
+</project>
+

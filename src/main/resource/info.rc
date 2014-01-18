@@ -1,12 +1,11 @@
 
 #include <Winver.h>
+#include "..\..\..\target\managed_src\version.h"
 
-#define VERSION "a.0.0\0"
-#define VERSION_MANIFEST 0,10,0,0
 
 1 VERSIONINFO
 		FILEVERSION   VERSION_MANIFEST
-		FILETYPE      VFT_DLL
+		FILETYPE      VFT_APP
 		FILEFLAGSMASK VS_FF_PRERELEASE
 		FILEFLAGS     VS_FF_PRERELEASE
 {

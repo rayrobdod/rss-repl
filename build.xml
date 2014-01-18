@@ -28,7 +28,12 @@
 	
 	<target name="resources" description="Compile resource files" >
 		<mkdir dir="target/windows" />
+		<mkdir dir="target/managed_src" />
 		
+		<echo output="target/managed_src/version.h">
+#define VERSION "${version}\0"
+#define VERSION_MANIFEST ${version_manifest}
+		</echo>
 		<exec executable="${microsoft_sdk}\Bin\rc">
 			<arg line="-I&quot;${visual_studio}\include&quot;"/>
 			<arg line="-I&quot;${microsoft_sdk}\Include&quot;"/>

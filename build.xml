@@ -4,9 +4,13 @@
 	<property name="version" value="a.0.0-SNAPSHOT" />
 	<property name="version_manifest" value="0,10,0,0" />
 
-	<property name="visual_studio" value="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\" />
-	<property name="microsoft_sdk" value="C:\Program Files\Microsoft SDKs\Windows\v7.1\" />
+	<property name="visual_studio" value="C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/" />
+	<property name="microsoft_sdk" value="C:/Program Files/Microsoft SDKs/Windows/v7.1/" />
+	<property name="mingw" value="C:/Users/Raymond/Downloads/Programs/minGW/bin/" />
 	
+	<property name="cpp"  value="${visual_studio}/bin/amd64/cl" />
+	<property name="rc"   value="${microsoft_sdk}/Bin/rc" />
+	<property name="link" value="${visual_studio}/bin/amd64/link" />
 	
 	
 	<target name="init" />
@@ -14,11 +18,11 @@
 	<target name="classes" description="Compile cpp files" >
 		<mkdir dir="target/windows" />
 		
-		<exec executable="${visual_studio}\bin\amd64\cl"
-				dir="target\windows">
-			<arg line="-I&quot;${visual_studio}\include&quot;"/>
-			<arg line="-I&quot;${microsoft_sdk}\Include&quot;"/>
-			<arg line="&quot;..\..\src\main\cpp\*.cpp&quot;"/>
+		<exec executable="${cpp}"
+				dir="target/windows">
+			<arg line="-I&quot;${visual_studio}/include&quot;"/>
+			<arg line="-I&quot;${microsoft_sdk}/Include&quot;"/>
+			<arg line="&quot;../../src/main/cpp/*.cpp&quot;"/>
 			<arg line="/O1"/>
 			<arg line="/EHsc"/>
 			<arg line="/LD"/>
@@ -34,24 +38,24 @@
 #define VERSION "${version}\0"
 #define VERSION_MANIFEST ${version_manifest}
 		</echo>
-		<exec executable="${microsoft_sdk}\Bin\rc">
-			<arg line="-I&quot;${visual_studio}\include&quot;"/>
-			<arg line="-I&quot;${microsoft_sdk}\Include&quot;"/>
-			<arg line="/fo"/> <arg line="target\windows\res.res"/>
-			<arg line="src\main\resource\info.rc"/>
+		<exec executable="${rc}">
+			<arg line="-I&quot;${visual_studio}/include&quot;"/>
+			<arg line="-I&quot;${microsoft_sdk}/Include&quot;"/>
+			<arg line="/fo"/> <arg line="target/windows/res.res"/>
+			<arg line="src/main/resource/info.rc"/>
 		</exec>
 	</target>
 	
 	<target name="program" description="link files" depends="classes,resources" >
 		<mkdir dir="target/windows" />
 		
-		<exec executable="${visual_studio}\bin\amd64\link"
-				dir="target\windows">
+		<exec executable="${link}"
+				dir="target/windows">
 			<arg line="commands.obj"/>
 			<arg line="main.obj"/>
 			<!-- arg line="res.res"/ -->
-			<arg line="&quot;${visual_studio}\lib\amd64\*.lib&quot;"/>
-			<arg line="&quot;${microsoft_sdk}\lib\x64\*.lib&quot;"/>
+			<arg line="&quot;${visual_studio}/lib/amd64/*.lib&quot;"/>
+			<arg line="&quot;${microsoft_sdk}/lib/x64/*.lib&quot;"/>
 			<arg line="/out:feeds.exe"/>
 		</exec>
 	</target>

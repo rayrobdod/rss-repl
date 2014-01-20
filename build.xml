@@ -7,10 +7,13 @@
 	<property name="visual_studio" value="C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/" />
 	<property name="microsoft_sdk" value="C:/Program Files/Microsoft SDKs/Windows/v7.1/" />
 	<property name="mingw" value="C:/Users/Raymond/Downloads/Programs/minGW/bin/" />
+	<property name="pelles_c" value="C:/Program Files/PellesC/" />
 	
 	<property name="cpp"  value="${visual_studio}/bin/amd64/cl" />
-	<property name="rc"   value="${microsoft_sdk}/Bin/rc" />
-	<property name="link" value="${visual_studio}/bin/amd64/link" />
+	<!-- property name="rc"   value="${microsoft_sdk}/Bin/rc" / -->
+	<!-- property name="link" value="${visual_studio}/bin/amd64/link" / -->
+	<property name="rc"   value="${pelles_c}/bin/porc" />
+	<property name="link" value="${pelles_c}/bin/polink" />
 	
 	
 	<target name="init" />
@@ -51,9 +54,11 @@
 		
 		<exec executable="${link}"
 				dir="target/windows">
+			<arg line="-subsystem:console" />
+			<arg line="-machine:amd64" />
 			<arg line="commands.obj"/>
 			<arg line="main.obj"/>
-			<!-- arg line="res.res"/ -->
+			<arg line="res.res"/>
 			<arg line="&quot;${visual_studio}/lib/amd64/*.lib&quot;"/>
 			<arg line="&quot;${microsoft_sdk}/lib/x64/*.lib&quot;"/>
 			<arg line="/out:feeds.exe"/>

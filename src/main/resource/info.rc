@@ -1,29 +1,36 @@
 
-#include <Winver.h>
+#include <windows.h>
 #include "..\..\..\target\managed_src\version.h"
 
+LANGUAGE LANG_ENGLISH,SUBLANG_ENGLISH_US
 
 1 VERSIONINFO
-		FILEVERSION   VERSION_MANIFEST
-		FILETYPE      VFT_APP
-		FILEFLAGSMASK VS_FF_PRERELEASE
-		FILEFLAGS     VS_FF_PRERELEASE
+		FILEVERSION    VERSION_MANIFEST
+		PRODUCTVERSION VERSION_MANIFEST
+		FILEFLAGSMASK  0x3F
+		FILETYPE       VFT_APP
+		FILEFLAGS      VS_FF_PRERELEASE
+		FILEOS         VOS__WINDOWS32
+		FILESUBTYPE    VFT2_UNKNOWN
 {
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904E4"
-        BEGIN
-            VALUE "CompanyName",      "Raymond Dodge"
-            VALUE "FileDescription",  "A Feed Manipulator"
-            VALUE "FileVersion",      VERSION
-            VALUE "InternalName",     "Whee!"
-            VALUE "LegalCopyright",   "Whee!"
-            VALUE "LegalTrademarks1", "Whee!"
-            VALUE "LegalTrademarks2", "Whee!"
-            VALUE "OriginalFilename", "feeds.exe"
-            VALUE "ProductName",      "Deduction Tactics"
-            VALUE "ProductVersion",   VERSION
-        END
-    END
-
+	BLOCK "StringFileInfo"
+	{
+		BLOCK "040904B0"
+		{
+			VALUE "CompanyName",      "Raymond Dodge\0"
+			VALUE "FileDescription",  "A Feed Manipulator\0"
+			VALUE "FileVersion",      VERSION
+			VALUE "InternalName",     "Whee!\0"
+			VALUE "LegalCopyright",   "Whee!\0"
+			VALUE "LegalTrademarks1", "Whee!\0"
+			VALUE "LegalTrademarks2", "Whee!\0"
+			VALUE "OriginalFilename", "feeds.exe\0"
+			VALUE "ProductName",      "Deduction Tactics\0"
+			VALUE "ProductVersion",   VERSION
+		}
+	}
+	BLOCK "VarFileInfo"
+	{
+		VALUE "Translation", 0x409, 0x4B0
+	}
 }

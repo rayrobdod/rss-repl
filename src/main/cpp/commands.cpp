@@ -51,7 +51,7 @@ void printFolder(IFeedFolder* folder) {
 		currentFeeds->Item(i, (IDispatch**)&currentFeed);
 		
 		currentFeed->get_Name(&name);
-		printf("%ls/\n", (char *)name);
+		printf("%ls/\n", (wchar_t *)name);
 	}
 	
 	
@@ -66,7 +66,7 @@ void printFolder(IFeedFolder* folder) {
 		
 		currentFeed->get_Name(&name);
 		currentFeed->get_UnreadItemCount(&unreadCount);
-		printf("%ls (%ld)\n", (char *)name, unreadCount);
+		printf("%ls (%ld)\n", (wchar_t *)name, unreadCount);
 	}
 }
 
@@ -79,7 +79,7 @@ void printFeed(IFeed* feed, bool filterUnread) {
 	VARIANT_BOOL isRead;
 	
 	feed->get_Name(&name);
-	printf(" Feed: %ls\n", (char*) name);
+	printf(" Feed: %ls\n", (wchar_t*) name);
 	
 	
 	// items
@@ -99,7 +99,7 @@ void printFeed(IFeed* feed, bool filterUnread) {
 			curItem->get_LocalId(&localId);
 			char* isReadMessage = (isRead ? "" : "<NEW>");
 			
-			printf("%4ld %5s %ls\n", localId, isReadMessage, (char *)name);
+			printf("%4ld %5s %ls\n", localId, isReadMessage, (wchar_t *)name);
 		}
 		
 		curItem->Release();

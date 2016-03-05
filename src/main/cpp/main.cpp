@@ -26,7 +26,7 @@
  * @param output indexies indicating the start of strings
  * @return the length of the output array
  */
-int tokenify(wchar_t* input, wchar_t** output)
+int tokenify(wchar_t* const input, wchar_t** const output)
 {
 	const int inputLen = wcslen(input);
 	int i;
@@ -82,10 +82,10 @@ int main(int argc, char** argv)
 	BSTR  currFolderPath;
 	BSTR  name;
 	
-	wchar_t*  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
-	wchar_t** paramv = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
+	wchar_t* const  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
+	wchar_t** const paramv = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
 	int paramc;
-	wchar_t* command = L"";
+	const wchar_t* command = L"";
 	
 	
 	CoInitializeEx(NULL, 2);
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 	
 	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
 		currFolder->get_Path(&currFolderPath);
-		printf("%%Feeds%%\\%ls> ", (char *)currFolderPath);
+		printf("%%Feeds%%\\%ls> ", (wchar_t *)currFolderPath);
 		
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
 			SysFreeString(path_b);
 			
-			bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
+			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
 			printFeed(currentFeed, filterNew);
 			

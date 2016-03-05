@@ -23,8 +23,11 @@ void printFeed(IFeed* base, bool filterUnread);
 // dir Folder
 void printFolder(IFeedFolder* folder);
 
+void printItem(IFeedItem* item);
+
 // cd
 IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path);
+
 
 
 #endif        //  #ifndef COMMANDS_H

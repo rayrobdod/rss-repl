@@ -9,14 +9,14 @@
 #include <iostream>
 #include "commands.h"
 
-#define END_LOOP         L"exit"
-#define PRINT_DIRECTORY  L"dir"
-#define PRINT_FEED       L"printfeed"
-#define CHANGE_DIRECTORY L"cd"
-#define MAKE_DIRECTORY   L"md"
-#define FEED_INFO        L"info"
-#define BUFFER_SIZE      (1028)
-#define MAX_PARAM_COUNT  (10)
+#define END_LOOP	L"exit"
+#define PRINT_DIRECTORY	L"dir"
+#define PRINT_FEED	L"printfeed"
+#define CHANGE_DIRECTORY	L"cd"
+#define MAKE_DIRECTORY	L"md"
+#define FEED_INFO	L"info"
+#define BUFFER_SIZE	(1028)
+#define MAX_PARAM_COUNT	(10)
 
 
 /**
@@ -124,6 +124,19 @@ int main(int argc, char** argv)
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
 			printFeed(currentFeed, filterNew);
+			
+		} else if (wcscmp(command, L"printitem") == 0) {
+			IFeed* currentFeed;
+			BSTR path_b = SysAllocString(paramv[1]);
+			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
+			SysFreeString(path_b);
+			
+			long int index = wcstol(paramv[2], NULL, 10);
+			
+			IFeedItem* currentItem;
+			currentFeed->GetItem((LONG) index, (IDispatch**)&currentItem);
+			
+			printItem(currentItem);
 			
 		} else if (wcscmp(command, L"markAsRead") == 0) {
 			IFeed* currentFeed;

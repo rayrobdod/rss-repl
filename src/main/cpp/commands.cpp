@@ -52,6 +52,7 @@ void printFolder(IFeedFolder* folder) {
 		
 		currentFeed->get_Name(&name);
 		printf("%ls/\n", (wchar_t *)name);
+		SysFreeString(name);
 		currentFeed->Release();
 	}
 	currentFeeds->Release();
@@ -69,6 +70,7 @@ void printFolder(IFeedFolder* folder) {
 		currentFeed->get_Name(&name);
 		currentFeed->get_UnreadItemCount(&unreadCount);
 		printf("%ls (%ld)\n", (wchar_t *)name, unreadCount);
+		SysFreeString(name);
 		currentFeed->Release();
 	}
 	currentFeeds->Release();
@@ -104,9 +106,55 @@ void printFeed(IFeed* feed, bool filterUnread) {
 			char* isReadMessage = (isRead ? "" : "<NEW>");
 			
 			printf("%4ld %5s %ls\n", localId, isReadMessage, (wchar_t *)name);
+			
+			SysFreeString(name);
 		}
 		
 		curItem->Release();
 	}
 	items->Release();
+}
+
+void printItem(IFeedItem* item) {
+	BSTR str;
+	DATE pubDate;
+	IDispatch* dispatch;
+	
+	item->get_Title(&str);
+	if (str) {
+		printf("\n%ls\n", str);
+		SysFreeString(str);
+	}
+	
+	item->get_Author(&str);
+	if (str) {
+		printf("    Author:  %ls\n", str);
+		SysFreeString(str);
+	}
+	
+//	item->get_Enclosure(&dispatch);
+//	if (dispatch != NULL) {
+//		printf("    Has Enclosure\n");
+//		dispatch->Release();
+//	}
+	
+	item->get_PubDate(&pubDate);
+	if (pubDate) {
+		// printf("    PubDate: %ls\n", (BSTR) pubDate);
+	}
+	
+	item->get_Modified(&pubDate);
+	if (pubDate) {
+		// printf("    PubDate: %ls\n", (BSTR) pubDate);
+	}
+	
+	printf("\n");
+	
+	item->get_Description(&str);
+	if (str) {
+		printf("%ls\n\n", str);
+		SysFreeString(str);
+	}
+	
+	
 }

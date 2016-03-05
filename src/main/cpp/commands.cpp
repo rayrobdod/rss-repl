@@ -52,7 +52,9 @@ void printFolder(IFeedFolder* folder) {
 		
 		currentFeed->get_Name(&name);
 		printf("%ls/\n", (wchar_t *)name);
+		currentFeed->Release();
 	}
+	currentFeeds->Release();
 	
 	
 	// not folders; feeds
@@ -67,7 +69,9 @@ void printFolder(IFeedFolder* folder) {
 		currentFeed->get_Name(&name);
 		currentFeed->get_UnreadItemCount(&unreadCount);
 		printf("%ls (%ld)\n", (wchar_t *)name, unreadCount);
+		currentFeed->Release();
 	}
+	currentFeeds->Release();
 }
 
 // print the contents of a feed
@@ -105,5 +109,4 @@ void printFeed(IFeed* feed, bool filterUnread) {
 		curItem->Release();
 	}
 	items->Release();
-	
 }

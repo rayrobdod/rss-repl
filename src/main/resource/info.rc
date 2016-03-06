@@ -18,14 +18,14 @@ LANGUAGE LANG_ENGLISH,SUBLANG_ENGLISH_US
 		BLOCK "040904B0"
 		{
 			VALUE "CompanyName",      "Raymond Dodge\0"
-			VALUE "FileDescription",  "A Feed Manipulator\0"
+			VALUE "FileDescription",  "RSS REPL\0"
 			VALUE "FileVersion",      VERSION
 			VALUE "InternalName",     "Whee!\0"
-			VALUE "LegalCopyright",   "Whee!\0"
+			VALUE "LegalCopyright",   "Raymond Dodge\0"
 			VALUE "LegalTrademarks1", "Whee!\0"
 			VALUE "LegalTrademarks2", "Whee!\0"
 			VALUE "OriginalFilename", "feeds.exe\0"
-			VALUE "ProductName",      "Deduction Tactics\0"
+			VALUE "ProductName",      "RSS REPL\0"
 			VALUE "ProductVersion",   VERSION
 		}
 	}

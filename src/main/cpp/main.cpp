@@ -1,6 +1,9 @@
 
 #include <windows.h>
 #include <msfeeds.h>
+#include <tchar.h>
+#include <conio.h>
+#include <strsafe.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
@@ -26,8 +29,7 @@
  * @param output indexies indicating the start of strings
  * @return the length of the output array
  */
-int tokenify(wchar_t* const input, wchar_t** const output)
-{
+int tokenify(wchar_t* const input, wchar_t** const output) {
 	const int inputLen = wcslen(input);
 	int i;
 	int outputLen = 0;
@@ -60,21 +62,6 @@ int tokenify(wchar_t* const input, wchar_t** const output)
 }
 
 
-
-int tokenify_test(int argc, char** argv)
-{
-	wchar_t* input   = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
-	wchar_t** output = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
-	
-	wcscpy(input, L"Hello World \"Hello world\"");
-	
-	int count = tokenify(input, output);
-	
-	printf("%d %ls %ls %ls\n", count, output[0], output[1], output[2]);
-	
-	return 0;
-}
-
 int main(int argc, char** argv)
 {
 	IFeedsManager* manager;
@@ -84,9 +71,10 @@ int main(int argc, char** argv)
 	
 	wchar_t* const  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
 	wchar_t** const paramv = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
-	int paramc;
 	const wchar_t* command = L"";
 	
+	
+	SetConsoleTitle(TEXT("RSS REPL"));
 	
 	CoInitializeEx(NULL, 2);
 	CoCreateInstance(
@@ -103,13 +91,11 @@ int main(int argc, char** argv)
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
 		
-		paramc = tokenify(input, paramv);
+		const int paramc = tokenify(input, paramv);
 		command = paramv[0];
 		
-		if (command == NULL) {
-			// do nothing
-			
-		} else if (wcscmp(command, END_LOOP) == 0) {
+		if (command == NULL || wcscmp(command, L"") == 0 ||
+				wcscmp(command, END_LOOP) == 0 ) {
 			// do nothing
 			
 		} else if (wcscmp(command, PRINT_DIRECTORY) == 0) {
@@ -160,11 +146,8 @@ int main(int argc, char** argv)
 			if (paramc >= 1) {
 				currFolder = changeDirectory(currFolder, paramv[1]);
 			} else {
-				printf("Needs a paramter; the directory to change to\n");
+				printf("Needs a parameter; the directory to change to\n");
 			}
-			
-		} else if (wcscmp(command, L"") == 0) {
-			// do nothing
 			
 		} else {
 			printf("Unknown Command\n");
@@ -173,5 +156,3 @@ int main(int argc, char** argv)
 	
 	return 0;
 }
-
-

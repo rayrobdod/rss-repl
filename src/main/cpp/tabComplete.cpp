@@ -1,34 +1,28 @@
 
-
-#include <windows.h>
-#include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <string>
-#include <wchar.h>
 #include <vector>
 
 using std::vector;
 using std::wstring;
-#define MAX_COMPLETE_SIZE 1028
 
 
 /**
  * Returns true if the first strlen(prefix) characters of string match prefix.
  * @pre parameters are not NULL
  */
-BOOL isPrefix(const wstring string, const wstring prefix) {
+bool isPrefix(const wstring string, const wstring prefix) {
 	wstring::const_iterator i1 = string.cbegin();
 	wstring::const_iterator i2 = prefix.cbegin();
 	wstring::const_iterator end1 = string.cend();
 	wstring::const_iterator end2 = prefix.cend();
 	
 	while (i1 != end1 && i2 != end2) {
-		if (*i1 != *i2) {return FALSE;}
+		if (*i1 != *i2) {return false;}
 		i1++; i2++;
 	}
-	return (i2 == end2 ? TRUE : FALSE);
+	return i2 == end2;
 }
 
 int isPrefixTestCases(int argc, char** argv) {
@@ -76,14 +70,14 @@ int tabCompleteTestCase(int argc, char** argv) {
 	comps.push_back(L"bbb");
 	comps.push_back(L"zzz");
 	
-	printf("aaa: %ls\n", tabComplete(L"", comps));
-	printf("aaa: %ls\n", tabComplete(L"a", comps));
-	printf("aaa: %ls\n", tabComplete(L"aa", comps));
-	printf("aaa: %ls\n", tabComplete(L"aaa", comps));
-	printf("aaaa: %ls\n", tabComplete(L"aaaa", comps));
-	printf("abc: %ls\n", tabComplete(L"ab", comps));
-	printf("bbb: %ls\n", tabComplete(L"b", comps));
-	printf("zzz: %ls\n", tabComplete(L"z", comps));
-	printf("x: %ls\n", tabComplete(L"x", comps));
+	printf("aaa: %ls\n", tabComplete(L"", comps).c_str());
+	printf("aaa: %ls\n", tabComplete(L"a", comps).c_str());
+	printf("aaa: %ls\n", tabComplete(L"aa", comps).c_str());
+	printf("aaa: %ls\n", tabComplete(L"aaa", comps).c_str());
+	printf("aaaa: %ls\n", tabComplete(L"aaaa", comps).c_str());
+	printf("abc: %ls\n", tabComplete(L"ab", comps).c_str());
+	printf("bbb: %ls\n", tabComplete(L"b", comps).c_str());
+	printf("zzz: %ls\n", tabComplete(L"z", comps).c_str());
+	printf("x: %ls\n", tabComplete(L"x", comps).c_str());
 	return 0;
 }

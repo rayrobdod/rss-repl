@@ -18,15 +18,17 @@ using std::wstring;
  * Returns true if the first strlen(prefix) characters of string match prefix.
  * @pre parameters are not NULL
  */
-BOOL isPrefix(const wchar_t* const string, const wchar_t* const prefix) {
-	const wchar_t* i1 = string;
-	const wchar_t* i2 = prefix;
+BOOL isPrefix(const wstring string, const wstring prefix) {
+	wstring::const_iterator i1 = string.cbegin();
+	wstring::const_iterator i2 = prefix.cbegin();
+	wstring::const_iterator end1 = string.cend();
+	wstring::const_iterator end2 = prefix.cend();
 	
-	while (*i1 != 0 && *i2 != 0) {
+	while (i1 != end1 && i2 != end2) {
 		if (*i1 != *i2) {return FALSE;}
 		i1++; i2++;
 	}
-	return (*i2 == 0 ? TRUE : FALSE);
+	return (i2 == end2 ? TRUE : FALSE);
 }
 
 int isPrefixTestCases(int argc, char** argv) {
@@ -43,28 +45,45 @@ int isPrefixTestCases(int argc, char** argv) {
 /**
  * @param current
  * @param completions_v, completions_c an array of possible completions
- * @return a newly malloc'd string that contains the tab completion
+ * @return a string that contains the tab completion;
+ * 		the first applicable completion; else current
  */
-wchar_t* tabComplete(
-	const wchar_t* const current,
-	const wchar_t** const completions_v, const int completions_c
+wstring tabComplete(
+	const wstring current,
+	const vector<wstring> completions
 ) {
 	vector<int> legal;
-	for (int i = 0; i < completions_c; i++) {
-		if (isPrefix(completions_v[i], current)) {
+	for (int i = 0; i < completions.size(); i++) {
+		if (isPrefix(completions[i], current)) {
 			legal.push_back(i);
 		}
 	}
 	
-	wchar_t* const retVal = (wchar_t*) malloc(MAX_COMPLETE_SIZE * sizeof(wchar_t));
 	if (legal.size() == 0) {
-		wcsncpy(retVal, current, MAX_COMPLETE_SIZE);
+		return current;
 	} else if (legal.size() == 1) {
-		wcsncpy(retVal, completions_v[legal[0]], MAX_COMPLETE_SIZE);
+		return completions[legal[0]];
 	} else {
 		// TODO: figure out greatest common prefix of completions 
-		wcsncpy(retVal, completions_v[legal[0]], MAX_COMPLETE_SIZE);
+		return completions[legal[0]];
 	}
+}
+
+int tabCompleteTestCase(int argc, char** argv) {
+	vector<wstring> comps;
+	comps.push_back(L"aaa");
+	comps.push_back(L"abc");
+	comps.push_back(L"bbb");
+	comps.push_back(L"zzz");
 	
-	return retVal;
+	printf("aaa: %ls\n", tabComplete(L"", comps));
+	printf("aaa: %ls\n", tabComplete(L"a", comps));
+	printf("aaa: %ls\n", tabComplete(L"aa", comps));
+	printf("aaa: %ls\n", tabComplete(L"aaa", comps));
+	printf("aaaa: %ls\n", tabComplete(L"aaaa", comps));
+	printf("abc: %ls\n", tabComplete(L"ab", comps));
+	printf("bbb: %ls\n", tabComplete(L"b", comps));
+	printf("zzz: %ls\n", tabComplete(L"z", comps));
+	printf("x: %ls\n", tabComplete(L"x", comps));
+	return 0;
 }

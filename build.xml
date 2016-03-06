@@ -63,6 +63,7 @@
 			<arg line="-machine:amd64" />
 			<arg line="/NODEFAULTLIB" />
 			<arg line="commands.obj"/>
+			<arg line="tabComplete.obj"/>
 			<arg line="main.obj"/>
 			<arg line="res.res"/>
 			<arg line="&quot;${visual_studio}/lib/amd64/*.lib&quot;"/>

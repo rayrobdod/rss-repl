@@ -3,31 +3,51 @@
 
 #include <msfeeds.h>
 #include <cwchar>
+#include <string>
 
-union AnyFeedType {
-	IFeedFolder* folder;
-	IFeed*       feed;
-	IFeedItem*   item;
+using std::wstring;
+
+class FeedElement {
+ public:
+	FeedElement();
+	virtual FeedElement* cd(const wstring path) const = 0;
+	virtual wstring getPath() const = 0;
+	virtual wstring getDetailsString() const = 0;
+	virtual wstring getContentsString(bool filterUnread) const = 0;
 };
 
-struct AnyFeedThing { 
-	enum {IFEEDFOLDER, IFEED, IFEEDITEM} type;
-	AnyFeedType item;
+class FeedFolder : public FeedElement {
+ public:
+	FeedFolder(IFeedFolder*);
+	virtual FeedElement* cd(const wstring path) const;
+	virtual wstring getPath() const;
+	virtual wstring getDetailsString() const;
+	virtual wstring getContentsString(const bool filterUnread) const;
+ private:
+	IFeedFolder* backing;
 };
 
+class FeedFeed : public FeedElement {
+ public:
+	FeedFeed(IFeed*);
+	virtual FeedElement* cd(const wstring path) const;
+	virtual wstring getPath() const;
+	virtual wstring getDetailsString() const;
+	virtual wstring getContentsString(const bool filterUnread) const;
+ private:
+	IFeed* backing;
+};
 
-
-// dir Feed
-void printFeed(IFeed* base, bool filterUnread);
-
-// dir Folder
-void printFolder(IFeedFolder* folder);
-
-void printItem(IFeedItem* item);
-
-// cd
-IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path);
-
+class FeedItem : public FeedElement {
+ public:
+	FeedItem(IFeedItem*);
+	virtual FeedElement* cd(const wstring path) const;
+	virtual wstring getPath() const;
+	virtual wstring getDetailsString() const;
+	virtual wstring getContentsString(const bool filterUnread) const;
+ private:
+	IFeedItem* backing;
+};
 
 
 #endif        //  #ifndef COMMANDS_H

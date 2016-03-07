@@ -1,48 +1,161 @@
 
-#include <iostream>
+#include <utility>
+#include <sstream>
 #include "commands.h"
 
-// cd
-// TODO: wcstok to allow "cd path\to\dir" to work
-// TODO: cd into a feed(?)
-IFeedFolder* changeDirectory(IFeedFolder* base, const wchar_t* const path) {
-	IFeedFolder* result;
-	HRESULT error;
-	const wchar_t* UP_ONE_LEVEL = L"..";
-	
-	if (wcscmp(path, UP_ONE_LEVEL) == 0) {
-		error = base->get_Parent((IDispatch**)&result);
-	} else if (wcscmp(path, L".") == 0) {
-		result = base;
-	} else {
-		BSTR path_b = SysAllocString(path);
-		error = base->GetSubfolder(path_b, (IDispatch**)&result);
-		SysFreeString(path_b);
+using std::pair;
+using std::wstring;
+const wchar_t* UP_ONE_LEVEL = L"..";
+const size_t MAX_STRING_SIZE = 1024;
+
+FeedElement::FeedElement() {}
+
+FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
+
+FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
+
+FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
+
+/**
+ * @return _1 the first element of the path
+ *   _2 the rest of the path
+ */
+pair<wstring, wstring> splitPathString(const wstring path) {
+	wstring::const_iterator i;
+	for (i = path.cbegin(); i < path.cend();  i++) {
+		if (*i == '/' || *i == '\\') {
+			break;
+		}
 	}
 	
-	if (error == 0x80070003) { // ERROR_PATH_NOT_FOUND
-		printf("No such directory\n");
-		return base;
-	} else if (error == 0x80070005) { // ERROR_ACCESS_DENIED; seems wider than 
-		printf("Access denied\n");
-		return base;
-	} else if (error) {
-		printf("Can't do that: %x\n", error);
-		return base;
+	const wstring a = wstring(path.cbegin(), i);
+	const wstring b = (i == path.cend() ? L"" : wstring(i + 1, path.cend()));
+	
+	pair<wstring, wstring> retVal(a,b);
+	return retVal;
+}
+
+/*
+ 0x80070003 // ERROR_PATH_NOT_FOUND
+ 0x80070005 // ERROR_ACCESS_DENIED
+*/
+FeedElement* FeedFolder::cd(const wstring path) const {
+	const pair<wstring, wstring> parts = splitPathString(path);
+	FeedElement* iterationStep;
+	
+	HRESULT error;
+	if (parts.first.compare(UP_ONE_LEVEL) == 0) {
+		IFeedFolder* result;
+		error = backing->get_Parent((IDispatch**)&result);
+		if (error) {
+			throw error;
+		} else {
+			iterationStep = new FeedFolder(result);
+		}
+	} else if (parts.first.compare(L".") == 0) {
+		iterationStep = new FeedFolder(this->backing);
 	} else {
-		return result;
+		VARIANT_BOOL feedExists;
+		VARIANT_BOOL folderExists;
+		BSTR name = SysAllocString(parts.first.c_str());
+		
+		error = backing->ExistsFeed(name, &feedExists);
+		error = backing->ExistsSubfolder(name, &folderExists);
+		
+		if (feedExists == VARIANT_TRUE) {
+			IFeed* result;
+			error = backing->GetFeed(name, (IDispatch**)&result);
+			iterationStep = new FeedFeed(result);
+		} else if (folderExists == VARIANT_TRUE) {
+			IFeedFolder* result;
+			error = backing->GetSubfolder(name, (IDispatch**)&result);
+			iterationStep = new FeedFolder(result);
+		} else {
+			throw "no such element";
+		}
+		SysFreeString(name);
+	}
+	
+	
+	if (parts.second.compare(L"") == 0) {
+		return iterationStep;
+	} else {
+		FeedElement* retVal = iterationStep->cd(parts.second);
+		delete iterationStep;
+		return retVal;
 	}
 }
 
+FeedElement* FeedFeed::cd(const wstring path) const {
+	const pair<wstring, wstring> parts = splitPathString(path);
+	FeedElement* iterationStep;
+	
+	HRESULT error;
+	if (parts.first.compare(UP_ONE_LEVEL) == 0) {
+		IFeedFolder* result;
+		error = backing->get_Parent((IDispatch**)&result);
+		if (error) {
+			throw error;
+		} else {
+			iterationStep = new FeedFolder(result);
+		}
+	} else if (parts.first.compare(L".") == 0) {
+		iterationStep = new FeedFeed(this->backing);
+	} else {
+		LONG id = stoi(parts.first);
+		IFeedItem* result;
+		error = backing->GetItem(id, (IDispatch**)&result);
+		iterationStep = new FeedItem(result);
+	}
+	
+	
+	if (parts.second.compare(L"") == 0) {
+		return iterationStep;
+	} else {
+		FeedElement* retVal = iterationStep->cd(parts.second);
+		delete iterationStep;
+		return retVal;
+	}
+}
 
-// dir
-void printFolder(IFeedFolder* folder) {
+FeedElement* FeedItem::cd(const wstring path) const {
+	const pair<wstring, wstring> parts = splitPathString(path);
+	FeedElement* iterationStep;
+	
+	HRESULT error;
+	if (parts.first.compare(UP_ONE_LEVEL) == 0) {
+		IFeed* result;
+		error = backing->get_Parent((IDispatch**)&result);
+		if (error) {
+			throw error;
+		} else {
+			iterationStep = new FeedFeed(result);
+		}
+	} else if (parts.first.compare(L".") == 0) {
+		iterationStep = new FeedItem(this->backing);
+	} else {
+		throw "No subelements of a feed item";
+	}
+	
+	
+	if (parts.second.compare(L"") == 0) {
+		return iterationStep;
+	} else {
+		FeedElement* retVal = iterationStep->cd(parts.second);
+		delete iterationStep;
+		return retVal;
+	}
+}
+
+wstring FeedFolder::getContentsString(const bool filterUnread) const {
 	IFeedsEnum* currentFeeds;
 	BSTR name;
+	std::wostringstream retVal;
+	char inbetween[MAX_STRING_SIZE];
 	
 	
 	// folders
-	folder->get_Subfolders((IDispatch**)&currentFeeds);
+	backing->get_Subfolders((IDispatch**)&currentFeeds);
 	
 	LONG feedCount;
 	currentFeeds->get_Count(&feedCount);
@@ -51,7 +164,8 @@ void printFolder(IFeedFolder* folder) {
 		currentFeeds->Item(i, (IDispatch**)&currentFeed);
 		
 		currentFeed->get_Name(&name);
-		printf("%ls/\n", (wchar_t *)name);
+		snprintf(inbetween, MAX_STRING_SIZE, "%ls/", (wchar_t *)name);
+		retVal << inbetween << std::endl;
 		SysFreeString(name);
 		currentFeed->Release();
 	}
@@ -59,7 +173,7 @@ void printFolder(IFeedFolder* folder) {
 	
 	
 	// not folders; feeds
-	folder->get_Feeds((IDispatch**)&currentFeeds);
+	backing->get_Feeds((IDispatch**)&currentFeeds);
 	
 	currentFeeds->get_Count(&feedCount);
 	for (int i = 0; i < feedCount; i++) {
@@ -69,27 +183,34 @@ void printFolder(IFeedFolder* folder) {
 		
 		currentFeed->get_Name(&name);
 		currentFeed->get_UnreadItemCount(&unreadCount);
-		printf("%ls (%ld)\n", (wchar_t *)name, unreadCount);
+		snprintf(inbetween, MAX_STRING_SIZE, "%ls (%ld)", (wchar_t *)name, unreadCount);
+		retVal << inbetween << std::endl;
 		SysFreeString(name);
 		currentFeed->Release();
 	}
 	currentFeeds->Release();
+	
+	return retVal.str();
 }
 
 // print the contents of a feed
-void printFeed(IFeed* feed, bool filterUnread) {
+wstring FeedFeed::getContentsString(const bool filterUnread) const {
 	IFeedsEnum* items;
 	BSTR name;
 	LONG localId;
 	DATE pubDate;
 	VARIANT_BOOL isRead;
+	std::wostringstream retVal;
+	char inbetween[MAX_STRING_SIZE];
 	
-	feed->get_Name(&name);
-	printf(" Feed: %ls\n", (wchar_t*) name);
+	// The feed name
+	backing->get_Name(&name);
+	snprintf(inbetween, MAX_STRING_SIZE, " Feed: %ls", (wchar_t*) name);
+	retVal << inbetween << std::endl;
+	SysFreeString(name);
 	
-	
-	// items
-	feed->get_Items((IDispatch**)&items);
+	// the feed items
+	backing->get_Items((IDispatch**)&items);
 	
 	LONG feedCount;
 	items->get_Count(&feedCount);
@@ -105,7 +226,8 @@ void printFeed(IFeed* feed, bool filterUnread) {
 			curItem->get_LocalId(&localId);
 			char* isReadMessage = (isRead ? "" : "<NEW>");
 			
-			printf("%4ld %5s %ls\n", localId, isReadMessage, (wchar_t *)name);
+			snprintf(inbetween, MAX_STRING_SIZE, "%4ld %5s %ls", localId, isReadMessage, (wchar_t *)name);
+			retVal << inbetween << std::endl;
 			
 			SysFreeString(name);
 		}
@@ -113,48 +235,102 @@ void printFeed(IFeed* feed, bool filterUnread) {
 		curItem->Release();
 	}
 	items->Release();
+	
+	return retVal.str();
 }
 
-void printItem(IFeedItem* item) {
+wstring FeedItem::getContentsString(const bool filterUnread) const {
+	return L"";
+}
+
+wstring FeedFolder::getDetailsString() const {
+	return L"";
+}
+
+wstring FeedFeed::getDetailsString() const {
+	return L"";
+}
+
+wstring FeedItem::getDetailsString() const {
 	BSTR str;
 	DATE pubDate;
 	IDispatch* dispatch;
+	std::wostringstream retVal;
+	char inbetween[MAX_STRING_SIZE];
 	
-	item->get_Title(&str);
+	backing->get_Title(&str);
 	if (str) {
-		printf("\n%ls\n", str);
+		snprintf(inbetween, MAX_STRING_SIZE, "\n%ls", str);
+		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
 	
-	item->get_Author(&str);
+	backing->get_Author(&str);
 	if (str) {
-		printf("    Author:  %ls\n", str);
+		snprintf(inbetween, MAX_STRING_SIZE, "    Author:  %ls", str);
+		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
 	
-//	item->get_Enclosure(&dispatch);
-//	if (dispatch != NULL) {
-//		printf("    Has Enclosure\n");
-//		dispatch->Release();
-//	}
+ //	backing->get_Enclosure(&dispatch);
+ //	if (dispatch != NULL) {
+ //		snprintf(inbetween, MAX_STRING_SIZE, "    Has Enclosure\n");
+ //		retVal << inbetween << std::endl;
+ //		dispatch->Release();
+ //	}
 	
-	item->get_PubDate(&pubDate);
+	backing->get_PubDate(&pubDate);
 	if (pubDate) {
-		// printf("    PubDate: %ls\n", (BSTR) pubDate);
+		// snprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
 	}
 	
-	item->get_Modified(&pubDate);
+	backing->get_Modified(&pubDate);
 	if (pubDate) {
-		// printf("    PubDate: %ls\n", (BSTR) pubDate);
+		// snprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
 	}
 	
-	printf("\n");
+	snprintf(inbetween, MAX_STRING_SIZE, "\n");
 	
-	item->get_Description(&str);
+	backing->get_Description(&str);
 	if (str) {
-		printf("%ls\n\n", str);
+		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		retVal << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
 	
+	return retVal.str();
+}
+
+wstring FeedFolder::getPath() const {
+	BSTR  currFolderPath;
+	backing->get_Path(&currFolderPath);
+	wstring retVal((wchar_t*)currFolderPath);
+	SysFreeString(currFolderPath);
+	return retVal;
+}
+
+wstring FeedFeed::getPath() const {
+	BSTR  currFolderPath;
+	backing->get_Path(&currFolderPath);
+	wstring retVal((wchar_t*)currFolderPath);
+	SysFreeString(currFolderPath);
+	return retVal;
+}
+
+wstring FeedItem::getPath() const {
+	IFeed* parent;
+	backing->get_Parent((IDispatch**)&parent);
 	
+	BSTR  parentPath;
+	parent->get_Path(&parentPath);
+	
+	LONG localid;
+	backing->get_LocalId(&localid);
+	
+	wchar_t retVal[MAX_STRING_SIZE];
+	swprintf(retVal, MAX_STRING_SIZE, L"%ls/%d", (wchar_t *)parentPath, localid);
+	
+	parent->Release();
+	SysFreeString(parentPath);
+	return retVal;
 }

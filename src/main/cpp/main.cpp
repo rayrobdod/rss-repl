@@ -13,8 +13,8 @@
 #include "commands.h"
 
 #define END_LOOP	L"exit"
-#define PRINT_DIRECTORY	L"dir"
-#define PRINT_FEED	L"printfeed"
+#define SHOW_CONTENTS	L"dir"
+#define SHOW_ITEM	L"print"
 #define CHANGE_DIRECTORY	L"cd"
 #define MAKE_DIRECTORY	L"md"
 #define FEED_INFO	L"info"
@@ -62,10 +62,9 @@ int tokenify(wchar_t* const input, wchar_t** const output) {
 }
 
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	IFeedsManager* manager;
-	IFeedFolder* currFolder;
+	FeedElement* currentFolder;
 	BSTR  currFolderPath;
 	BSTR  name;
 	
@@ -81,12 +80,15 @@ int main(int argc, char** argv)
 			CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager ,
 			(void**)&manager);
 	
-	manager->get_RootFolder((IDispatch**)&currFolder);
+	{
+		IFeedFolder* startingFolder;
+		manager->get_RootFolder((IDispatch**)&startingFolder);
+		currentFolder = new FeedFolder(startingFolder);
+	}
 	
 	
 	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
-		currFolder->get_Path(&currFolderPath);
-		printf("%%Feeds%%\\%ls> ", (wchar_t *)currFolderPath);
+		printf("%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
 		
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
@@ -98,33 +100,33 @@ int main(int argc, char** argv)
 				wcscmp(command, END_LOOP) == 0 ) {
 			// do nothing
 			
-		} else if (wcscmp(command, PRINT_DIRECTORY) == 0) {
-			printFolder(currFolder);
-			
-		} else if (wcscmp(command, PRINT_FEED) == 0) {
-			IFeed* currentFeed;
-			BSTR path_b = SysAllocString(paramv[1]);
-			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
-			SysFreeString(path_b);
-			
+		} else if (wcscmp(command, SHOW_CONTENTS) == 0) {
+			wchar_t* path;
+			if (paramc == 1) {
+				path = L".";
+			} else {
+				path = paramv[1];
+			}
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
-			printFeed(currentFeed, filterNew);
+			FeedElement* targetFolder = currentFolder->cd(path);
+			printf("%ls\n", targetFolder->getContentsString(filterNew).c_str());
+			delete targetFolder;
 			
-		} else if (wcscmp(command, L"printitem") == 0) {
-			IFeed* currentFeed;
-			BSTR path_b = SysAllocString(paramv[1]);
-			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
-			SysFreeString(path_b);
+		} else if (wcscmp(command, SHOW_ITEM) == 0) {
+			wchar_t* path;
+			if (paramc == 1) {
+				path = L".";
+			} else {
+				path = paramv[1];
+			}
+			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
-			long int index = wcstol(paramv[2], NULL, 10);
+			FeedElement* targetFolder = currentFolder->cd(path);
+			printf("%ls\n", targetFolder->getDetailsString().c_str());
+			delete targetFolder;
 			
-			IFeedItem* currentItem;
-			currentFeed->GetItem((LONG) index, (IDispatch**)&currentItem);
-			
-			printItem(currentItem);
-			
-		} else if (wcscmp(command, L"markAsRead") == 0) {
+/*		} else if (wcscmp(command, L"markAsRead") == 0) {
 			IFeed* currentFeed;
 			BSTR path_b = SysAllocString(paramv[1]);
 			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
@@ -137,17 +139,22 @@ int main(int argc, char** argv)
 			
 			currentItem->put_IsRead(VARIANT_TRUE);
 			
-		} else if (wcscmp(command, L"echo") == 0) {
+*/		} else if (wcscmp(command, L"echo") == 0) {
 			for (int i = 0; i < paramc; i++) {
 				printf("\t%ls\n", paramv[i]);
 			}
 			
 		} else if (wcscmp(command, CHANGE_DIRECTORY) == 0) {
-			if (paramc >= 1) {
-				currFolder = changeDirectory(currFolder, paramv[1]);
+			FeedElement* prevFolder = currentFolder;
+			wchar_t* path;
+			if (paramc == 1) {
+				path = L".";
 			} else {
-				printf("Needs a parameter; the directory to change to\n");
+				path = paramv[1];
 			}
+			
+			currentFolder = currentFolder->cd(path);
+			delete prevFolder;
 			
 		} else {
 			printf("Unknown Command\n");

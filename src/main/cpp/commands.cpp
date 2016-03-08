@@ -16,6 +16,8 @@ FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
 
 FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
 
+ErrorFeedElement::ErrorFeedElement(const wstring message) : message(message) {}
+
 /**
  * @return _1 the first element of the path
  *   _2 the rest of the path
@@ -48,7 +50,7 @@ FeedElement* FeedFolder::cd(const wstring path) const {
 		IFeedFolder* result;
 		error = backing->get_Parent((IDispatch**)&result);
 		if (error) {
-			throw error;
+			iterationStep = new ErrorFeedElement(L"Already top level; no parent to cd to");
 		} else {
 			iterationStep = new FeedFolder(result);
 		}
@@ -71,7 +73,7 @@ FeedElement* FeedFolder::cd(const wstring path) const {
 			error = backing->GetSubfolder(name, (IDispatch**)&result);
 			iterationStep = new FeedFolder(result);
 		} else {
-			throw "no such element";
+			iterationStep = new ErrorFeedElement(L"No such element");
 		}
 		SysFreeString(name);
 	}
@@ -95,17 +97,25 @@ FeedElement* FeedFeed::cd(const wstring path) const {
 		IFeedFolder* result;
 		error = backing->get_Parent((IDispatch**)&result);
 		if (error) {
-			throw error;
+			iterationStep = new ErrorFeedElement(L"Already top level; no parent to cd to");
 		} else {
 			iterationStep = new FeedFolder(result);
 		}
 	} else if (parts.first.compare(L".") == 0) {
 		iterationStep = new FeedFeed(this->backing);
 	} else {
-		LONG id = stoi(parts.first);
-		IFeedItem* result;
-		error = backing->GetItem(id, (IDispatch**)&result);
-		iterationStep = new FeedItem(result);
+		try {
+			LONG id = stoi(parts.first);
+			IFeedItem* result;
+			error = backing->GetItem(id, (IDispatch**)&result);
+			if (error) {
+				iterationStep = new ErrorFeedElement(L"Unknown feed item number");
+			} else {
+				iterationStep = new FeedItem(result);
+			}
+		} catch (const std::invalid_argument& e) {
+			iterationStep = new ErrorFeedElement(L"FeedItem names are integers");
+		}
 	}
 	
 	
@@ -127,14 +137,14 @@ FeedElement* FeedItem::cd(const wstring path) const {
 		IFeed* result;
 		error = backing->get_Parent((IDispatch**)&result);
 		if (error) {
-			throw error;
+			iterationStep = new ErrorFeedElement(L"Already top level; no parent to cd to");
 		} else {
 			iterationStep = new FeedFeed(result);
 		}
 	} else if (parts.first.compare(L".") == 0) {
 		iterationStep = new FeedItem(this->backing);
 	} else {
-		throw "No subelements of a feed item";
+		iterationStep = new ErrorFeedElement(L"No subelements of a feed item");
 	}
 	
 	
@@ -145,6 +155,10 @@ FeedElement* FeedItem::cd(const wstring path) const {
 		delete iterationStep;
 		return retVal;
 	}
+}
+
+FeedElement* ErrorFeedElement::cd(const wstring path) const {
+	return new ErrorFeedElement(this->message);
 }
 
 wstring FeedFolder::getContentsString(const bool filterUnread) const {
@@ -240,15 +254,19 @@ wstring FeedFeed::getContentsString(const bool filterUnread) const {
 }
 
 wstring FeedItem::getContentsString(const bool filterUnread) const {
-	return L"";
+	return L"No contents inside an item";
+}
+
+wstring ErrorFeedElement::getContentsString(const bool filterUnread) const {
+	return this->message;
 }
 
 wstring FeedFolder::getDetailsString() const {
-	return L"";
+	return L"No details about a folder";
 }
 
 wstring FeedFeed::getDetailsString() const {
-	return L"";
+	return L"No details about a feed";
 }
 
 wstring FeedItem::getDetailsString() const {
@@ -301,6 +319,10 @@ wstring FeedItem::getDetailsString() const {
 	return retVal.str();
 }
 
+wstring ErrorFeedElement::getDetailsString() const {
+	return this->message;
+}
+
 wstring FeedFolder::getPath() const {
 	BSTR  currFolderPath;
 	backing->get_Path(&currFolderPath);
@@ -328,9 +350,18 @@ wstring FeedItem::getPath() const {
 	backing->get_LocalId(&localid);
 	
 	wchar_t retVal[MAX_STRING_SIZE];
-	swprintf(retVal, MAX_STRING_SIZE, L"%ls/%d", (wchar_t *)parentPath, localid);
+	swprintf(retVal, MAX_STRING_SIZE, L"%ls\\%d", (wchar_t *)parentPath, localid);
 	
 	parent->Release();
 	SysFreeString(parentPath);
 	return retVal;
 }
+
+wstring ErrorFeedElement::getPath() const {
+	return L"ERROR";
+}
+
+bool FeedFolder::isError() const { return false; }
+bool FeedFeed::isError() const { return false; }
+bool FeedItem::isError() const { return false; }
+bool ErrorFeedElement::isError() const { return true; }

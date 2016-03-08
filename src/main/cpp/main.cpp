@@ -143,7 +143,6 @@ int main(int argc, char** argv) {
 			}
 			
 		} else if (wcscmp(command, CHANGE_DIRECTORY) == 0) {
-			FeedElement* prevFolder = currentFolder;
 			wchar_t* path;
 			if (paramc == 1) {
 				path = L".";
@@ -151,9 +150,15 @@ int main(int argc, char** argv) {
 				path = paramv[1];
 			}
 			
-			currentFolder = currentFolder->cd(path);
-			delete prevFolder;
-			
+			FeedElement* newFolder = currentFolder->cd(path);
+			if (newFolder->isError()) {
+				printf("%ls\n", newFolder->getDetailsString().c_str());
+				delete newFolder;
+			}
+			else {
+				delete currentFolder;
+				currentFolder = newFolder;
+			}
 		} else {
 			printf("Unknown Command\n");
 		}

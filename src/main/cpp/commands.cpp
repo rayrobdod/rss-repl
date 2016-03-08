@@ -303,7 +303,81 @@ wstring FeedFolder::getDetailsString() const {
 }
 
 wstring FeedFeed::getDetailsString() const {
-	return L"No details about a feed";
+	BSTR str;
+	LONG number;
+	FEEDS_DOWNLOAD_STATUS dlstatus;
+	FEEDS_DOWNLOAD_ERROR dlerror;
+	DATE pubDate;
+	std::wostringstream retVal;
+	char inbetween[MAX_STRING_SIZE];
+	HRESULT error;
+
+	error = backing->get_Title(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		retVal << std::endl << inbetween << std::endl << std::endl;
+		SysFreeString(str);
+	}
+
+	error = backing->get_UnreadItemCount(&number);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Unread Item Count:  %d", number);
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_ItemCount(&number);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Item Count:  %d", number);
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_MaxItemCount(&number);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Max Item Count:  %d", number);
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_DownloadStatus(&dlstatus);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Download Status: %ls", downloadStatus2String(dlstatus).c_str());
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_LastDownloadError(&dlerror);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Download Error: %ls", downloadError2String(dlerror).c_str());
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_Image(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Image: %ls", str);
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_Link(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Link: %ls", str);
+		retVal << inbetween << std::endl;
+	}
+
+	error = backing->get_DownloadUrl(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "    Download Url: %ls", str);
+		retVal << inbetween << std::endl;
+		SysFreeString(str);
+	}
+
+	retVal << std::endl;
+
+	error = backing->get_Description(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		retVal << inbetween << std::endl << std::endl;
+		SysFreeString(str);
+	}
+
+	return retVal.str();
 }
 
 wstring FeedItem::getDetailsString() const {

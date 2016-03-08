@@ -14,6 +14,7 @@ class FeedElement {
 	virtual wstring getPath() const = 0;
 	virtual wstring getDetailsString() const = 0;
 	virtual wstring getContentsString(const bool filterUnread) const = 0;
+	virtual HRESULT markAsRead() = 0;
 	virtual bool isError() const = 0;
 };
 
@@ -24,6 +25,7 @@ class FeedFolder : public FeedElement {
 	virtual wstring getPath() const;
 	virtual wstring getDetailsString() const;
 	virtual wstring getContentsString(const bool filterUnread) const;
+	virtual HRESULT markAsRead();
 	virtual bool isError() const;
  private:
 	IFeedFolder* const backing;
@@ -36,6 +38,7 @@ class FeedFeed : public FeedElement {
 	virtual wstring getPath() const;
 	virtual wstring getDetailsString() const;
 	virtual wstring getContentsString(const bool filterUnread) const;
+	virtual HRESULT markAsRead();
 	virtual bool isError() const;
  private:
 	IFeed* const backing;
@@ -48,6 +51,7 @@ public:
 	virtual wstring getPath() const;
 	virtual wstring getDetailsString() const;
 	virtual wstring getContentsString(const bool filterUnread) const;
+	virtual HRESULT markAsRead();
 	virtual bool isError() const;
 private:
 	IFeedItem* const backing;
@@ -63,6 +67,7 @@ public:
 	virtual wstring getPath() const;
 	virtual wstring getDetailsString() const;
 	virtual wstring getContentsString(const bool filterUnread) const;
+	virtual HRESULT markAsRead();
 	virtual bool isError() const;
 private:
 	const wstring message;

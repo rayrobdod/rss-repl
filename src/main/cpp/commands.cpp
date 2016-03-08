@@ -8,6 +8,8 @@ using std::wstring;
 const wchar_t* UP_ONE_LEVEL = L"..";
 const size_t MAX_STRING_SIZE = 1024;
 
+
+
 FeedElement::FeedElement() {}
 FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
 FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
@@ -201,8 +203,9 @@ FeedElement* ErrorFeedElement::cd(const wstring path) const {
 wstring FeedFolder::getContentsString(const bool filterUnread) const {
 	IFeedsEnum* currentFeeds;
 	BSTR name;
+	HRESULT error;
 	std::wostringstream retVal;
-	char inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[MAX_STRING_SIZE];
 	
 	
 	// folders
@@ -212,13 +215,21 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 	currentFeeds->get_Count(&feedCount);
 	for (int i = 0; i < feedCount; i++) {
 		IFeedFolder* currentFeed;
-		currentFeeds->Item(i, (IDispatch**)&currentFeed);
+		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
 		
-		currentFeed->get_Name(&name);
-		snprintf(inbetween, MAX_STRING_SIZE, "%ls/", (wchar_t *)name);
-		retVal << inbetween << std::endl;
-		SysFreeString(name);
-		currentFeed->Release();
+		if (SUCCEEDED(error)) {
+			error = currentFeed->get_Name(&name);
+			if (SUCCEEDED(error)) {
+				swprintf(inbetween, MAX_STRING_SIZE, L"%ls/", (wchar_t *)name);
+				retVal << inbetween << std::endl;
+				SysFreeString(name);
+			} else {
+				retVal << "ERROR" << std::endl;
+			}
+			currentFeed->Release();
+		} else {
+			retVal << "ERROR" << std::endl;
+		}
 	}
 	currentFeeds->Release();
 	
@@ -230,62 +241,93 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 	for (int i = 0; i < feedCount; i++) {
 		IFeed* currentFeed;
 		LONG unreadCount;
-		currentFeeds->Item(i, (IDispatch**)&currentFeed);
-		
-		currentFeed->get_Name(&name);
-		currentFeed->get_UnreadItemCount(&unreadCount);
-		snprintf(inbetween, MAX_STRING_SIZE, "%ls (%ld)", (wchar_t *)name, unreadCount);
-		retVal << inbetween << std::endl;
-		SysFreeString(name);
-		currentFeed->Release();
+		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+
+		if (SUCCEEDED(error)) {
+			error = currentFeed->get_Name(&name);
+			if (SUCCEEDED(error)) {
+				error = currentFeed->get_UnreadItemCount(&unreadCount);
+				if (SUCCEEDED(error)) {
+					swprintf(inbetween, MAX_STRING_SIZE, L"%ls (%ld)", (wchar_t *)name, unreadCount);
+					retVal << inbetween << std::endl;
+				} else {
+					swprintf(inbetween, MAX_STRING_SIZE, L"%ls (???)", (wchar_t *)name);
+					retVal << inbetween << std::endl;
+				}
+			} else {
+				retVal << "ERROR" << std::endl;
+			}
+			SysFreeString(name);
+			currentFeed->Release();
+		} else {
+			retVal << "ERROR" << std::endl;
+		}
 	}
 	currentFeeds->Release();
 	
 	return retVal.str();
 }
 
-// print the contents of a feed
 wstring FeedFeed::getContentsString(const bool filterUnread) const {
 	IFeedsEnum* items;
 	BSTR name;
 	LONG localId;
 	DATE pubDate;
+	HRESULT error;
 	VARIANT_BOOL isRead;
 	std::wostringstream retVal;
-	char inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[MAX_STRING_SIZE];
 	
 	// The feed name
-	backing->get_Name(&name);
-	snprintf(inbetween, MAX_STRING_SIZE, " Feed: %ls", (wchar_t*) name);
-	retVal << inbetween << std::endl;
-	SysFreeString(name);
+	error = backing->get_Name(&name);
+	if (SUCCEEDED(error)) {
+		swprintf(inbetween, MAX_STRING_SIZE, L" Feed: %ls", (wchar_t*)name);
+		retVal << inbetween << std::endl;
+		SysFreeString(name);
+	} else {
+		retVal << " Feed: ???" << std::endl << std::endl;
+	}
 	
 	// the feed items
-	backing->get_Items((IDispatch**)&items);
-	
-	LONG feedCount;
-	items->get_Count(&feedCount);
-	for (int i = 0; i < feedCount; i++) {
-		IFeedItem* curItem;
-		items->Item(i, (IDispatch**)&curItem);
-		curItem->get_IsRead(&isRead);
-		
-		if (!filterUnread || (isRead == VARIANT_FALSE)) {
-			
-			curItem->get_Title(&name);
-			curItem->get_PubDate(&pubDate);
-			curItem->get_LocalId(&localId);
-			char* isReadMessage = (isRead ? "" : "<NEW>");
-			
-			snprintf(inbetween, MAX_STRING_SIZE, "%4ld %5s %ls", localId, isReadMessage, (wchar_t *)name);
-			retVal << inbetween << std::endl;
-			
-			SysFreeString(name);
+	error = backing->get_Items((IDispatch**)&items);
+	if (SUCCEEDED(error)) {
+
+		LONG feedCount;
+		error = items->get_Count(&feedCount);
+		if (SUCCEEDED(error)) {
+			for (int i = 0; i < feedCount; i++) {
+				IFeedItem* curItem;
+				items->Item(i, (IDispatch**)&curItem);
+				curItem->get_IsRead(&isRead);
+
+				if (!filterUnread || (isRead == VARIANT_FALSE)) {
+					HRESULT error2;
+					HRESULT error3;
+
+					error = curItem->get_Title(&name);
+					error2 = curItem->get_PubDate(&pubDate);
+					error3 = curItem->get_LocalId(&localId);
+					if (SUCCEEDED(error3) && SUCCEEDED(error)) {
+						wchar_t* isReadMessage = (isRead ? L"" : L"<NEW>");
+
+						swprintf(inbetween, MAX_STRING_SIZE, L"%4ld %5ls %ls", localId, isReadMessage, (wchar_t *)name);
+						retVal << inbetween << std::endl;
+
+						SysFreeString(name);
+					} else {
+						retVal << "???? COULD NOT READ ITEM" << std::endl;
+					}
+				}
+
+				curItem->Release();
+			}
+		} else {
+			retVal << "ERROR: could not read item count" << std::endl;
 		}
-		
-		curItem->Release();
+		items->Release();
+	} else {
+		retVal << "ERROR: could not read feed items" << std::endl;
 	}
-	items->Release();
 	
 	return retVal.str();
 }
@@ -309,61 +351,61 @@ wstring FeedFeed::getDetailsString() const {
 	FEEDS_DOWNLOAD_ERROR dlerror;
 	DATE pubDate;
 	std::wostringstream retVal;
-	char inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[MAX_STRING_SIZE];
 	HRESULT error;
 
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
 		retVal << std::endl << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_UnreadItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Unread Item Count:  %d", number);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Unread Item Count:  %d", number);
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_ItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Item Count:  %d", number);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Item Count:  %d", number);
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_MaxItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Max Item Count:  %d", number);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Max Item Count:  %d", number);
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_DownloadStatus(&dlstatus);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Download Status: %ls", downloadStatus2String(dlstatus).c_str());
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Download Status: %ls", downloadStatus2String(dlstatus).c_str());
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_LastDownloadError(&dlerror);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Download Error: %ls", downloadError2String(dlerror).c_str());
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Download Error: %ls", downloadError2String(dlerror).c_str());
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_Image(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Image: %ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Image: %ls", str);
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Link: %ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Link: %ls", str);
 		retVal << inbetween << std::endl;
 	}
 
 	error = backing->get_DownloadUrl(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Download Url: %ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Download Url: %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
@@ -372,7 +414,7 @@ wstring FeedFeed::getDetailsString() const {
 
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
 		retVal << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
@@ -385,19 +427,19 @@ wstring FeedItem::getDetailsString() const {
 	DATE pubDate;
 	IFeedEnclosure* enclosure;
 	std::wostringstream retVal;
-	char inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[MAX_STRING_SIZE];
 	HRESULT error;
 	
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
 		retVal << std::endl << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
 	
 	error = backing->get_Author(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "    Author:  %ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Author:  %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
@@ -411,47 +453,47 @@ wstring FeedItem::getDetailsString() const {
 
 		error = enclosure->get_Type(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Type: %ls", str);
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Type: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_Url(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Url:  %ls", str);
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Url:  %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadStatus(&dlstatus);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Download Status: %ls", downloadStatus2String(dlstatus).c_str());
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Status: %ls", downloadStatus2String(dlstatus).c_str());
 			retVal << inbetween << std::endl;
 		}
 
 		error = enclosure->get_LocalPath(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Local Path: %ls", str);
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Local Path: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_LastDownloadError(&dlerror);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Download Error: %ls", downloadError2String(dlerror).c_str());
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Error: %ls", downloadError2String(dlerror).c_str());
 			retVal << inbetween << std::endl;
 		}
 
 		error = enclosure->get_DownloadMimeType(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Download Type: %ls", str);
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Type: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadUrl(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			snprintf(inbetween, MAX_STRING_SIZE, "        Download Url: %ls", str);
+			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Url: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
@@ -462,19 +504,19 @@ wstring FeedItem::getDetailsString() const {
 	
 	error = backing->get_PubDate(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		// snprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
+		// swprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
 	}
 	
 	error = backing->get_Modified(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		// snprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
+		// swprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
 	}
 
 	retVal << std::endl;
 	
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
 		retVal << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
@@ -528,3 +570,10 @@ bool FeedFolder::isError() const { return false; }
 bool FeedFeed::isError() const { return false; }
 bool FeedItem::isError() const { return false; }
 bool ErrorFeedElement::isError() const { return true; }
+
+HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
+HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
+HRESULT FeedItem::markAsRead() {
+	return backing->put_IsRead(VARIANT_TRUE);
+}
+HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }

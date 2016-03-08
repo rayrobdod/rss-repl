@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 	
 	
 	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
-		printf("%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
+		wprintf(L"%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
 		
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
 			FeedElement* targetFolder = currentFolder->cd(path);
-			printf("%ls\n", targetFolder->getContentsString(filterNew).c_str());
+			wprintf(L"%ls\n", targetFolder->getContentsString(filterNew).c_str());
 			delete targetFolder;
 			
 		} else if (wcscmp(command, SHOW_ITEM) == 0) {
@@ -121,25 +121,31 @@ int main(int argc, char** argv) {
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
 			FeedElement* targetFolder = currentFolder->cd(path);
-			printf("%ls\n", targetFolder->getDetailsString().c_str());
+			wprintf(L"%ls\n", targetFolder->getDetailsString().c_str());
 			delete targetFolder;
 			
-/*		} else if (wcscmp(command, L"markAsRead") == 0) {
-			IFeed* currentFeed;
-			BSTR path_b = SysAllocString(paramv[1]);
-			currFolder->GetFeed(path_b, (IDispatch**)&currentFeed);
-			SysFreeString(path_b);
-			
-			long int index = wcstol(paramv[2], NULL, 10);
-			
-			IFeedItem* currentItem;
-			currentFeed->GetItem((LONG) index, (IDispatch**)&currentItem);
-			
-			currentItem->put_IsRead(VARIANT_TRUE);
-			
-*/		} else if (wcscmp(command, L"echo") == 0) {
+		} else if (wcscmp(command, L"markAsRead") == 0) {
+			wchar_t* path;
+			if (paramc == 1) {
+				path = L".";
+			}
+			else {
+				path = paramv[1];
+			}
+			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
+
+			FeedElement* targetFolder = currentFolder->cd(path);
+			HRESULT result = targetFolder->markAsRead();
+			if (SUCCEEDED(result)) {
+				printf("Mark as read succeeded\n");
+			} else {
+				printf("Mark as read failed\n");
+			}
+			delete targetFolder;
+
+		} else if (wcscmp(command, L"echo") == 0) {
 			for (int i = 0; i < paramc; i++) {
-				printf("\t%ls\n", paramv[i]);
+				wprintf(L"\t%ls\n", paramv[i]);
 			}
 			
 		} else if (wcscmp(command, CHANGE_DIRECTORY) == 0) {
@@ -152,10 +158,9 @@ int main(int argc, char** argv) {
 			
 			FeedElement* newFolder = currentFolder->cd(path);
 			if (newFolder->isError()) {
-				printf("%ls\n", newFolder->getDetailsString().c_str());
+				wprintf(L"%ls\n", newFolder->getDetailsString().c_str());
 				delete newFolder;
-			}
-			else {
+			} else {
 				delete currentFolder;
 				currentFolder = newFolder;
 			}

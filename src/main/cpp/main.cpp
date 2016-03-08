@@ -30,7 +30,7 @@
  * @return the length of the output array
  */
 int tokenify(wchar_t* const input, wchar_t** const output) {
-	const int inputLen = wcslen(input);
+	const size_t inputLen = wcslen(input);
 	int i;
 	int outputLen = 0;
 	bool quoteMode = false;
@@ -65,8 +65,6 @@ int tokenify(wchar_t* const input, wchar_t** const output) {
 int main(int argc, char** argv) {
 	IFeedsManager* manager;
 	FeedElement* currentFolder;
-	BSTR  currFolderPath;
-	BSTR  name;
 	
 	wchar_t* const  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
 	wchar_t** const paramv = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));

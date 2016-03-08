@@ -13,7 +13,7 @@ class FeedElement {
 	virtual FeedElement* cd(const wstring path) const = 0;
 	virtual wstring getPath() const = 0;
 	virtual wstring getDetailsString() const = 0;
-	virtual wstring getContentsString(bool filterUnread) const = 0;
+	virtual wstring getContentsString(const bool filterUnread) const = 0;
 };
 
 class FeedFolder : public FeedElement {

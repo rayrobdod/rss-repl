@@ -9,13 +9,9 @@ const wchar_t* UP_ONE_LEVEL = L"..";
 const size_t MAX_STRING_SIZE = 1024;
 
 FeedElement::FeedElement() {}
-
 FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
-
 FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
-
 FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
-
 ErrorFeedElement::ErrorFeedElement(const wstring message) : message(message) {}
 
 /**
@@ -36,6 +32,47 @@ pair<wstring, wstring> splitPathString(const wstring path) {
 	pair<wstring, wstring> retVal(a,b);
 	return retVal;
 }
+
+/** Returns a string that representing the status */
+wstring downloadStatus2String(const FEEDS_DOWNLOAD_STATUS status) {
+	switch (status) {
+		case FDS_NONE: return L"Not Attempted";
+		case FDS_PENDING: return L"Pending";
+		case FDS_DOWNLOADING: return L"Downloading";
+		case FDS_DOWNLOADED: return L"Success";
+		case FDS_DOWNLOAD_FAILED: return L"Failed";
+		default: return L"Unknown";
+	}
+}
+
+/** Returns a string that representing the status */
+wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status) {
+	switch (status) {
+		case FDE_NONE: return L"Successful";
+		case FDE_DOWNLOAD_FAILED: return L"Download failed";
+		case FDE_INVALID_FEED_FORMAT: return L"Feed is in an unsupported format";
+		case FDE_NORMALIZATION_FAILED: return L"Feed has xml errors";
+		case FDE_PERSISTENCE_FAILED: return L"Could not save file to disk";
+		case FDE_DOWNLOAD_BLOCKED: return L"The security manager blocked the download";
+		case FDE_CANCELED: return L"The download was interrupted";
+		case FDE_UNSUPPORTED_AUTH: return L"UNSUPPORTED_AUTH";
+		case FDE_BACKGROUND_DOWNLOAD_DISABLED: return L"The background download service was disabled";
+		case FDE_NOT_EXIST: return L"The feed no longer exists";
+		case FDE_UNSUPPORTED_MSXML: return L"UNSUPPORTED_MSXML";
+		case FDE_UNSUPPORTED_DTD: return L"Feed contains a DTD";
+		case FDE_DOWNLOAD_SIZE_LIMIT_EXCEEDED: "The XML source of the feed exceeds the maximum allowed size.";
+		case FDE_ACCESS_DENIED: return L"ACCESS_DENIED";
+		case FDE_AUTH_FAILED: return L"AUTH_FAILED";
+		case FDE_INVALID_AUTH: return L"INVALID_AUTH";
+		default: return L"Unknown";
+	}
+}
+
+
+
+
+
+
 
 /*
  0x80070003 // ERROR_PATH_NOT_FOUND
@@ -272,45 +309,97 @@ wstring FeedFeed::getDetailsString() const {
 wstring FeedItem::getDetailsString() const {
 	BSTR str;
 	DATE pubDate;
-	IDispatch* dispatch;
+	IFeedEnclosure* enclosure;
 	std::wostringstream retVal;
 	char inbetween[MAX_STRING_SIZE];
+	HRESULT error;
 	
-	backing->get_Title(&str);
-	if (str) {
-		snprintf(inbetween, MAX_STRING_SIZE, "\n%ls", str);
-		retVal << inbetween << std::endl;
+	error = backing->get_Title(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
+		retVal << std::endl << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
 	
-	backing->get_Author(&str);
-	if (str) {
+	error = backing->get_Author(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
 		snprintf(inbetween, MAX_STRING_SIZE, "    Author:  %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
 	
- //	backing->get_Enclosure(&dispatch);
- //	if (dispatch != NULL) {
- //		snprintf(inbetween, MAX_STRING_SIZE, "    Has Enclosure\n");
- //		retVal << inbetween << std::endl;
- //		dispatch->Release();
- //	}
+	error = backing->get_Enclosure((IDispatch**) &enclosure);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		FEEDS_DOWNLOAD_STATUS dlstatus;
+		FEEDS_DOWNLOAD_ERROR dlerror;
+
+		retVal << "    Enclosure:" << std::endl;
+
+		error = enclosure->get_Type(&str);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Type: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		}
+
+		error = enclosure->get_Url(&str);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Url:  %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		}
+
+		error = enclosure->get_DownloadStatus(&dlstatus);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Download Status: %ls", downloadStatus2String(dlstatus).c_str());
+			retVal << inbetween << std::endl;
+		}
+
+		error = enclosure->get_LocalPath(&str);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Local Path: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		}
+
+		error = enclosure->get_LastDownloadError(&dlerror);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Download Error: %ls", downloadError2String(dlerror).c_str());
+			retVal << inbetween << std::endl;
+		}
+
+		error = enclosure->get_DownloadMimeType(&str);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Download Type: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		}
+
+		error = enclosure->get_DownloadUrl(&str);
+		if (SUCCEEDED(error) && error != S_FALSE) {
+			snprintf(inbetween, MAX_STRING_SIZE, "        Download Url: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		}
+
+
+ 		enclosure->Release();
+ 	}
 	
-	backing->get_PubDate(&pubDate);
-	if (pubDate) {
+	error = backing->get_PubDate(&pubDate);
+	if (SUCCEEDED(error) && error != S_FALSE) {
 		// snprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
 	}
 	
-	backing->get_Modified(&pubDate);
-	if (pubDate) {
+	error = backing->get_Modified(&pubDate);
+	if (SUCCEEDED(error) && error != S_FALSE) {
 		// snprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
 	}
+
+	retVal << std::endl;
 	
-	snprintf(inbetween, MAX_STRING_SIZE, "\n");
-	
-	backing->get_Description(&str);
-	if (str) {
+	error = backing->get_Description(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
 		snprintf(inbetween, MAX_STRING_SIZE, "%ls", str);
 		retVal << inbetween << std::endl << std::endl;
 		SysFreeString(str);

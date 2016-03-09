@@ -425,6 +425,7 @@ wstring FeedFeed::getDetailsString() const {
 wstring FeedItem::getDetailsString() const {
 	BSTR str;
 	DATE pubDate;
+	VARIANT_BOOL isRead;
 	IFeedEnclosure* enclosure;
 	std::wostringstream retVal;
 	wchar_t inbetween[MAX_STRING_SIZE];
@@ -442,6 +443,25 @@ wstring FeedItem::getDetailsString() const {
 		swprintf(inbetween, MAX_STRING_SIZE, L"    Author:  %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
+	}
+
+	error = backing->get_Link(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		swprintf(inbetween, MAX_STRING_SIZE, L"    URL:  %ls", str);
+		retVal << inbetween << std::endl;
+		SysFreeString(str);
+	}
+
+	error = backing->get_Comments(&str);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		swprintf(inbetween, MAX_STRING_SIZE, L"    Comments:  %ls", str);
+		retVal << inbetween << std::endl;
+		SysFreeString(str);
+	}
+
+	error = backing->get_IsRead(&isRead);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		retVal << "    READ: " << (isRead ? "TRUE" : "FALSE") << std::endl;
 	}
 	
 	error = backing->get_Enclosure((IDispatch**) &enclosure);

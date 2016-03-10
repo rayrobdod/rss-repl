@@ -163,6 +163,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cpp/tabComplete.cpp" />
+    <ClCompile Include="cpp/commands.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\main\Feeds.vcxproj">

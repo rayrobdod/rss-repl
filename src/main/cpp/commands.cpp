@@ -9,7 +9,6 @@ const wchar_t* UP_ONE_LEVEL = L"..";
 const size_t MAX_STRING_SIZE = 1024;
 
 
-
 FeedElement::FeedElement() {}
 FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
 FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
@@ -417,8 +416,7 @@ wstring FeedFeed::getDetailsString() const {
 		}
 	}
 
-	error = foo(backing, &pubDate);
-	//error = backing->get_LastDownloadTime(&pubDate);
+	error = backing->get_LastDownloadTime(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {

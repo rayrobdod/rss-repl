@@ -10,8 +10,6 @@ namespace Tests
 	{
 	public:
 
-		TEST_METHOD(dummy) { Assert::AreEqual(1, 1); }
-
 		TEST_METHOD(isPrefix_emptyIsPrefixOfEmpty) { Assert::IsTrue(::isPrefix(L"", L"")); }
 		TEST_METHOD(isPrefix_emptyIsPrefixOfAny) { Assert::IsTrue(::isPrefix(L"abc", L"")); }
 		TEST_METHOD(isPrefix_nothingIsPrefixOfEmpty) { Assert::IsFalse(::isPrefix(L"", L"abc")); }

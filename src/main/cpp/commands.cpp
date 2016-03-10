@@ -391,6 +391,46 @@ wstring FeedFeed::getDetailsString() const {
 		retVal << inbetween << std::endl;
 	}
 
+	error = backing->get_PubDate(&pubDate);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
+		if (SUCCEEDED(error)) {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		} else {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: ERROR");
+			retVal << inbetween << std::endl;
+		}
+	}
+
+	error = backing->get_LastBuildDate(&pubDate);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
+		if (SUCCEEDED(error)) {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Built: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		} else {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Built: ERROR");
+			retVal << inbetween << std::endl;
+		}
+	}
+
+	error = foo(backing, &pubDate);
+	//error = backing->get_LastDownloadTime(&pubDate);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
+		if (SUCCEEDED(error)) {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Downloaded: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		} else {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Downloaded: ERROR");
+			retVal << inbetween << std::endl;
+		}
+	}
+
 	error = backing->get_Image(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		swprintf(inbetween, MAX_STRING_SIZE, L"    Image: %ls", str);
@@ -524,12 +564,29 @@ wstring FeedItem::getDetailsString() const {
 	
 	error = backing->get_PubDate(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		// swprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
+		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
+		if (SUCCEEDED(error)) {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		} else {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: ERROR");
+			retVal << inbetween << std::endl;
+		}
 	}
 	
 	error = backing->get_Modified(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		// swprintf(inbetween, MAX_STRING_SIZE, "    PubDate: %ls\n", (BSTR) pubDate);
+		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
+		if (SUCCEEDED(error)) {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Modified: %ls", str);
+			retVal << inbetween << std::endl;
+			SysFreeString(str);
+		}
+		else {
+			swprintf(inbetween, MAX_STRING_SIZE, L"    Modified: ERROR");
+			retVal << inbetween << std::endl;
+		}
 	}
 
 	retVal << std::endl;

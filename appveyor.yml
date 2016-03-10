@@ -1,6 +1,15 @@
 version: a.0.{build}
 build:
   verbosity: minimal
+platform: x86
+test_script:
+- cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" target\test\Win32\Debug\Tests.dll /logger:trx'
+- ps: |
+    $wc = New-Object 'System.Net.WebClient'
+    $files = Get-ChildItem -Path .\TestResults -Filter *.trx
+    foreach ($file in $files) {
+      $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", (Resolve-Path ".\TestResults\$file"))
+    }
 artifacts:
 - path: target\main\x64\Debug\Feeds.exe
   name: Feeds.exe

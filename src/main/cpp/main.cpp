@@ -31,7 +31,7 @@
  */
 int tokenify(wchar_t* const input, wchar_t** const output) {
 	const size_t inputLen = wcslen(input);
-	int i;
+	size_t i;
 	int outputLen = 0;
 	bool quoteMode = false;
 	bool outsideToken = true;

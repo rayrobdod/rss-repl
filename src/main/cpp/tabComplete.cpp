@@ -1,8 +1,5 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
+#include "tabComplete.h"
 
 using std::vector;
 using std::wstring;
@@ -25,16 +22,6 @@ bool isPrefix(const wstring string, const wstring prefix) {
 	return i2 == end2;
 }
 
-int isPrefixTestCases(int argc, char** argv) {
-	printf("TRUE: %s\n", (isPrefix(L"", L"") ? "TRUE" : "FALSE"));
-	printf("TRUE: %s\n", (isPrefix(L"abc", L"") ? "TRUE" : "FALSE"));
-	printf("FALS: %s\n", (isPrefix(L"", L"abc") ? "TRUE" : "FALSE"));
-	printf("TRUE: %s\n", (isPrefix(L"abc", L"abc") ? "TRUE" : "FALSE"));
-	printf("TRUE: %s\n", (isPrefix(L"abc", L"ab") ? "TRUE" : "FALSE"));
-	printf("FALS: %s\n", (isPrefix(L"ab", L"abc") ? "TRUE" : "FALSE"));
-	printf("FALS: %s\n", (isPrefix(L"abc", L"xy") ? "TRUE" : "FALSE"));
-	return 0;
-}
 
 /**
  * @param current
@@ -46,8 +33,8 @@ wstring tabComplete(
 	const wstring current,
 	const vector<wstring> completions
 ) {
-	vector<int> legal;
-	for (int i = 0; i < completions.size(); i++) {
+	vector<size_t> legal;
+	for (size_t i = 0; i < completions.size(); i++) {
 		if (isPrefix(completions[i], current)) {
 			legal.push_back(i);
 		}
@@ -61,23 +48,4 @@ wstring tabComplete(
 		// TODO: figure out greatest common prefix of completions 
 		return completions[legal[0]];
 	}
-}
-
-int tabCompleteTestCase(int argc, char** argv) {
-	vector<wstring> comps;
-	comps.push_back(L"aaa");
-	comps.push_back(L"abc");
-	comps.push_back(L"bbb");
-	comps.push_back(L"zzz");
-	
-	printf("aaa: %ls\n", tabComplete(L"", comps).c_str());
-	printf("aaa: %ls\n", tabComplete(L"a", comps).c_str());
-	printf("aaa: %ls\n", tabComplete(L"aa", comps).c_str());
-	printf("aaa: %ls\n", tabComplete(L"aaa", comps).c_str());
-	printf("aaaa: %ls\n", tabComplete(L"aaaa", comps).c_str());
-	printf("abc: %ls\n", tabComplete(L"ab", comps).c_str());
-	printf("bbb: %ls\n", tabComplete(L"b", comps).c_str());
-	printf("zzz: %ls\n", tabComplete(L"z", comps).c_str());
-	printf("x: %ls\n", tabComplete(L"x", comps).c_str());
-	return 0;
 }

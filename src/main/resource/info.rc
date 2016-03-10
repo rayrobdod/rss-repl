@@ -1,6 +1,7 @@
 
 #include <windows.h>
-#include "..\..\..\target\managed_src\version.h"
+#define VERSION "a.0.0-SNAPSHOT\0"
+#define VERSION_MANIFEST 0,10,0,0
 
 LANGUAGE LANG_ENGLISH,SUBLANG_ENGLISH_US
 

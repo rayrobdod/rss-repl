@@ -1,0 +1,6 @@
+version: a.0.{build}
+build:
+  verbosity: minimal
+artifacts:
+- path: target\main\x64\Debug\Feeds.exe
+  name: Feeds.exe

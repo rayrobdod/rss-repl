@@ -14,7 +14,9 @@
 
 #define END_LOOP	L"exit"
 #define SHOW_CONTENTS	L"dir"
-#define SHOW_ITEM	L"print"
+#define OPEN_INTERNAL	L"print"
+#define OPEN_EXTERNAL	L"open"
+#define OPEN_EXTERNAL_ATTACHMENT	L"open_attachment"
 #define CHANGE_DIRECTORY	L"cd"
 #define MAKE_DIRECTORY	L"md"
 #define FEED_INFO	L"info"
@@ -111,7 +113,7 @@ int main(int argc, char** argv) {
 			wprintf(L"%ls\n", targetFolder->getContentsString(filterNew).c_str());
 			delete targetFolder;
 			
-		} else if (wcscmp(command, SHOW_ITEM) == 0) {
+		} else if (wcscmp(command, OPEN_INTERNAL) == 0) {
 			wchar_t* path;
 			if (paramc == 1) {
 				path = L".";
@@ -124,12 +126,65 @@ int main(int argc, char** argv) {
 			wprintf(L"%ls\n", targetFolder->getDetailsString().c_str());
 			delete targetFolder;
 			
+		}
+		else if (wcscmp(command, OPEN_EXTERNAL_ATTACHMENT) == 0) {
+			wchar_t* path;
+			if (paramc == 1) {
+				path = L".";
+			} else {
+				path = paramv[1];
+			}
+
+			FeedElement* targetFolder = currentFolder->cd(path);
+			if (targetFolder->isError()) {
+				printf("No such element\n");
+			} else {
+				std::pair<HRESULT, std::wstring> res = targetFolder->getAttachmentFile();
+				if (res.first == S_FALSE) {
+					printf("Element does not contain attachment\n");
+				} else if (res.first == E_NOTIMPL) {
+					printf("Not a thing that can contain an attachment\n");
+				} else if (SUCCEEDED(res.first)) {
+					ShellExecute(GetConsoleWindow(), L"open", res.second.c_str(), NULL, NULL, SW_SHOWNORMAL);
+					printf("Attachment opened.\n");
+				} else {
+					printf("Failed to open attachment\n");
+				}
+			}
+			delete targetFolder;
+
+		}
+		else if (wcscmp(command, OPEN_EXTERNAL) == 0) {
+			wchar_t* path;
+			if (paramc == 1) {
+				path = L".";
+			} else {
+				path = paramv[1];
+			}
+
+			FeedElement* targetFolder = currentFolder->cd(path);
+			if (targetFolder->isError()) {
+				printf("No such element\n");
+			} else {
+				std::pair<HRESULT, std::wstring> res = targetFolder->getUrl();
+				if (res.first == S_FALSE) {
+					printf("Element does not contain attachment\n");
+				} else if (res.first == E_NOTIMPL) {
+					printf("Not a thing that can contain an attachment\n");
+				} else if (SUCCEEDED(res.first)) {
+					ShellExecute(GetConsoleWindow(), L"open", res.second.c_str(), NULL, NULL, SW_SHOWNORMAL);
+					printf("Attachment opened.\n");
+				} else {
+					printf("Failed to open attachment\n");
+				}
+			}
+			delete targetFolder;
+
 		} else if (wcscmp(command, L"markAsRead") == 0) {
 			wchar_t* path;
 			if (paramc == 1) {
 				path = L".";
-			}
-			else {
+			} else {
 				path = paramv[1];
 			}
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);

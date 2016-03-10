@@ -21,6 +21,10 @@ class FeedElement {
 	 * @return S_OK if succeeded; E_NOTIMPL if the item cannot be marked as read; maybe others
 	 */
 	virtual HRESULT markAsRead() = 0;
+	/** Returns a path (either a local file or a url) that represents the attachment location */
+	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const = 0;
+	/** Returns a url representing the item */
+	virtual std::pair<HRESULT, std::wstring> getUrl() const = 0;
 	/** True if this is to be treated as the error object */
 	virtual bool isError() const = 0;
 };
@@ -34,6 +38,8 @@ class FeedFolder : public FeedElement {
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
 	virtual HRESULT markAsRead();
+	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
+	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
  private:
 	IFeedFolder* const backing;
@@ -48,6 +54,8 @@ class FeedFeed : public FeedElement {
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
 	virtual HRESULT markAsRead();
+	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
+	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
  private:
 	IFeed* const backing;
@@ -62,6 +70,8 @@ public:
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
 	virtual HRESULT markAsRead();
+	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
+	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 private:
 	IFeedItem* const backing;
@@ -78,6 +88,8 @@ public:
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
 	virtual HRESULT markAsRead();
+	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
+	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 private:
 	const std::wstring message;

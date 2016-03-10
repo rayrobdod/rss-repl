@@ -652,3 +652,72 @@ HRESULT FeedItem::markAsRead() {
 	return backing->put_IsRead(VARIANT_TRUE);
 }
 HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
+
+std::pair<HRESULT, std::wstring> FeedFolder::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+std::pair<HRESULT, std::wstring> FeedFeed::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+std::pair<HRESULT, std::wstring> ErrorFeedElement::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+std::pair<HRESULT, std::wstring> FeedItem::getAttachmentFile() const {
+	FEEDS_DOWNLOAD_STATUS status;
+	IFeedEnclosure* enclosure;
+	HRESULT result;
+	
+	result = backing->get_Enclosure((IDispatch**)&enclosure);
+	if (SUCCEEDED(result) && result != S_FALSE) {
+		result = enclosure->get_DownloadStatus(&status);
+		if (SUCCEEDED(result) && result != S_FALSE) {
+			BSTR bpath;
+
+			if (FDS_DOWNLOADED == status) {
+				result = enclosure->get_LocalPath(&bpath);
+			} else {
+				result = enclosure->get_Url(&bpath);
+			}
+
+			if (SUCCEEDED(result) && result != S_FALSE) {
+				wchar_t wpath[MAX_STRING_SIZE];
+				swprintf(wpath, MAX_STRING_SIZE, L"%s", bpath);
+				SysFreeString(bpath);
+				return std::pair<HRESULT, std::wstring>(S_OK, wpath);
+			} else {
+				return std::pair<HRESULT, std::wstring>(result, L"");
+			}
+
+		} else {
+			return std::pair<HRESULT, std::wstring>(result, L"");
+		}
+	} else {
+		return std::pair<HRESULT, std::wstring>(result, L"");
+	}
+}
+
+std::pair<HRESULT, std::wstring> FeedFolder::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
+	HRESULT result;
+	BSTR bpath;
+
+	result = backing->get_Url(&bpath);
+	if (SUCCEEDED(result) && result != S_FALSE) {
+		wchar_t wpath[MAX_STRING_SIZE];
+		swprintf(wpath, MAX_STRING_SIZE, L"%s", bpath);
+		SysFreeString(bpath);
+		return std::pair<HRESULT, std::wstring>(S_OK, wpath);
+	} else {
+		return std::pair<HRESULT, std::wstring>(result, L"");
+	}
+}
+std::pair<HRESULT, std::wstring> FeedItem::getUrl() const {
+	HRESULT result;
+	BSTR bpath;
+
+	result = backing->get_Link(&bpath);
+	if (SUCCEEDED(result) && result != S_FALSE) {
+		wchar_t wpath[MAX_STRING_SIZE];
+		swprintf(wpath, MAX_STRING_SIZE, L"%s", bpath);
+		SysFreeString(bpath);
+		return std::pair<HRESULT, std::wstring>(S_OK, wpath);
+	}
+	else {
+		return std::pair<HRESULT, std::wstring>(result, L"");
+	}
+}
+std::pair<HRESULT, std::wstring> ErrorFeedElement::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }

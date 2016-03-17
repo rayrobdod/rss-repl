@@ -133,10 +133,12 @@
     <ClCompile Include="cpp\FeedElement_Shared.cpp" />
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\tabComplete.cpp" />
+    <ClCompile Include="cpp\SplitStringIterator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\FeedElement.h" />
     <ClInclude Include="cpp\tabComplete.h" />
+    <ClInclude Include="cpp\SplitStringIterator.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource\info.rc" />

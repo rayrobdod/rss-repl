@@ -63,7 +63,6 @@ int tokenify(wchar_t* const input, wchar_t** const output) {
 
 
 int main(int argc, char** argv) {
-	IFeedsManager* manager;
 	FeedElement* currentFolder;
 	
 	wchar_t* const  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
@@ -74,15 +73,8 @@ int main(int argc, char** argv) {
 	SetConsoleTitle(TEXT("RSS REPL"));
 	
 	CoInitializeEx(NULL, 2);
-	CoCreateInstance(
-			CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager ,
-			(void**)&manager);
 	
-	{
-		IFeedFolder* startingFolder;
-		manager->get_RootFolder((IDispatch**)&startingFolder);
-		currentFolder = new FeedFolder(startingFolder);
-	}
+	currentFolder = getRootFolder();
 	
 	
 	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
@@ -107,7 +99,7 @@ int main(int argc, char** argv) {
 			}
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
-			FeedElement* targetFolder = currentFolder->cd(path);
+			FeedElement* targetFolder = currentFolder->followPath(path);
 			wprintf(L"%ls\n", targetFolder->getContentsString(filterNew).c_str());
 			delete targetFolder;
 			
@@ -120,7 +112,7 @@ int main(int argc, char** argv) {
 			}
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 			
-			FeedElement* targetFolder = currentFolder->cd(path);
+			FeedElement* targetFolder = currentFolder->followPath(path);
 			wprintf(L"%ls\n", targetFolder->getDetailsString().c_str());
 			delete targetFolder;
 			
@@ -133,7 +125,7 @@ int main(int argc, char** argv) {
 				path = paramv[1];
 			}
 
-			FeedElement* targetFolder = currentFolder->cd(path);
+			FeedElement* targetFolder = currentFolder->followPath(path);
 			if (targetFolder->isError()) {
 				printf("No such element\n");
 			} else {
@@ -160,7 +152,7 @@ int main(int argc, char** argv) {
 				path = paramv[1];
 			}
 
-			FeedElement* targetFolder = currentFolder->cd(path);
+			FeedElement* targetFolder = currentFolder->followPath(path);
 			if (targetFolder->isError()) {
 				printf("No such element\n");
 			} else {
@@ -187,7 +179,7 @@ int main(int argc, char** argv) {
 			}
 			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 
-			FeedElement* targetFolder = currentFolder->cd(path);
+			FeedElement* targetFolder = currentFolder->followPath(path);
 			HRESULT result = targetFolder->markAsRead();
 			if (SUCCEEDED(result)) {
 				printf("Mark as read succeeded\n");
@@ -209,7 +201,7 @@ int main(int argc, char** argv) {
 				path = paramv[1];
 			}
 			
-			FeedElement* newFolder = currentFolder->cd(path);
+			FeedElement* newFolder = currentFolder->followPath(path);
 			if (newFolder->isError()) {
 				wprintf(L"%ls\n", newFolder->getDetailsString().c_str());
 				delete newFolder;

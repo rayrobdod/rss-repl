@@ -11,51 +11,44 @@ FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
  0x80070003 // ERROR_PATH_NOT_FOUND
  0x80070005 // ERROR_ACCESS_DENIED
 */
-FeedElement* FeedFolder::cd(const wstring path) const {
-	const pair<wstring, wstring> parts = splitPathString(path);
-	FeedElement* iterationStep;
-	
+FeedElement* FeedFolder::getParent() const {
 	HRESULT error;
-	if (parts.first.compare(UP_ONE_LEVEL) == 0) {
+	IFeedFolder* result;
+	error = backing->get_Parent((IDispatch**)&result);
+	if (error) {
+		return new ErrorFeedElement(L"Already top level; no parent to cd to");
+	} else {
+		return new FeedFolder(result);
+	}
+}
+
+FeedElement* FeedFolder::getChild(const wstring name2) const {
+	FeedElement* iterationStep;
+	HRESULT error;
+	VARIANT_BOOL feedExists;
+	VARIANT_BOOL folderExists;
+	BSTR name = SysAllocString(name2.c_str());
+	
+	error = backing->ExistsFeed(name, &feedExists);
+	error = backing->ExistsSubfolder(name, &folderExists);
+	
+	if (feedExists == VARIANT_TRUE) {
+		IFeed* result;
+		error = backing->GetFeed(name, (IDispatch**)&result);
+		iterationStep = new FeedFeed(result);
+	} else if (folderExists == VARIANT_TRUE) {
 		IFeedFolder* result;
-		error = backing->get_Parent((IDispatch**)&result);
-		if (error) {
-			iterationStep = new ErrorFeedElement(L"Already top level; no parent to cd to");
-		} else {
-			iterationStep = new FeedFolder(result);
-		}
-	} else if (parts.first.compare(L".") == 0) {
-		iterationStep = new FeedFolder(this->backing);
+		error = backing->GetSubfolder(name, (IDispatch**)&result);
+		iterationStep = new FeedFolder(result);
 	} else {
-		VARIANT_BOOL feedExists;
-		VARIANT_BOOL folderExists;
-		BSTR name = SysAllocString(parts.first.c_str());
-		
-		error = backing->ExistsFeed(name, &feedExists);
-		error = backing->ExistsSubfolder(name, &folderExists);
-		
-		if (feedExists == VARIANT_TRUE) {
-			IFeed* result;
-			error = backing->GetFeed(name, (IDispatch**)&result);
-			iterationStep = new FeedFeed(result);
-		} else if (folderExists == VARIANT_TRUE) {
-			IFeedFolder* result;
-			error = backing->GetSubfolder(name, (IDispatch**)&result);
-			iterationStep = new FeedFolder(result);
-		} else {
-			iterationStep = new ErrorFeedElement(L"No such element");
-		}
-		SysFreeString(name);
+		iterationStep = new ErrorFeedElement(L"No such element");
 	}
-	
-	
-	if (parts.second.compare(L"") == 0) {
-		return iterationStep;
-	} else {
-		FeedElement* retVal = iterationStep->cd(parts.second);
-		delete iterationStep;
-		return retVal;
-	}
+	SysFreeString(name);
+	return iterationStep;
+}
+
+FeedElement* FeedFolder::clone() const {
+	return new FeedFolder(this->backing);
 }
 
 wstring FeedFolder::getContentsString(const bool filterUnread) const {

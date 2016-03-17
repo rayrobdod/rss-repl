@@ -9,34 +9,23 @@ using std::wstring;
 FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
 
 
-
-FeedElement* FeedItem::cd(const wstring path) const {
-	const pair<wstring, wstring> parts = splitPathString(path);
-	FeedElement* iterationStep;
-	
+FeedElement* FeedItem::getParent() const {
 	HRESULT error;
-	if (parts.first.compare(UP_ONE_LEVEL) == 0) {
-		IFeed* result;
-		error = backing->get_Parent((IDispatch**)&result);
-		if (error) {
-			iterationStep = new ErrorFeedElement(L"Already top level; no parent to cd to");
-		} else {
-			iterationStep = new FeedFeed(result);
-		}
-	} else if (parts.first.compare(L".") == 0) {
-		iterationStep = new FeedItem(this->backing);
+	IFeed* result;
+	error = backing->get_Parent((IDispatch**)&result);
+	if (error) {
+		return new ErrorFeedElement(L"Already top level; no parent to cd to");
 	} else {
-		iterationStep = new ErrorFeedElement(L"No subelements of a feed item");
+		return new FeedFeed(result);
 	}
-	
-	
-	if (parts.second.compare(L"") == 0) {
-		return iterationStep;
-	} else {
-		FeedElement* retVal = iterationStep->cd(parts.second);
-		delete iterationStep;
-		return retVal;
-	}
+}
+
+FeedElement* FeedItem::getChild(const wstring name) const {
+	return new ErrorFeedElement(L"No subelements of a feed item");
+}
+
+FeedElement* FeedItem::clone() const {
+	return new FeedItem(this->backing);
 }
 
 wstring FeedItem::getContentsString(const bool filterUnread) const {

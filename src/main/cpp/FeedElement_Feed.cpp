@@ -9,44 +9,36 @@ using std::wstring;
 FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
 
 
-FeedElement* FeedFeed::cd(const wstring path) const {
-	const pair<wstring, wstring> parts = splitPathString(path);
-	FeedElement* iterationStep;
-	
+FeedElement* FeedFeed::getParent() const {
 	HRESULT error;
-	if (parts.first.compare(UP_ONE_LEVEL) == 0) {
-		IFeedFolder* result;
-		error = backing->get_Parent((IDispatch**)&result);
+	IFeedFolder* result;
+	error = backing->get_Parent((IDispatch**)&result);
+	if (error) {
+		return new ErrorFeedElement(L"Already top level; no parent to cd to");
+	} else {
+		return new FeedFolder(result);
+	}
+}
+
+FeedElement* FeedFeed::getChild(const wstring name) const {
+	HRESULT error;
+
+	try {
+		LONG id = stoi(name);
+		IFeedItem* result;
+		error = backing->GetItem(id, (IDispatch**)&result);
 		if (error) {
-			iterationStep = new ErrorFeedElement(L"Already top level; no parent to cd to");
+			return new ErrorFeedElement(L"Unknown feed item number");
 		} else {
-			iterationStep = new FeedFolder(result);
+			return new FeedItem(result);
 		}
-	} else if (parts.first.compare(L".") == 0) {
-		iterationStep = new FeedFeed(this->backing);
-	} else {
-		try {
-			LONG id = stoi(parts.first);
-			IFeedItem* result;
-			error = backing->GetItem(id, (IDispatch**)&result);
-			if (error) {
-				iterationStep = new ErrorFeedElement(L"Unknown feed item number");
-			} else {
-				iterationStep = new FeedItem(result);
-			}
-		} catch (const std::invalid_argument& e) {
-			iterationStep = new ErrorFeedElement(L"FeedItem names are integers");
-		}
+	} catch (const std::invalid_argument& e) {
+		return new ErrorFeedElement(L"FeedItem names are integers");
 	}
-	
-	
-	if (parts.second.compare(L"") == 0) {
-		return iterationStep;
-	} else {
-		FeedElement* retVal = iterationStep->cd(parts.second);
-		delete iterationStep;
-		return retVal;
-	}
+}
+
+FeedElement* FeedFeed::clone() const {
+	return new FeedFeed(this->backing);
 }
 
 wstring FeedFeed::getContentsString(const bool filterUnread) const {

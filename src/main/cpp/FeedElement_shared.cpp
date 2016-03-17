@@ -1,5 +1,6 @@
 
 #include "FeedElement.h"
+#include "SplitStringIterator.h"
 
 
 using std::wstring;
@@ -57,6 +58,47 @@ wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status) {
 	}
 }
 
+FeedFolder* getRootFolder() {
+	IFeedsManager* manager;
+	IFeedFolder* backing;
+	
+	CoCreateInstance(
+			CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager ,
+			(void**)&manager);
+	
+	manager->get_RootFolder((IDispatch**)&backing);
+	manager->Release();
+	
+	return new FeedFolder(backing);
+}
+
+
 FeedElement::FeedElement() {}
 
+FeedElement* FeedElement::followPath(const wstring path) const {
+	const wstring CD_PARENT = L"..";
+	const wstring CD_SELF = L".";
+	const wstring SEPARATORS = L"/\\";
 
+	FeedElement* current;
+	if (find(SEPARATORS.cbegin(), SEPARATORS.cend(), path[0]) != SEPARATORS.cend()) {
+		current = getRootFolder();
+	} else {
+		current = this->clone();
+	}
+
+	for (SplitStringIterator i(path, SEPARATORS); i != SplitStringIterator::end(); ++i) {
+		if (*i == CD_SELF) {
+			// do nothing
+		} else if (*i == CD_PARENT) {
+			FeedElement* next = current->getParent();
+			delete current;
+			current = next;
+		} else {
+			FeedElement* next = current->getChild(*i);
+			delete current;
+			current = next;
+		}
+	}
+	return current;
+}

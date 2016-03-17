@@ -7,7 +7,15 @@ using std::wstring;
 
 ErrorFeedElement::ErrorFeedElement(const wstring message) : message(message) {}
 
-FeedElement* ErrorFeedElement::cd(const wstring path) const {
+FeedElement* ErrorFeedElement::getParent() const {
+	return new ErrorFeedElement(this->message);
+}
+
+FeedElement* ErrorFeedElement::getChild(const wstring name) const {
+	return new ErrorFeedElement(this->message);
+}
+
+FeedElement* ErrorFeedElement::clone() const {
 	return new ErrorFeedElement(this->message);
 }
 

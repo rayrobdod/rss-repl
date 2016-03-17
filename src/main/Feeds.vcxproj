@@ -126,12 +126,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cpp\commands.cpp" />
+    <ClCompile Include="cpp\FeedElement_Feed.cpp" />
+    <ClCompile Include="cpp\FeedElement_Folder.cpp" />
+    <ClCompile Include="cpp\FeedElement_Item.cpp" />
+    <ClCompile Include="cpp\FeedElement_Null.cpp" />
+    <ClCompile Include="cpp\FeedElement_Shared.cpp" />
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\tabComplete.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpp\commands.h" />
+    <ClInclude Include="cpp\FeedElement.h" />
     <ClInclude Include="cpp\tabComplete.h" />
   </ItemGroup>
   <ItemGroup>

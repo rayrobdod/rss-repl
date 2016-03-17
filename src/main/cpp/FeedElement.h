@@ -1,9 +1,31 @@
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef FEED_ELEMENT_H
+#define FEED_ELEMENT_H
 
 #include <msfeeds.h>
 #include <cwchar>
 #include <string>
+#include <utility> /** std::pair */
+
+const size_t MAX_PARAM_COUNT = 10;
+const size_t BUFFER_SIZE = 1024;
+const size_t MAX_STRING_SIZE = 1024;
+const wchar_t* const UP_ONE_LEVEL = L"..";
+
+/**
+ * Splits the first element of a path-like string from the rest of the path-like string
+ * @param path a path-like string separated by either '/' or '\' characters
+ * @return _.first the first element of the path
+ *   _.second the rest of the path; `L""` if there is no more parts ot the path
+ */
+std::pair<std::wstring, std::wstring> splitPathString(const std::wstring path);
+
+
+/** Returns a string that representing the status */
+std::wstring downloadStatus2String(const FEEDS_DOWNLOAD_STATUS status);
+
+/** Returns a string that representing the status */
+std::wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status);
+
 
 class FeedElement {
  public:
@@ -96,4 +118,4 @@ private:
 };
 
 
-#endif        //  #ifndef COMMANDS_H
+#endif        //  #ifndef FEED_ELEMENT_H

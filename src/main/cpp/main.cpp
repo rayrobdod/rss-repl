@@ -10,7 +10,7 @@
 #include <string>
 #include <cwchar>
 #include <iostream>
-#include "commands.h"
+#include "FeedElement.h"
 
 #define END_LOOP	L"exit"
 #define SHOW_CONTENTS	L"dir"
@@ -20,8 +20,6 @@
 #define CHANGE_DIRECTORY	L"cd"
 #define MAKE_DIRECTORY	L"md"
 #define FEED_INFO	L"info"
-#define BUFFER_SIZE	(1028)
-#define MAX_PARAM_COUNT	(10)
 
 
 /**

@@ -1,6 +1,10 @@
 #include "CppUnitTest.h"
 // I can't get the build to find the main project's methods from the test project
-#include "../../main/cpp/commands.cpp"
+#include "../../main/cpp/FeedElement_Folder.cpp"
+#include "../../main/cpp/FeedElement_Null.cpp"
+#include "../../main/cpp/FeedElement_Feed.cpp"
+#include "../../main/cpp/FeedElement_Item.cpp"
+#include "../../main/cpp/FeedElement_shared.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

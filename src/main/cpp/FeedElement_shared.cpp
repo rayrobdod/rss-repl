@@ -8,21 +8,6 @@ using std::pair;
 
 
 
-pair<wstring, wstring> splitPathString(const wstring path) {
-	wstring::const_iterator i;
-	for (i = path.cbegin(); i < path.cend();  i++) {
-		if (*i == '/' || *i == '\\') {
-			break;
-		}
-	}
-	
-	const wstring a = wstring(path.cbegin(), i);
-	const wstring b = (i == path.cend() ? L"" : wstring(i + 1, path.cend()));
-	
-	pair<wstring, wstring> retVal(a,b);
-	return retVal;
-}
-
 /** Returns a string that representing the status */
 wstring downloadStatus2String(const FEEDS_DOWNLOAD_STATUS status) {
 	switch (status) {

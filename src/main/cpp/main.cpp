@@ -11,6 +11,10 @@
 #include <cwchar>
 #include <iostream>
 #include "FeedElement.h"
+#include "SplitStringIterator.h"
+
+using std::wstring;
+using std::vector;
 
 #define END_LOOP	L"exit"
 #define SHOW_CONTENTS	L"dir"
@@ -22,52 +26,12 @@
 #define FEED_INFO	L"info"
 
 
-/**
- * 
- * @note uses and modifies the input array
- * @param input the line
- * @param output indexies indicating the start of strings
- * @return the length of the output array
- */
-int tokenify(wchar_t* const input, wchar_t** const output) {
-	const size_t inputLen = wcslen(input);
-	size_t i;
-	int outputLen = 0;
-	bool quoteMode = false;
-	bool outsideToken = true;
-	for (i = 0; i < MAX_PARAM_COUNT; i++) {
-		output[i] = L"\0";
-	}
-	
-	for (i = 0; i < inputLen; i++) {
-		if (outputLen >= MAX_PARAM_COUNT) break; 
-		
-		if ((input[i] == ' ' || input[i] == '\n') && !quoteMode && !outsideToken) {
-			input[i] = L'\0';
-			outsideToken = true;
-			
-		} else if (input[i] == L'"') {
-			quoteMode = !quoteMode;
-			input[i] = L'\0';
-		} else {
-			if (outsideToken) {
-				outsideToken = false;
-				output[outputLen] = input + i;
-				outputLen++;
-			}
-		}
-	}
-	
-	return outputLen;
-}
-
 
 int main(int argc, char** argv) {
 	FeedElement* currentFolder;
 	
 	wchar_t* const  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
-	wchar_t** const paramv = (wchar_t**) malloc(MAX_PARAM_COUNT * sizeof(wchar_t*));
-	const wchar_t* command = L"";
+	wstring command = L"";
 	
 	
 	SetConsoleTitle(TEXT("RSS REPL"));
@@ -77,52 +41,51 @@ int main(int argc, char** argv) {
 	currentFolder = getRootFolder();
 	
 	
-	while (command == NULL || wcscmp(command, END_LOOP) != 0) {
+	while (command.compare(END_LOOP) != 0) {
 		wprintf(L"%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
 		
 		fflush(stdout);
 		fgetws(input, BUFFER_SIZE, stdin);
 		
-		const int paramc = tokenify(input, paramv);
-		command = paramv[0];
+		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
+		command = param[0];
 		
-		if (command == NULL || wcscmp(command, L"") == 0 ||
-				wcscmp(command, END_LOOP) == 0 ) {
+		if (command.compare(L"") == 0 ||
+				command.compare(END_LOOP) == 0 ) {
 			// do nothing
 			
-		} else if (wcscmp(command, SHOW_CONTENTS) == 0) {
-			wchar_t* path;
-			if (paramc == 1) {
+		} else if (command.compare(SHOW_CONTENTS) == 0) {
+			wstring path;
+			if (param.size() == 1) {
 				path = L".";
 			} else {
-				path = paramv[1];
+				path = param[1];
 			}
-			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
+			const bool filterNew = (param[2].compare(L"-n") == 0);
 			
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			wprintf(L"%ls\n", targetFolder->getContentsString(filterNew).c_str());
 			delete targetFolder;
 			
-		} else if (wcscmp(command, OPEN_INTERNAL) == 0) {
-			wchar_t* path;
-			if (paramc == 1) {
+		} else if (command.compare(OPEN_INTERNAL) == 0) {
+			wstring path;
+			if (param.size() == 1) {
 				path = L".";
 			} else {
-				path = paramv[1];
+				path = param[1];
 			}
-			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
-			
+
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			wprintf(L"%ls\n", targetFolder->getDetailsString().c_str());
 			delete targetFolder;
 			
 		}
-		else if (wcscmp(command, OPEN_EXTERNAL_ATTACHMENT) == 0) {
-			wchar_t* path;
-			if (paramc == 1) {
+		else if (command.compare(OPEN_EXTERNAL_ATTACHMENT) == 0) {
+			wstring path;
+			if (param.size() == 1) {
 				path = L".";
 			} else {
-				path = paramv[1];
+				path = param[1];
 			}
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
@@ -144,12 +107,12 @@ int main(int argc, char** argv) {
 			delete targetFolder;
 
 		}
-		else if (wcscmp(command, OPEN_EXTERNAL) == 0) {
-			wchar_t* path;
-			if (paramc == 1) {
+		else if (command.compare(OPEN_EXTERNAL) == 0) {
+			wstring path;
+			if (param.size() == 1) {
 				path = L".";
 			} else {
-				path = paramv[1];
+				path = param[1];
 			}
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
@@ -170,14 +133,13 @@ int main(int argc, char** argv) {
 			}
 			delete targetFolder;
 
-		} else if (wcscmp(command, L"markAsRead") == 0) {
-			wchar_t* path;
-			if (paramc == 1) {
+		} else if (command.compare(L"markAsRead") == 0) {
+			wstring path;
+			if (param.size() == 1) {
 				path = L".";
 			} else {
-				path = paramv[1];
+				path = param[1];
 			}
-			const bool filterNew = (wcscmp(paramv[2], L"-n") == 0);
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			HRESULT result = targetFolder->markAsRead();
@@ -188,17 +150,17 @@ int main(int argc, char** argv) {
 			}
 			delete targetFolder;
 
-		} else if (wcscmp(command, L"echo") == 0) {
-			for (int i = 0; i < paramc; i++) {
-				wprintf(L"\t%ls\n", paramv[i]);
+		} else if (command.compare(L"echo") == 0) {
+			for (size_t i = 0; i < param.size(); i++) {
+				std::wcout << "\t" << param[i] << "\n";
 			}
 			
-		} else if (wcscmp(command, CHANGE_DIRECTORY) == 0) {
-			wchar_t* path;
-			if (paramc == 1) {
+		} else if (command.compare(CHANGE_DIRECTORY) == 0) {
+			wstring path;
+			if (param.size() == 1) {
 				path = L".";
 			} else {
-				path = paramv[1];
+				path = param[1];
 			}
 			
 			FeedElement* newFolder = currentFolder->followPath(path);

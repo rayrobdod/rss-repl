@@ -1,31 +1,33 @@
 
 #include"SplitStringIterator.h"
 
-SplitStringIterator::SplitStringIterator(std::wstring a, wchar_t d) :
-	backing(a) {
-	this->delimiters.push_back(d);
-	this->current_end = backing.cbegin();
-	++(*this);
+bool contains(std::vector<wchar_t> coll, wchar_t value) {
+	return std::find(coll.cbegin(), coll.cend(), value) != coll.cend();
 }
+
 
 SplitStringIterator::SplitStringIterator(const SplitStringIterator& other) :
 		backing(other.backing),
-		delimiters(other.delimiters) {
+		delimiters(other.delimiters),
+		quotes(other.quotes) {
 	this->current_begin = this->backing.cbegin() + (other.current_begin - other.backing.cbegin());
 	this->current_end = this->backing.cbegin() + (other.current_end - other.backing.cbegin());
 }
 
 SplitStringIterator& SplitStringIterator::operator++() {
 	// find the start of the next segment
-	while (this->current_end != this->backing.cend() &&
-			(find(delimiters.cbegin(), delimiters.cend(), *(this->current_end)) != delimiters.cend())) {
+	bool quoteMode = false;
+	while ((this->current_end != this->backing.cend()) &&
+			(contains(this->delimiters, *(this->current_end)) ||
+			contains(this->quotes, *(this->current_end)))) {
+		quoteMode = contains(this->quotes, *(this->current_end));
 		this->current_end++;
 	}
 	this->current_begin = this->current_end;
 
 	// find the end of the segment
-	while (this->current_end != this->backing.cend() &&
-			!(find(delimiters.cbegin(), delimiters.cend(), *(this->current_end)) != delimiters.cend())) {
+	while ((this->current_end != this->backing.cend()) &&
+			!contains(( quoteMode ? this->quotes :  this->delimiters), *(this->current_end))) {
 		this->current_end++;
 	}
 
@@ -47,8 +49,9 @@ bool SplitStringIterator::operator==(const SplitStringIterator& other) const {
 		) || (
 			this->backing == other.backing &&
 			this->delimiters == other.delimiters &&
-			this->current_begin == other.current_begin &&
-			this->current_end == other.current_end
+			this->quotes == other.quotes &&
+			(this->backing.cbegin() - this->current_begin) == (other.backing.cbegin() - other.current_begin) &&
+			(this->backing.cbegin() - this->current_end) == (other.backing.cbegin() - other.current_end)
 		);
 }
 
@@ -61,6 +64,7 @@ bool SplitStringIterator::isAtEnd() const {
 }
 
 SplitStringIterator SplitStringIterator::end() {
-	SplitStringIterator retval(L"", L' ');
+	std::vector<wchar_t> empty;
+	SplitStringIterator retval(L"", empty);
 	return retval;
 }

@@ -11,39 +11,51 @@ namespace Microsoft { namespace VisualStudio { namespace CppUnitTestFramework {
 
 namespace Tests
 {
+	std::vector<wchar_t> singleton(wchar_t a) {
+		std::vector<wchar_t> retval;
+		retval.push_back(a);
+		return retval;
+	}
 
 	TEST_CLASS(SplitStringIterator)
 	{
 	public:
 
 		TEST_METHOD(whenConstructed_thenPointsToFirstSection) {
-			::SplitStringIterator dut(L"1 2 3 10 11", L' ');
+			::SplitStringIterator dut(L"1 2 3 10 11", singleton(L' '));
 			Assert::AreEqual(L"1", (*dut).c_str());
 		}
 
 		TEST_METHOD(whenFirstIncrement_thenPointsToSecondSection) {
-			::SplitStringIterator dut(L"1 2 3 10 11", L' ');
+			::SplitStringIterator dut(L"1 2 3 10 11", singleton(L' '));
 			Assert::AreEqual(L"2", (*(++dut)).c_str());
 		}
 
+		TEST_METHOD(whenFirstIncrement_thenEqualsSimilar) {
+			::SplitStringIterator first(L"1 2 3 10 11", singleton(L' '));
+			::SplitStringIterator second(first);
+			Assert::AreEqual(++first, ++second);
+		}
+
 		TEST_METHOD(whenIncrementedToEnd_thenComparesEqualToEnd) {
-			::SplitStringIterator dut(L"first second", L' ');
+			::SplitStringIterator dut(L"first second", singleton(L' '));
 			Assert::AreEqual(++(++dut), ::SplitStringIterator::end(), L"dut does not compare equal to the end iterator");
 		}
 
 		TEST_METHOD(whenEmptyConstructed_thenComparesEqualToEnd) {
-			::SplitStringIterator dut(L"", L' ');
+			::SplitStringIterator dut(L"", singleton(L' '));
 			Assert::AreEqual(dut, ::SplitStringIterator::end());
 		}
 
 		TEST_METHOD(whenEmptyConstructed_dereferencesToEmpty) {
-			// dereferencing a
-			::SplitStringIterator dut(L"", L' ');
-			Assert::AreEqual(dut, ::SplitStringIterator::end());
+			// dereferencing a end-of-thing is undefined behavior;
+			// so I'm doing the no-error variant
+			::SplitStringIterator dut(L"", singleton(L' '));
+			Assert::AreEqual(L"", (*dut).c_str());
 		}
 
 		TEST_METHOD(iteration) {
-			::SplitStringIterator dut(L"ABC/DEFG/HI", L'/');
+			::SplitStringIterator dut(L"ABC/DEFG/HI", singleton(L'/'));
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 
 			Assert::AreEqual(L"ABC", vals[0].c_str());
@@ -64,6 +76,19 @@ namespace Tests
 			Assert::AreEqual(L"78", vals[3].c_str());
 			Assert::AreEqual(L"90", vals[4].c_str());
 			Assert::AreEqual(L"21", vals[5].c_str());
+		}
+
+		TEST_METHOD(quotes) {
+			std::vector<wchar_t> delims;
+			delims.push_back(L',');
+			delims.push_back(L';');
+			::SplitStringIterator dut(L"one two \"three and\" four", singleton(L' '), singleton(L'\"'));
+			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
+
+			Assert::AreEqual(L"one", vals[0].c_str());
+			Assert::AreEqual(L"two", vals[1].c_str());
+			Assert::AreEqual(L"three and", vals[2].c_str());
+			Assert::AreEqual(L"four", vals[3].c_str());
 		}
 	};
 }

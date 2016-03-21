@@ -1,14 +1,10 @@
 
 #include <windows.h>
 #include <msfeeds.h>
-#include <tchar.h>
 #include <conio.h>
-#include <strsafe.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cstring>
 #include <string>
-#include <cwchar>
 #include <iostream>
 #include "FeedElement.h"
 #include "SplitStringIterator.h"
@@ -24,13 +20,14 @@ using std::vector;
 #define CHANGE_DIRECTORY	L"cd"
 #define MAKE_DIRECTORY	L"md"
 #define FEED_INFO	L"info"
+#define MARK_READ	L"markAsRead"
 
 
 
 int main(int argc, char** argv) {
 	FeedElement* currentFolder;
 	
-	wchar_t* const  input  = (wchar_t*) malloc(BUFFER_SIZE * sizeof(wchar_t));
+	wchar_t* const  input  = (wchar_t*) malloc(STR_BUFFER_SIZE * sizeof(wchar_t));
 	wstring command = L"";
 	
 	
@@ -45,7 +42,7 @@ int main(int argc, char** argv) {
 		wprintf(L"%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
 		
 		fflush(stdout);
-		fgetws(input, BUFFER_SIZE, stdin);
+		fgetws(input, STR_BUFFER_SIZE, stdin);
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
 		command = param[0];
@@ -55,25 +52,15 @@ int main(int argc, char** argv) {
 			// do nothing
 			
 		} else if (command.compare(SHOW_CONTENTS) == 0) {
-			wstring path;
-			if (param.size() == 1) {
-				path = L".";
-			} else {
-				path = param[1];
-			}
-			const bool filterNew = (param[2].compare(L"-n") == 0);
+			const wstring path = (param.size() > 1 ? param[1] : L".");
+			const bool filterNew = (param.size() > 2 ? (param[2].compare(L"-n") == 0) : false);
 			
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			wprintf(L"%ls\n", targetFolder->getContentsString(filterNew).c_str());
 			delete targetFolder;
 			
 		} else if (command.compare(OPEN_INTERNAL) == 0) {
-			wstring path;
-			if (param.size() == 1) {
-				path = L".";
-			} else {
-				path = param[1];
-			}
+			const wstring path = (param.size() > 1 ? param[1] : L".");
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			wprintf(L"%ls\n", targetFolder->getDetailsString().c_str());
@@ -81,12 +68,7 @@ int main(int argc, char** argv) {
 			
 		}
 		else if (command.compare(OPEN_EXTERNAL_ATTACHMENT) == 0) {
-			wstring path;
-			if (param.size() == 1) {
-				path = L".";
-			} else {
-				path = param[1];
-			}
+			const wstring path = (param.size() > 1 ? param[1] : L".");
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			if (targetFolder->isError()) {
@@ -108,12 +90,7 @@ int main(int argc, char** argv) {
 
 		}
 		else if (command.compare(OPEN_EXTERNAL) == 0) {
-			wstring path;
-			if (param.size() == 1) {
-				path = L".";
-			} else {
-				path = param[1];
-			}
+			const wstring path = (param.size() > 1 ? param[1] : L".");
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			if (targetFolder->isError()) {
@@ -133,13 +110,8 @@ int main(int argc, char** argv) {
 			}
 			delete targetFolder;
 
-		} else if (command.compare(L"markAsRead") == 0) {
-			wstring path;
-			if (param.size() == 1) {
-				path = L".";
-			} else {
-				path = param[1];
-			}
+		} else if (command.compare(MARK_READ) == 0) {
+			const wstring path = (param.size() > 1 ? param[1] : L".");
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
 			HRESULT result = targetFolder->markAsRead();
@@ -156,12 +128,7 @@ int main(int argc, char** argv) {
 			}
 			
 		} else if (command.compare(CHANGE_DIRECTORY) == 0) {
-			wstring path;
-			if (param.size() == 1) {
-				path = L".";
-			} else {
-				path = param[1];
-			}
+			const wstring path = (param.size() > 1 ? param[1] : L".");
 			
 			FeedElement* newFolder = currentFolder->followPath(path);
 			if (newFolder->isError()) {

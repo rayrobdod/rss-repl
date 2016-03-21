@@ -8,7 +8,7 @@
  * Returns true if the first strlen(prefix) characters of string match prefix.
  * @pre parameters are not NULL
  */
-bool _declspec(dllexport) isPrefix(const std::wstring string, const std::wstring prefix);
+bool isPrefix(const std::wstring string, const std::wstring prefix);
 
 /**
  * @param current

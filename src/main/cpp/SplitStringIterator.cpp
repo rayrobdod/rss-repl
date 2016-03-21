@@ -1,7 +1,7 @@
 
 #include"SplitStringIterator.h"
 
-bool contains(std::vector<wchar_t> coll, wchar_t value) {
+bool contains(const std::vector<wchar_t> coll, const wchar_t value) {
 	return std::find(coll.cbegin(), coll.cend(), value) != coll.cend();
 }
 
@@ -38,7 +38,7 @@ SplitStringIterator SplitStringIterator::operator++(int) {
 	SplitStringIterator tmp(*this); this->operator++(); return tmp;
 }
 
-std::wstring SplitStringIterator::operator*() {
+std::wstring SplitStringIterator::operator*() const {
 	std::wstring retval(current_begin, current_end);
 	return retval;
 }

@@ -49,16 +49,15 @@ wstring FeedFeed::getContentsString(const bool filterUnread) const {
 	HRESULT error;
 	VARIANT_BOOL isRead;
 	std::wostringstream retVal;
-	wchar_t inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	// The feed name
 	error = backing->get_Name(&name);
 	if (SUCCEEDED(error)) {
-		swprintf(inbetween, MAX_STRING_SIZE, L" Feed: %ls", (wchar_t*)name);
-		retVal << inbetween << std::endl;
+		retVal << " Feed: " << name << std::endl << std::endl;
 		SysFreeString(name);
 	} else {
-		retVal << " Feed: ???" << std::endl << std::endl;
+		retVal << " Feed: " << "???" << std::endl << std::endl;
 	}
 	
 	// the feed items
@@ -83,7 +82,7 @@ wstring FeedFeed::getContentsString(const bool filterUnread) const {
 					if (SUCCEEDED(error3) && SUCCEEDED(error)) {
 						wchar_t* isReadMessage = (isRead ? L"" : L"<NEW>");
 
-						swprintf(inbetween, MAX_STRING_SIZE, L"%4ld %5ls %ls", localId, isReadMessage, (wchar_t *)name);
+						swprintf(inbetween, STR_BUFFER_SIZE, L"%4ld %5ls %ls", localId, isReadMessage, (wchar_t *)name);
 						retVal << inbetween << std::endl;
 
 						SysFreeString(name);
@@ -112,56 +111,47 @@ wstring FeedFeed::getDetailsString() const {
 	FEEDS_DOWNLOAD_ERROR dlerror;
 	DATE pubDate;
 	std::wostringstream retVal;
-	wchar_t inbetween[MAX_STRING_SIZE];
 	HRESULT error;
 
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
-		retVal << std::endl << inbetween << std::endl << std::endl;
+		retVal << std::endl << str << std::endl << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_UnreadItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Unread Item Count:  %d", number);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Unread Item Count: " << number << std::endl;
 	}
 
 	error = backing->get_ItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Item Count:  %d", number);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Item Count: " << number << std::endl;
 	}
 
 	error = backing->get_MaxItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Max Item Count:  %d", number);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Max Item Count: " << number << std::endl;
 	}
 
 	error = backing->get_DownloadStatus(&dlstatus);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Download Status: %ls", downloadStatus2String(dlstatus).c_str());
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
 	}
 
 	error = backing->get_LastDownloadError(&dlerror);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Download Error: %ls", downloadError2String(dlerror).c_str());
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
 	}
 
 	error = backing->get_PubDate(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Published: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: ERROR");
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Published: " << "ERROR" << std::endl;
 		}
 	}
 
@@ -169,12 +159,10 @@ wstring FeedFeed::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Built: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Built: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Built: ERROR");
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Built: " << "ERROR" << std::endl;
 		}
 	}
 
@@ -182,31 +170,28 @@ wstring FeedFeed::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Downloaded: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Downloaded: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Downloaded: ERROR");
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Downloaded: " << "ERROR" << std::endl;
 		}
 	}
 
 	error = backing->get_Image(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Image: %ls", str);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Image: " << str << std::endl;
+		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Link: %ls", str);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Link: " << str << std::endl;
+		SysFreeString(str);
 	}
 
 	error = backing->get_DownloadUrl(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Download Url: %ls", str);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Download Url: " << str << std::endl;
 		SysFreeString(str);
 	}
 
@@ -214,8 +199,7 @@ wstring FeedFeed::getDetailsString() const {
 
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
-		retVal << inbetween << std::endl << std::endl;
+		retVal << str << std::endl;
 		SysFreeString(str);
 	}
 
@@ -242,8 +226,8 @@ std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
 
 	result = backing->get_Url(&bpath);
 	if (SUCCEEDED(result) && result != S_FALSE) {
-		wchar_t wpath[MAX_STRING_SIZE];
-		swprintf(wpath, MAX_STRING_SIZE, L"%s", bpath);
+		wchar_t wpath[STR_BUFFER_SIZE];
+		swprintf(wpath, STR_BUFFER_SIZE, L"%s", bpath);
 		SysFreeString(bpath);
 		return std::pair<HRESULT, std::wstring>(S_OK, wpath);
 	} else {

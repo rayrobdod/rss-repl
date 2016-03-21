@@ -56,7 +56,7 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 	BSTR name;
 	HRESULT error;
 	std::wostringstream retVal;
-	wchar_t inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	
 	// folders
@@ -71,7 +71,7 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 		if (SUCCEEDED(error)) {
 			error = currentFeed->get_Name(&name);
 			if (SUCCEEDED(error)) {
-				swprintf(inbetween, MAX_STRING_SIZE, L"%ls/", (wchar_t *)name);
+				swprintf(inbetween, STR_BUFFER_SIZE, L"%ls/", (wchar_t *)name);
 				retVal << inbetween << std::endl;
 				SysFreeString(name);
 			} else {
@@ -99,10 +99,10 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 			if (SUCCEEDED(error)) {
 				error = currentFeed->get_UnreadItemCount(&unreadCount);
 				if (SUCCEEDED(error)) {
-					swprintf(inbetween, MAX_STRING_SIZE, L"%ls (%ld)", (wchar_t *)name, unreadCount);
+					swprintf(inbetween, STR_BUFFER_SIZE, L"%ls (%ld)", (wchar_t *)name, unreadCount);
 					retVal << inbetween << std::endl;
 				} else {
-					swprintf(inbetween, MAX_STRING_SIZE, L"%ls (???)", (wchar_t *)name);
+					swprintf(inbetween, STR_BUFFER_SIZE, L"%ls (???)", (wchar_t *)name);
 					retVal << inbetween << std::endl;
 				}
 			} else {

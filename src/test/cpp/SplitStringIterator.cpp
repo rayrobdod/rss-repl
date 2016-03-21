@@ -78,10 +78,19 @@ namespace Tests
 			Assert::AreEqual(L"21", vals[5].c_str());
 		}
 
+		TEST_METHOD(multipleDelimitersUsingStr) {
+			::SplitStringIterator dut(L"12,34,56;78;90,21", std::wstring(L",;"));
+			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
+
+			Assert::AreEqual(L"12", vals[0].c_str());
+			Assert::AreEqual(L"34", vals[1].c_str());
+			Assert::AreEqual(L"56", vals[2].c_str());
+			Assert::AreEqual(L"78", vals[3].c_str());
+			Assert::AreEqual(L"90", vals[4].c_str());
+			Assert::AreEqual(L"21", vals[5].c_str());
+		}
+
 		TEST_METHOD(quotes) {
-			std::vector<wchar_t> delims;
-			delims.push_back(L',');
-			delims.push_back(L';');
 			::SplitStringIterator dut(L"one two \"three and\" four", singleton(L' '), singleton(L'\"'));
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 

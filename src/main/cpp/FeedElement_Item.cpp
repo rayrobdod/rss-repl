@@ -38,33 +38,32 @@ wstring FeedItem::getDetailsString() const {
 	VARIANT_BOOL isRead;
 	IFeedEnclosure* enclosure;
 	std::wostringstream retVal;
-	wchar_t inbetween[MAX_STRING_SIZE];
+	wchar_t inbetween[STR_BUFFER_SIZE];
 	HRESULT error;
 	
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
-		retVal << std::endl << inbetween << std::endl << std::endl;
+		retVal << std::endl << str << std::endl << std::endl;
 		SysFreeString(str);
 	}
 	
 	error = backing->get_Author(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Author:  %ls", str);
+		swprintf(inbetween, STR_BUFFER_SIZE, L"    Author:  %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    URL:  %ls", str);
+		swprintf(inbetween, STR_BUFFER_SIZE, L"    URL:  %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Comments(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"    Comments:  %ls", str);
+		swprintf(inbetween, STR_BUFFER_SIZE, L"    Comments:  %ls", str);
 		retVal << inbetween << std::endl;
 		SysFreeString(str);
 	}
@@ -83,47 +82,47 @@ wstring FeedItem::getDetailsString() const {
 
 		error = enclosure->get_Type(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Type: %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Type: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_Url(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Url:  %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Url:  %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadStatus(&dlstatus);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Status: %ls", downloadStatus2String(dlstatus).c_str());
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Status: %ls", downloadStatus2String(dlstatus).c_str());
 			retVal << inbetween << std::endl;
 		}
 
 		error = enclosure->get_LocalPath(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Local Path: %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Local Path: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_LastDownloadError(&dlerror);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Error: %ls", downloadError2String(dlerror).c_str());
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Error: %ls", downloadError2String(dlerror).c_str());
 			retVal << inbetween << std::endl;
 		}
 
 		error = enclosure->get_DownloadMimeType(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Type: %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Type: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadUrl(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"        Download Url: %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Url: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
@@ -136,11 +135,11 @@ wstring FeedItem::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"    Published: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		} else {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Published: ERROR");
+			swprintf(inbetween, STR_BUFFER_SIZE, L"    Published: ERROR");
 			retVal << inbetween << std::endl;
 		}
 	}
@@ -149,12 +148,12 @@ wstring FeedItem::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Modified: %ls", str);
+			swprintf(inbetween, STR_BUFFER_SIZE, L"    Modified: %ls", str);
 			retVal << inbetween << std::endl;
 			SysFreeString(str);
 		}
 		else {
-			swprintf(inbetween, MAX_STRING_SIZE, L"    Modified: ERROR");
+			swprintf(inbetween, STR_BUFFER_SIZE, L"    Modified: ERROR");
 			retVal << inbetween << std::endl;
 		}
 	}
@@ -163,7 +162,7 @@ wstring FeedItem::getDetailsString() const {
 	
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, MAX_STRING_SIZE, L"%ls", str);
+		swprintf(inbetween, STR_BUFFER_SIZE, L"%ls", str);
 		retVal << inbetween << std::endl << std::endl;
 		SysFreeString(str);
 	}
@@ -181,8 +180,8 @@ wstring FeedItem::getPath() const {
 	LONG localid;
 	backing->get_LocalId(&localid);
 	
-	wchar_t retVal[MAX_STRING_SIZE];
-	swprintf(retVal, MAX_STRING_SIZE, L"%ls\\%d", (wchar_t *)parentPath, localid);
+	wchar_t retVal[STR_BUFFER_SIZE];
+	swprintf(retVal, STR_BUFFER_SIZE, L"%ls\\%d", (wchar_t *)parentPath, localid);
 	
 	parent->Release();
 	SysFreeString(parentPath);
@@ -213,8 +212,8 @@ std::pair<HRESULT, std::wstring> FeedItem::getAttachmentFile() const {
 			}
 
 			if (SUCCEEDED(result) && result != S_FALSE) {
-				wchar_t wpath[MAX_STRING_SIZE];
-				swprintf(wpath, MAX_STRING_SIZE, L"%s", bpath);
+				wchar_t wpath[STR_BUFFER_SIZE];
+				swprintf(wpath, STR_BUFFER_SIZE, L"%s", bpath);
 				SysFreeString(bpath);
 				return std::pair<HRESULT, std::wstring>(S_OK, wpath);
 			} else {
@@ -235,8 +234,8 @@ std::pair<HRESULT, std::wstring> FeedItem::getUrl() const {
 
 	result = backing->get_Link(&bpath);
 	if (SUCCEEDED(result) && result != S_FALSE) {
-		wchar_t wpath[MAX_STRING_SIZE];
-		swprintf(wpath, MAX_STRING_SIZE, L"%s", bpath);
+		wchar_t wpath[STR_BUFFER_SIZE];
+		swprintf(wpath, STR_BUFFER_SIZE, L"%s", bpath);
 		SysFreeString(bpath);
 		return std::pair<HRESULT, std::wstring>(S_OK, wpath);
 	}

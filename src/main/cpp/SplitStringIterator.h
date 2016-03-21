@@ -1,6 +1,5 @@
 
 #include <vector>
-#include <cwchar>
 #include <string>
 #include <iterator>
 
@@ -24,7 +23,7 @@ public:
 	SplitStringIterator(const SplitStringIterator& other);
 	bool operator==(const SplitStringIterator& other) const;
 	bool operator!=(const SplitStringIterator& other) const;
-	std::wstring operator*();
+	std::wstring operator*() const;
 	SplitStringIterator& operator++();
 	SplitStringIterator operator++(int);
 	static SplitStringIterator end();

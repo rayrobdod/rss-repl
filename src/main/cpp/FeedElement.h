@@ -2,13 +2,11 @@
 #define FEED_ELEMENT_H
 
 #include <msfeeds.h>
-#include <cwchar>
 #include <string>
 #include <utility> /** std::pair */
 
-const size_t MAX_PARAM_COUNT = 10;
-const size_t BUFFER_SIZE = 1024;
-const size_t MAX_STRING_SIZE = 1024;
+const size_t STR_BUFFER_SIZE = 1024;
+const std::wstring INDENT = L"    ";
 
 
 /** Returns a string that representing the status */

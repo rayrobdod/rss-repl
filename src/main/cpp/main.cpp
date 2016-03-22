@@ -1,4 +1,7 @@
 
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
 #include <windows.h>
 #include <msfeeds.h>
 #include <conio.h>
@@ -23,20 +26,15 @@ using std::vector;
 #define MARK_READ	L"markAsRead"
 
 
-
 int main(int argc, char** argv) {
 	FeedElement* currentFolder;
-	
-	wchar_t* const  input  = (wchar_t*) malloc(STR_BUFFER_SIZE * sizeof(wchar_t));
+	wchar_t  input[STR_BUFFER_SIZE];
 	wstring command = L"";
 	
-	
 	SetConsoleTitle(TEXT("RSS REPL"));
-	
 	CoInitializeEx(NULL, 2);
 	
 	currentFolder = getRootFolder();
-	
 	
 	while (command.compare(END_LOOP) != 0) {
 		wprintf(L"%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
@@ -66,8 +64,7 @@ int main(int argc, char** argv) {
 			wprintf(L"%ls\n", targetFolder->getDetailsString().c_str());
 			delete targetFolder;
 			
-		}
-		else if (command.compare(OPEN_EXTERNAL_ATTACHMENT) == 0) {
+		} else if (command.compare(OPEN_EXTERNAL_ATTACHMENT) == 0) {
 			const wstring path = (param.size() > 1 ? param[1] : L".");
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
@@ -88,8 +85,7 @@ int main(int argc, char** argv) {
 			}
 			delete targetFolder;
 
-		}
-		else if (command.compare(OPEN_EXTERNAL) == 0) {
+		} else if (command.compare(OPEN_EXTERNAL) == 0) {
 			const wstring path = (param.size() > 1 ? param[1] : L".");
 
 			FeedElement* targetFolder = currentFolder->followPath(path);
@@ -143,5 +139,10 @@ int main(int argc, char** argv) {
 		}
 	}
 	
+	delete currentFolder;
+	
+	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
+	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+	_CrtDumpMemoryLeaks();
 	return 0;
 }

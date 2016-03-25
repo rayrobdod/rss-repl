@@ -80,7 +80,7 @@ wstring FeedFeed::getContentsString(const bool filterUnread) const {
 					error2 = curItem->get_PubDate(&pubDate);
 					error3 = curItem->get_LocalId(&localId);
 					if (SUCCEEDED(error3) && SUCCEEDED(error)) {
-						wchar_t* isReadMessage = (isRead ? L"" : L"<NEW>");
+						const wchar_t* const isReadMessage = (isRead ? L"" : L"<NEW>");
 
 						swprintf(inbetween, STR_BUFFER_SIZE, L"%4ld %5ls %ls", localId, isReadMessage, (wchar_t *)name);
 						retVal << inbetween << std::endl;

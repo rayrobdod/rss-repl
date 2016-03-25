@@ -38,7 +38,6 @@ wstring FeedItem::getDetailsString() const {
 	VARIANT_BOOL isRead;
 	IFeedEnclosure* enclosure;
 	std::wostringstream retVal;
-	wchar_t inbetween[STR_BUFFER_SIZE];
 	HRESULT error;
 	
 	error = backing->get_Title(&str);
@@ -49,28 +48,25 @@ wstring FeedItem::getDetailsString() const {
 	
 	error = backing->get_Author(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, STR_BUFFER_SIZE, L"    Author:  %ls", str);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Author: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, STR_BUFFER_SIZE, L"    URL:  %ls", str);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Url: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Comments(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, STR_BUFFER_SIZE, L"    Comments:  %ls", str);
-		retVal << inbetween << std::endl;
+		retVal << INDENT << "Comments: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_IsRead(&isRead);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << "    READ: " << (isRead ? "TRUE" : "FALSE") << std::endl;
+		retVal << INDENT << "Read: " << (isRead ? "TRUE" : "FALSE") << std::endl;
 	}
 	
 	error = backing->get_Enclosure((IDispatch**) &enclosure);
@@ -78,52 +74,45 @@ wstring FeedItem::getDetailsString() const {
 		FEEDS_DOWNLOAD_STATUS dlstatus;
 		FEEDS_DOWNLOAD_ERROR dlerror;
 
-		retVal << "    Enclosure:" << std::endl;
+		retVal << INDENT << "Enclosure:" << std::endl;
 
 		error = enclosure->get_Type(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Type: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Type: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_Url(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Url:  %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Url: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadStatus(&dlstatus);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Status: %ls", downloadStatus2String(dlstatus).c_str());
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
 		}
 
 		error = enclosure->get_LocalPath(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Local Path: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Local Path: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_LastDownloadError(&dlerror);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Error: %ls", downloadError2String(dlerror).c_str());
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
 		}
 
 		error = enclosure->get_DownloadMimeType(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Type: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Download Type: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadUrl(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"        Download Url: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << INDENT << "Download Url: " << str << std::endl;
 			SysFreeString(str);
 		}
 
@@ -135,12 +124,10 @@ wstring FeedItem::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"    Published: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Published: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"    Published: ERROR");
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Published: " << "ERROR" << std::endl;
 		}
 	}
 	
@@ -148,13 +135,10 @@ wstring FeedItem::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"    Modified: %ls", str);
-			retVal << inbetween << std::endl;
+			retVal << INDENT << "Modified: " << str << std::endl;
 			SysFreeString(str);
-		}
-		else {
-			swprintf(inbetween, STR_BUFFER_SIZE, L"    Modified: ERROR");
-			retVal << inbetween << std::endl;
+		} else {
+			retVal << INDENT << "Modified: " << "ERROR" << std::endl;
 		}
 	}
 
@@ -162,8 +146,7 @@ wstring FeedItem::getDetailsString() const {
 	
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		swprintf(inbetween, STR_BUFFER_SIZE, L"%ls", str);
-		retVal << inbetween << std::endl << std::endl;
+		retVal << str << std::endl << std::endl;
 		SysFreeString(str);
 	}
 	

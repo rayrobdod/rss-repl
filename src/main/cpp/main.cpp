@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 		fgetws(input, STR_BUFFER_SIZE, stdin);
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
-		command = param[0];
+		command = (param.size() > 0 ? param[0] : L"");
 		
 		if (command.compare(L"") == 0 ||
 				command.compare(END_LOOP) == 0 ) {

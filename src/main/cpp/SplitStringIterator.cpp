@@ -68,3 +68,14 @@ SplitStringIterator SplitStringIterator::end() {
 	SplitStringIterator retval(L"", empty);
 	return retval;
 }
+
+size_t SplitStringIterator::length() const {
+	size_t retVal = 0;
+	SplitStringIterator copy(*this);
+	
+	while (! copy.isAtEnd()) {
+		retVal++;
+		copy++;
+	}
+	return retVal;
+}

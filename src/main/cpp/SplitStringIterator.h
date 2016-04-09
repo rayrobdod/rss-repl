@@ -26,6 +26,9 @@ public:
 	std::wstring operator*() const;
 	SplitStringIterator& operator++();
 	SplitStringIterator operator++(int);
+	/** The number of increments remaining until this reaches the end */
+	size_t length() const;
+	/** An iterator that can be used as the end iterator for any SplitStringIterator */
 	static SplitStringIterator end();
 private:
 	const std::wstring backing;

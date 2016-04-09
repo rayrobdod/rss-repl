@@ -8,12 +8,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #include <iostream>
 #include "FeedElement.h"
 #include "SplitStringIterator.h"
+#include "linenoise.h"
 
 using std::wstring;
 using std::vector;
+
+#define _CRT_STDIO_ISO_WIDE_SPECIFIERS
 
 #define END_LOOP	L"exit"
 #define SHOW_CONTENTS	L"dir"
@@ -26,21 +30,59 @@ using std::vector;
 #define MARK_READ	L"markAsRead"
 
 
+static const wchar_t* const commands[] = {
+	END_LOOP, SHOW_CONTENTS, OPEN_INTERNAL, OPEN_EXTERNAL, OPEN_EXTERNAL_ATTACHMENT, CHANGE_DIRECTORY, MAKE_DIRECTORY, FEED_INFO, MARK_READ
+};
+
+void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
+	size_t prefixLen(strlen(prefix));
+	wstring prefix2(prefix, prefix + prefixLen);
+	SplitStringIterator prefixSplit(prefix2, (wstring)L" \n\t", (wstring)L"\"");
+	
+	if ((prefix[prefixLen - 1] == L' ') || (prefixSplit.length() > 1)) {
+		// has command; give a sub directory
+
+
+	} else {
+		// complete command
+		
+		for (int i = 0; i < 9; ++i) {
+			wstring command(commands[i]);
+			
+			if (prefix2.compare(command.substr(0, prefixLen)) == 0) {
+				std::string command2(command.cbegin(), command.cend());
+				linenoiseAddCompletion(lc, command2.c_str());
+			}
+		}
+	}
+}
+
+
 int main(int argc, char** argv) {
 	FeedElement* currentFolder;
-	wchar_t  input[STR_BUFFER_SIZE];
 	wstring command = L"";
 	
 	SetConsoleTitle(TEXT("RSS REPL"));
 	CoInitializeEx(NULL, 2);
 	
+	linenoiseInstallWindowChangeHandler();
+	linenoiseSetCompletionCallback(lineNoiseCompletionHook);
+	
 	currentFolder = getRootFolder();
 	
 	while (command.compare(END_LOOP) != 0) {
-		wprintf(L"%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
+		wstring input;
+		{
+			char prompt[STR_BUFFER_SIZE];
+			snprintf(prompt, STR_BUFFER_SIZE, "%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
+			char* const input_n = linenoise(prompt);
+			std::string input_ns(input_n);
+			input = wstring(input_ns.cbegin(), input_ns.cend());
+			
+			linenoiseHistoryAdd(input_n);
+			free(input_n);
+		}
 		
-		fflush(stdout);
-		fgetws(input, STR_BUFFER_SIZE, stdin);
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
 		command = (param.size() > 0 ? param[0] : L"");

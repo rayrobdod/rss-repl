@@ -2,6 +2,9 @@ version: a.0.{build}
 build:
   verbosity: minimal
 platform: x86
+before_build:
+- cmd: git submodule init
+- cmd: git submodule update
 test_script:
 - cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" target\test\Win32\Debug\Tests.dll /logger:trx'
 - ps: |

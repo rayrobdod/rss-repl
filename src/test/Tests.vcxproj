@@ -162,7 +162,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cpp/tabComplete.cpp" />
     <ClCompile Include="cpp\FeedElement_Item.cpp" />
     <ClCompile Include="cpp\SplitStringIterator.cpp" />
   </ItemGroup>

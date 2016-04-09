@@ -45,6 +45,7 @@ namespace Tests
 		TEST_METHOD(whenEmptyConstructed_thenComparesEqualToEnd) {
 			::SplitStringIterator dut(L"", singleton(L' '));
 			Assert::AreEqual(dut, ::SplitStringIterator::end());
+			Assert::IsTrue(0 == dut.length());
 		}
 
 		TEST_METHOD(whenEmptyConstructed_dereferencesToEmpty) {
@@ -58,6 +59,7 @@ namespace Tests
 			::SplitStringIterator dut(L"ABC/DEFG/HI", singleton(L'/'));
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 
+			Assert::IsTrue(3 == dut.length());
 			Assert::AreEqual(L"ABC", vals[0].c_str());
 			Assert::AreEqual(L"DEFG", vals[1].c_str());
 			Assert::AreEqual(L"HI", vals[2].c_str());
@@ -70,6 +72,7 @@ namespace Tests
 			::SplitStringIterator dut(L"12,34,56;78;90,21", delims);
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 
+			Assert::IsTrue(6 == dut.length());
 			Assert::AreEqual(L"12", vals[0].c_str());
 			Assert::AreEqual(L"34", vals[1].c_str());
 			Assert::AreEqual(L"56", vals[2].c_str());
@@ -82,6 +85,7 @@ namespace Tests
 			::SplitStringIterator dut(L"12,34,56;78;90,21", std::wstring(L",;"));
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 
+			Assert::IsTrue(6 == dut.length());
 			Assert::AreEqual(L"12", vals[0].c_str());
 			Assert::AreEqual(L"34", vals[1].c_str());
 			Assert::AreEqual(L"56", vals[2].c_str());
@@ -94,6 +98,7 @@ namespace Tests
 			::SplitStringIterator dut(L"one two \"three and\" four", singleton(L' '), singleton(L'\"'));
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 
+			Assert::IsTrue(4 == dut.length());
 			Assert::AreEqual(L"one", vals[0].c_str());
 			Assert::AreEqual(L"two", vals[1].c_str());
 			Assert::AreEqual(L"three and", vals[2].c_str());

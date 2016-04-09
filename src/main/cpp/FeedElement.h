@@ -4,6 +4,7 @@
 #include <msfeeds.h>
 #include <string>
 #include <utility> /** std::pair */
+#include <vector>
 
 const size_t STR_BUFFER_SIZE = 1024;
 const std::wstring INDENT = L"    ";
@@ -23,10 +24,12 @@ class FeedElement {
 	FeedElement* followPath(const std::wstring path) const;
 	/** Returns the object's path */
 	virtual std::wstring getPath() const = 0;
-	/** Returns a string describing the object's contents */
-	virtual std::wstring getDetailsString() const = 0;
 	/** Returns a string describing the object */
+	virtual std::wstring getDetailsString() const = 0;
+	/** Returns a string describing the object's contents */
 	virtual std::wstring getContentsString(const bool filterUnread) const = 0;
+	/** Returns a list of the object's contents */
+	virtual std::vector<std::wstring> getContents() const = 0;
 	/**
 	 * Attempts to mark the item as read
 	 * @return S_OK if succeeded; E_NOTIMPL if the item cannot be marked as read; maybe others
@@ -53,6 +56,7 @@ class FeedFolder : public FeedElement {
 	virtual std::wstring getPath() const;
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
@@ -72,6 +76,7 @@ class FeedFeed : public FeedElement {
 	virtual std::wstring getPath() const;
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
@@ -91,6 +96,7 @@ class FeedItem : public FeedElement {
 	virtual std::wstring getPath() const;
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
@@ -112,6 +118,7 @@ class ErrorFeedElement : public FeedElement {
 	virtual std::wstring getPath() const;
 	virtual std::wstring getDetailsString() const;
 	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;

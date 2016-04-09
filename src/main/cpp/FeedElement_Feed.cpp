@@ -104,6 +104,41 @@ wstring FeedFeed::getContentsString(const bool filterUnread) const {
 	return retVal.str();
 }
 
+std::vector<wstring> FeedFeed::getContents() const {
+	IFeedsEnum* items;
+	LONG localId;
+	HRESULT error;
+	std::vector<wstring> retVal;
+	wchar_t inbetween[STR_BUFFER_SIZE];
+
+	// the feed items
+	error = backing->get_Items((IDispatch**)&items);
+	if (SUCCEEDED(error)) {
+
+		LONG feedCount;
+		error = items->get_Count(&feedCount);
+		if (SUCCEEDED(error)) {
+			for (int i = 0; i < feedCount; i++) {
+				IFeedItem* curItem;
+				error = items->Item(i, (IDispatch**)&curItem);
+				if (SUCCEEDED(error)) {
+					error = curItem->get_LocalId(&localId);
+					if (SUCCEEDED(error)) {
+						swprintf(inbetween, STR_BUFFER_SIZE, L"%ld", localId);
+						retVal.push_back(inbetween);
+					}
+					curItem->Release();
+				}
+			}
+		}
+		items->Release();
+	}
+	else {
+	}
+
+	return retVal;
+}
+
 wstring FeedFeed::getDetailsString() const {
 	BSTR str;
 	LONG number;

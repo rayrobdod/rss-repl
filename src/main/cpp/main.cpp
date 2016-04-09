@@ -34,32 +34,42 @@ static const wchar_t* const commands[] = {
 	END_LOOP, SHOW_CONTENTS, OPEN_INTERNAL, OPEN_EXTERNAL, OPEN_EXTERNAL_ATTACHMENT, CHANGE_DIRECTORY, MAKE_DIRECTORY, FEED_INFO, MARK_READ
 };
 
+
+// set in main; read in main and lineNoiseCompletionHook
+FeedElement* currentFolder;
+
+
+// NOTE: prefix contains at most one word, so there is no way to tell whether the line already has a command or not
 void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
-	size_t prefixLen(strlen(prefix));
-	wstring prefix2(prefix, prefix + prefixLen);
+	const size_t prefixLen(strlen(prefix));
+	const wstring prefix2(prefix, prefix + prefixLen);
 	SplitStringIterator prefixSplit(prefix2, (wstring)L" \n\t", (wstring)L"\"");
-	
-	if ((prefix[prefixLen - 1] == L' ') || (prefixSplit.length() > 1)) {
-		// has command; give a sub directory
 
+	// directories
+	vector<wstring> values = currentFolder->getContents();
+	for (auto i = values.cbegin(); i != values.cend(); i++) {
+		if ((*prefixSplit).compare(i->substr(0, prefixLen)) == 0) {
+			std::string command2(i->cbegin(), i->cend());
+			// could bother to check whether the dir has spaces in it, but effort.
+			command2.insert(0, "\"");
+			command2.append("\"");
+			linenoiseAddCompletion(lc, command2.c_str());
+		}
+	}
 
-	} else {
-		// complete command
+	// complete command
+	for (int i = 0; i < 9; ++i) {
+		wstring command(commands[i]);
 		
-		for (int i = 0; i < 9; ++i) {
-			wstring command(commands[i]);
-			
-			if (prefix2.compare(command.substr(0, prefixLen)) == 0) {
-				std::string command2(command.cbegin(), command.cend());
-				linenoiseAddCompletion(lc, command2.c_str());
-			}
+		if (prefix2.compare(command.substr(0, prefixLen)) == 0) {
+			std::string command2(command.cbegin(), command.cend());
+			linenoiseAddCompletion(lc, command2.c_str());
 		}
 	}
 }
 
 
 int main(int argc, char** argv) {
-	FeedElement* currentFolder;
 	wstring command = L"";
 	
 	SetConsoleTitle(TEXT("RSS REPL"));

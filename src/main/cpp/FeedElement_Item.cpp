@@ -32,6 +32,10 @@ wstring FeedItem::getContentsString(const bool filterUnread) const {
 	return L"No contents inside an item";
 }
 
+std::vector<wstring> FeedItem::getContents() const {
+	return std::vector<wstring>();
+}
+
 wstring FeedItem::getDetailsString() const {
 	BSTR str;
 	DATE pubDate;

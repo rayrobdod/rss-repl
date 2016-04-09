@@ -119,6 +119,63 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 	return retVal.str();
 }
 
+std::vector<wstring> FeedFolder::getContents() const {
+	IFeedsEnum* currentFeeds;
+	BSTR name;
+	HRESULT error;
+	std::vector<std::wstring> retVal;
+	wchar_t inbetween[STR_BUFFER_SIZE];
+	
+	
+	// folders
+	backing->get_Subfolders((IDispatch**)&currentFeeds);
+	
+	LONG feedCount;
+	currentFeeds->get_Count(&feedCount);
+	for (int i = 0; i < feedCount; i++) {
+		IFeedFolder* currentFeed;
+		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+		
+		if (SUCCEEDED(error)) {
+			error = currentFeed->get_Name(&name);
+			if (SUCCEEDED(error)) {
+				retVal.push_back(name);
+			} else {
+			}
+			SysFreeString(name);
+			currentFeed->Release();
+		} else {
+		}
+	}
+	currentFeeds->Release();
+	
+	
+	// not folders; feeds
+	backing->get_Feeds((IDispatch**)&currentFeeds);
+	
+	currentFeeds->get_Count(&feedCount);
+	for (int i = 0; i < feedCount; i++) {
+		IFeed* currentFeed;
+		LONG unreadCount;
+		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+
+		if (SUCCEEDED(error)) {
+			error = currentFeed->get_Name(&name);
+			if (SUCCEEDED(error)) {
+				retVal.push_back(name);
+			} else {
+			}
+			SysFreeString(name);
+			currentFeed->Release();
+		} else {
+		}
+	}
+	currentFeeds->Release();
+	
+	
+	return retVal;
+}
+
 wstring FeedFolder::getDetailsString() const {
 	return L"No details about a folder";
 }

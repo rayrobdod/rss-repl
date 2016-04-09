@@ -23,6 +23,10 @@ wstring ErrorFeedElement::getContentsString(const bool filterUnread) const {
 	return this->message;
 }
 
+std::vector<wstring> ErrorFeedElement::getContents() const {
+	return std::vector<wstring>();
+}
+
 wstring ErrorFeedElement::getDetailsString() const {
 	return this->message;
 }

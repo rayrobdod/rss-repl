@@ -4,6 +4,7 @@
 #include "../../main/cpp/FeedElement.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using std::wostringstream;
 
 namespace Microsoft { namespace VisualStudio { namespace CppUnitTestFramework {
 	template<> inline std::wstring ToString<FeedElement>(FeedElement* t) {
@@ -42,34 +43,39 @@ namespace Tests
 
 		TEST_METHOD(whenEmptyCommand_thenElemNotTouched) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(L"");
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
+			Assert::AreEqual(L"", out.str().c_str());
 			Assert::IsFalse(std::get<0>(res), L"return[0] was true");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenExitCommand_thenElemNotTouched) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(END_LOOP);
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
+			Assert::AreEqual(L"", out.str().c_str());
 			Assert::IsTrue(std::get<0>(res), L"return[0] was false");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenShowContents) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(SHOW_CONTENTS);
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getContentsString", calls[1].c_str());
@@ -80,11 +86,12 @@ namespace Tests
 
 		TEST_METHOD(whenShowContentsWithSubdir) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(SHOW_CONTENTS);
 			command.push_back(L"12345");
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getChild", calls[1].c_str());
@@ -96,10 +103,11 @@ namespace Tests
 
 		TEST_METHOD(whenOpenInternal) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(OPEN_INTERNAL);
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getDetailsString", calls[1].c_str());
@@ -110,10 +118,11 @@ namespace Tests
 
 		TEST_METHOD(whenMarkAsRead) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(MARK_READ);
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"markAsRead", calls[1].c_str());
@@ -124,12 +133,14 @@ namespace Tests
 
 		TEST_METHOD(whenUnkown) {
 			calls.clear();
+			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
 			command.push_back(L"ARGLEBARGLE");
-			auto res = ::processCommand(&elem, command);
+			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size());
 			
+			Assert::AreNotEqual(wstring::npos, out.str().find(L"Unknown Command"));
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}

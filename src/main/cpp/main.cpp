@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
 		
-		auto result = processCommand(currentFolder, param);
+		auto result = processCommand(currentFolder, param, std::wcout);
 		std::tie (exit, currentFolder) = result;
 	}
 	

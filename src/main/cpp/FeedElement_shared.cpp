@@ -1,11 +1,10 @@
 
 #include "FeedElement.h"
 #include "SplitStringIterator.h"
-
+#include <atlcomcli.h>
 
 using std::wstring;
 using std::pair;
-
 
 
 /** Returns a string that representing the status */
@@ -44,15 +43,11 @@ wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status) {
 }
 
 FeedFolder* getRootFolder() {
-	IFeedsManager* manager;
+	CComPtr<IFeedsManager> manager;
 	IFeedFolder* backing;
 	
-	CoCreateInstance(
-			CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager ,
-			(void**)&manager);
-	
+	manager.CoCreateInstance(CLSID_FeedsManager);
 	manager->get_RootFolder((IDispatch**)&backing);
-	manager->Release();
 	
 	return new FeedFolder(backing);
 }

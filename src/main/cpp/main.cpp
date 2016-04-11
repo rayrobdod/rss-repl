@@ -61,16 +61,11 @@ void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
 
 
 
-
-
-
-
-
 int main(int argc, char** argv) {
 	bool exit = false;
 	
 	SetConsoleTitle(TEXT("RSS REPL"));
-	CoInitializeEx(NULL, 2);
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	
 	linenoiseInstallWindowChangeHandler();
 	linenoiseSetCompletionCallback(lineNoiseCompletionHook);
@@ -96,6 +91,7 @@ int main(int argc, char** argv) {
 		std::tie (exit, currentFolder) = result;
 	}
 	
+	linenoiseHistoryFree();
 	delete currentFolder;
 	
 	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );

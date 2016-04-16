@@ -135,6 +135,7 @@
     <ClCompile Include="cpp\FeedElement_Item.cpp" />
     <ClCompile Include="cpp\FeedElement_Null.cpp" />
     <ClCompile Include="cpp\FeedElement_Shared.cpp" />
+    <ClCompile Include="cpp\command.cpp" />
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\SplitStringIterator.cpp" />
     <ClCompile Include="..\..\include\linenoise\src\linenoise.cpp" />
@@ -142,6 +143,7 @@
     <ClCompile Include="..\..\include\linenoise\src\wcwidth.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cpp\command.h" />
     <ClInclude Include="cpp\FeedElement.h" />
     <ClInclude Include="cpp\SplitStringIterator.h" />
     <ClInclude Include="..\..\include\linenoise\include\linenoise.h" />

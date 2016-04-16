@@ -41,6 +41,19 @@ namespace Tests
 	{
 	public:
 
+		TEST_METHOD(whenEmptyVector_thenElemNotTouched) {
+			calls.clear();
+			wostringstream out;
+			StubFeedElement elem;
+			vector<wstring> command;
+			auto res = ::processCommand(&elem, command, out);
+			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
+			
+			Assert::AreEqual(L"", out.str().c_str());
+			Assert::IsFalse(std::get<0>(res), L"return[0] was true");
+			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+		}
+		
 		TEST_METHOD(whenEmptyCommand_thenElemNotTouched) {
 			calls.clear();
 			wostringstream out;

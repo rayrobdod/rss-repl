@@ -13,7 +13,7 @@
 #include "FeedElement.h"
 #include "SplitStringIterator.h"
 #include "linenoise.h"
-#include "command.cpp"
+#include "command.h"
 
 using std::wstring;
 using std::vector;

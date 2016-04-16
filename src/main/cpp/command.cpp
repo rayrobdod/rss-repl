@@ -1,39 +1,17 @@
 
-#include <tuple>
-#include <iostream>
-#include "FeedElement.h"
+#include "command.h"
 
-#define END_LOOP	L"exit"
-#define SHOW_CONTENTS	L"dir"
-#define OPEN_INTERNAL	L"print"
-#define OPEN_EXTERNAL	L"open"
-#define OPEN_EXTERNAL_ATTACHMENT	L"open_attachment"
-#define CHANGE_DIRECTORY	L"cd"
-#define MAKE_DIRECTORY	L"md"
-#define FEED_INFO	L"info"
-#define MARK_READ	L"markAsRead"
 
 using std::wstring;
 using std::vector;
 
-typedef std::tuple<bool, FeedElement*>
-	ProcessCommandReturnValue;
-
-
-/**
- * @param currentFolder the folder to act upon. This method will then own the pointer.
- * @param command the entered command
- * @param out the output stream to print output to
- * @return [0] true iff the program should exit
- * @return [1] the new folder to act upon
- */
-ProcessCommandReturnValue processCommand(FeedElement* currentFolder, const std::vector<std::wstring> command, std::wostream& out) {
+ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const std::vector<std::wstring> command, std::wostream& out) {
 	
-	if (command[0].compare(L"") == 0) {
+	if (command.size() == 0 || command[0].compare(L"") == 0) {
 		// do nothing
 		
 	} else if (command[0].compare(END_LOOP) == 0) {
-		// do nothing
+		return std::make_tuple(true, currentFolder);
 		
 	} else if (command[0].compare(SHOW_CONTENTS) == 0) {
 		const wstring path = (command.size() > 1 ? command[1] : L".");
@@ -119,11 +97,11 @@ ProcessCommandReturnValue processCommand(FeedElement* currentFolder, const std::
 			delete newFolder;
 		} else {
 			delete currentFolder;
-			currentFolder = newFolder;
+			return std::make_tuple(false, newFolder);
 		}
 	} else {
 		out << "Unknown Command" << std::endl;
 	}
-	
-	return std::make_tuple(command[0].compare(END_LOOP) == 0, currentFolder);
+
+	return std::make_tuple(false, currentFolder);
 }

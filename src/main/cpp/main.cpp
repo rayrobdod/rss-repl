@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include "FeedElement.h"
 #include "SplitStringIterator.h"
 #include "linenoise.h"
@@ -23,6 +24,30 @@ using std::vector;
 
 static const wchar_t* const commands[] = {
 	END_LOOP, SHOW_CONTENTS, OPEN_INTERNAL, OPEN_EXTERNAL, OPEN_EXTERNAL_ATTACHMENT, CHANGE_DIRECTORY, MAKE_DIRECTORY, FEED_INFO, MARK_READ
+};
+
+
+class FilteringOutputStreambuf : public std::wstreambuf {
+ public:
+	FilteringOutputStreambuf(std::wstreambuf* backing) : backing(backing) {}
+	virtual ~FilteringOutputStreambuf() {};
+	virtual int_type overflow(int_type ch) {
+		int result(EOF);
+		if (ch == EOF) {
+			return sync();
+		} else if (backing != NULL) {
+			const int_type newChar = (ch > 0x7E ? '?' : ch);
+			return backing->sputc(newChar);			
+		} else {
+			return traits_type::eof();
+		}
+	}
+	virtual int_type underflow() { return traits_type::eof(); }
+	virtual int sync() { return backing->pubsync(); }
+	virtual std::wstreambuf* setbuf(wchar_t* p, int len) { return backing->pubsetbuf(p, len); }
+
+ private:
+	std::wstreambuf* backing;
 };
 
 
@@ -65,6 +90,8 @@ int main(int argc, char** argv) {
 	bool exit = false;
 	
 	SetConsoleTitle(TEXT("RSS REPL"));
+	const UINT oldcp = GetConsoleOutputCP();
+	SetConsoleOutputCP(CP_UTF8);
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 	
 	linenoiseInstallWindowChangeHandler();
@@ -87,12 +114,14 @@ int main(int argc, char** argv) {
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
 		
-		auto result = processCommand(currentFolder, param, std::wcout);
+		FilteringOutputStreambuf buf(std::wcout.rdbuf());
+		auto result = processCommand(currentFolder, param, std::wostream(&buf));
 		std::tie (exit, currentFolder) = result;
 	}
 	
 	linenoiseHistoryFree();
 	delete currentFolder;
+	SetConsoleOutputCP(oldcp);
 	
 	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
 	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );

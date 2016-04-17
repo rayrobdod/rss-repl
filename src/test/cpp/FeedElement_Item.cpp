@@ -55,25 +55,34 @@ namespace Tests
 
 		TEST_METHOD(FeedItem_DetailsContainsTitle) {
 			BluntFeedItem backing;
+			std::wostringstream stream;
 			backing.title = L"The Title";
 			::FeedItem dut(& backing);
-			Assert::AreNotEqual(wstring::npos, dut.getDetailsString().find(L"The Title"));
+
+			dut.printDetails(stream);
+			Assert::AreNotEqual(wstring::npos, stream.str().find(L"The Title"));
 		}
 
 		TEST_METHOD(FeedItem_DetailsNotContainsUrlWhenSfalse) {
 			BluntFeedItem backing;
+			std::wostringstream stream;
 			backing.urlRetVal = S_FALSE;
 			backing.url = L"Theurl";
 			::FeedItem dut(& backing);
-			Assert::AreEqual(wstring::npos, dut.getDetailsString().find(L"Theurl"));
+
+			dut.printDetails(stream);
+			Assert::AreEqual(wstring::npos, stream.str().find(L"Theurl"));
 		}
 
 		TEST_METHOD(FeedItem_DetailsNotContainsUrlWhenSok) {
 			BluntFeedItem backing;
+			std::wostringstream stream;
 			backing.urlRetVal = S_OK;
 			backing.url = L"Theurl";
 			::FeedItem dut(& backing);
-			Assert::AreNotEqual(wstring::npos, dut.getDetailsString().find(L"Theurl"));
+
+			dut.printDetails(stream);
+			Assert::AreNotEqual(wstring::npos, stream.str().find(L"Theurl"));
 		}
 
 		TEST_METHOD(FeedItem_IsErrorIsFalse) {
@@ -92,7 +101,10 @@ namespace Tests
 		TEST_METHOD(FeedItem_ContentsStringIsEmpty) {
 			BluntFeedItem backing;
 			::FeedItem dut(& backing);
-			Assert::AreEqual(wstring::npos, dut.getContentsString(false).find(L"\n"));
+			std::wostringstream stream;
+
+			dut.printContents(false, stream);
+			Assert::AreEqual(wstring::npos, stream.str().find(L"\n"));
 		}
 
 		TEST_METHOD(FeedItem_ChildIsError) {

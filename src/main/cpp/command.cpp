@@ -18,15 +18,16 @@ ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const
 		const bool filterNew = (command.size() > 2 ? (command[2].compare(L"-n") == 0) : false);
 		
 		FeedElement* targetFolder = currentFolder->followPath(path);
-		
-		out << targetFolder->getContentsString(filterNew) << std::endl;
+		targetFolder->printContents(filterNew, out);
+		out << std::endl;
 		delete targetFolder;
 		
 	} else if (command[0].compare(OPEN_INTERNAL) == 0) {
 		const wstring path = (command.size() > 1 ? command[1] : L".");
 		
-		FeedElement* targetFolder = currentFolder->followPath(path);
-		out << targetFolder->getDetailsString() << std::endl;
+		FeedElement* const targetFolder = currentFolder->followPath(path);
+		targetFolder->printDetails(out);
+		out << std::endl;
 		delete targetFolder;
 		
 	} else if (command[0].compare(OPEN_EXTERNAL_ATTACHMENT) == 0) {
@@ -93,7 +94,8 @@ ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const
 		
 		FeedElement* newFolder = currentFolder->followPath(path);
 		if (newFolder->isError()) {
-			out << newFolder->getDetailsString() << std::endl;
+			newFolder->printDetails(out);
+			out << std::endl;
 			delete newFolder;
 		} else {
 			delete currentFolder;

@@ -25,6 +25,10 @@ typedef std::tuple<bool, FeedElement*>
  * @return [0] true iff the program should exit
  * @return [1] the new folder to act upon
  */
-ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const std::vector<std::wstring> command, std::wostream& out);
+ProcessCommandReturnValue processCommand(
+	FeedElement* const currentFolder,
+	const std::vector<std::wstring> command,
+	std::wostream& out
+);
 
 #endif        //  #ifndef COMMAND_H

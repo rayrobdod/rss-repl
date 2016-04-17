@@ -5,6 +5,7 @@
 #include <string>
 #include <utility> /** std::pair */
 #include <vector>
+#include <iostream>
 
 const size_t STR_BUFFER_SIZE = 1024;
 const std::wstring INDENT = L"    ";
@@ -25,9 +26,9 @@ class FeedElement {
 	/** Returns the object's path */
 	virtual std::wstring getPath() const = 0;
 	/** Returns a string describing the object */
-	virtual std::wstring getDetailsString() const = 0;
+	virtual void printDetails(std::wostream& out) const = 0;
 	/** Returns a string describing the object's contents */
-	virtual std::wstring getContentsString(const bool filterUnread) const = 0;
+	virtual void printContents(const bool filterUnread, std::wostream& out) const = 0;
 	/** Returns a list of the object's contents */
 	virtual std::vector<std::wstring> getContents() const = 0;
 	/**
@@ -54,8 +55,8 @@ class FeedFolder : public FeedElement {
 	/** @ref This takes possession of the IFeedFolder */
 	FeedFolder(IFeedFolder*);
 	virtual std::wstring getPath() const;
-	virtual std::wstring getDetailsString() const;
-	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual void printDetails(std::wostream& out) const;
+	virtual void printContents(const bool filterUnread, std::wostream& out) const;
 	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
@@ -74,8 +75,8 @@ class FeedFeed : public FeedElement {
 	 /** @ref This takes possession of the IFeedFolder */
 	FeedFeed(IFeed*);
 	virtual std::wstring getPath() const;
-	virtual std::wstring getDetailsString() const;
-	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual void printDetails(std::wostream& out) const;
+	virtual void printContents(const bool filterUnread, std::wostream& out) const;
 	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
@@ -94,8 +95,8 @@ class FeedItem : public FeedElement {
 	/** @ref This takes possession of the IFeedFolder */
 	FeedItem(IFeedItem*);
 	virtual std::wstring getPath() const;
-	virtual std::wstring getDetailsString() const;
-	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual void printDetails(std::wostream& out) const;
+	virtual void printContents(const bool filterUnread, std::wostream& out) const;
 	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
@@ -116,8 +117,8 @@ class ErrorFeedElement : public FeedElement {
  public:
 	ErrorFeedElement(const std::wstring message);
 	virtual std::wstring getPath() const;
-	virtual std::wstring getDetailsString() const;
-	virtual std::wstring getContentsString(const bool filterUnread) const;
+	virtual void printDetails(std::wostream& out) const;
+	virtual void printContents(const bool filterUnread, std::wostream& out) const;
 	virtual std::vector<std::wstring> getContents() const;
 	virtual HRESULT markAsRead();
 	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;

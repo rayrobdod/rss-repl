@@ -24,8 +24,8 @@ namespace Tests
 		StubFeedElement() {}
 		StubFeedElement(const StubFeedElement& other) {}
 		std::wstring getPath() const {calls.push_back(L"getPath"); return L"";}
-		std::wstring getDetailsString() const {calls.push_back(L"getDetailsString"); return L"";}
-		std::wstring getContentsString(const bool filterUnread) const {calls.push_back(L"getContentsString"); return L"";}
+		void printDetails(std::wostream& out) const {calls.push_back(L"getDetailsString"); }
+		void printContents(const bool filterUnread, std::wostream& out) const { calls.push_back(L"getContentsString"); }
 		std::vector<std::wstring> getContents() const {calls.push_back(L"getContents"); return std::vector<wstring>();}
 		HRESULT markAsRead() {calls.push_back(L"markAsRead"); return S_OK;}
 		std::pair<HRESULT, std::wstring> getAttachmentFile() const {calls.push_back(L"getAttachmentFile"); return std::make_pair(S_FALSE, L"");}

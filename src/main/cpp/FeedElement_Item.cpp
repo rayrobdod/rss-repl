@@ -1,5 +1,4 @@
 
-#include <sstream>
 #include "FeedElement.h"
 
 using std::pair;
@@ -28,49 +27,48 @@ FeedElement* FeedItem::clone() const {
 	return new FeedItem(this->backing);
 }
 
-wstring FeedItem::getContentsString(const bool filterUnread) const {
-	return L"No contents inside an item";
+void FeedItem::printContents(const bool filterUnread, std::wostream& out) const {
+	out << L"No contents inside an item";
 }
 
 std::vector<wstring> FeedItem::getContents() const {
 	return std::vector<wstring>();
 }
 
-wstring FeedItem::getDetailsString() const {
+void FeedItem::printDetails(std::wostream& out) const {
 	BSTR str;
 	DATE pubDate;
 	VARIANT_BOOL isRead;
 	IFeedEnclosure* enclosure;
-	std::wostringstream retVal;
 	HRESULT error;
 	
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << std::endl << str << std::endl << std::endl;
+		out << std::endl << str << std::endl << std::endl;
 		SysFreeString(str);
 	}
 	
 	error = backing->get_Author(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Author: " << str << std::endl;
+		out << INDENT << "Author: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Url: " << str << std::endl;
+		out << INDENT << "Url: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Comments(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Comments: " << str << std::endl;
+		out << INDENT << "Comments: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_IsRead(&isRead);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Read: " << (isRead ? "TRUE" : "FALSE") << std::endl;
+		out << INDENT << "Read: " << (isRead ? "TRUE" : "FALSE") << std::endl;
 	}
 	
 	error = backing->get_Enclosure((IDispatch**) &enclosure);
@@ -78,45 +76,45 @@ wstring FeedItem::getDetailsString() const {
 		FEEDS_DOWNLOAD_STATUS dlstatus;
 		FEEDS_DOWNLOAD_ERROR dlerror;
 
-		retVal << INDENT << "Enclosure:" << std::endl;
+		out << INDENT << "Enclosure:" << std::endl;
 
 		error = enclosure->get_Type(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Type: " << str << std::endl;
+			out << INDENT << INDENT << "Type: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_Url(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Url: " << str << std::endl;
+			out << INDENT << INDENT << "Url: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadStatus(&dlstatus);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
+			out << INDENT << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
 		}
 
 		error = enclosure->get_LocalPath(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Local Path: " << str << std::endl;
+			out << INDENT << INDENT << "Local Path: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_LastDownloadError(&dlerror);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
+			out << INDENT << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
 		}
 
 		error = enclosure->get_DownloadMimeType(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Download Type: " << str << std::endl;
+			out << INDENT << INDENT << "Download Type: " << str << std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadUrl(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			retVal << INDENT << INDENT << "Download Url: " << str << std::endl;
+			out << INDENT << INDENT << "Download Url: " << str << std::endl;
 			SysFreeString(str);
 		}
 
@@ -128,10 +126,10 @@ wstring FeedItem::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			retVal << INDENT << "Published: " << str << std::endl;
+			out << INDENT << "Published: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			retVal << INDENT << "Published: " << "ERROR" << std::endl;
+			out << INDENT << "Published: " << "ERROR" << std::endl;
 		}
 	}
 	
@@ -139,22 +137,20 @@ wstring FeedItem::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			retVal << INDENT << "Modified: " << str << std::endl;
+			out << INDENT << "Modified: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			retVal << INDENT << "Modified: " << "ERROR" << std::endl;
+			out << INDENT << "Modified: " << "ERROR" << std::endl;
 		}
 	}
 
-	retVal << std::endl;
+	out << std::endl;
 	
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << str << std::endl << std::endl;
+		out << str << std::endl << std::endl;
 		SysFreeString(str);
 	}
-	
-	return retVal.str();
 }
 
 wstring FeedItem::getPath() const {

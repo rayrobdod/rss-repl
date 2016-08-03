@@ -1,3 +1,9 @@
 [submodule "include/linenoise"]
 	path = include/linenoise
 	url = https://github.com/arangodb/linenoise-ng.git
+[submodule "include/libhubbub"]
+	path = include/libhubbub
+	url = git://git.netsurf-browser.org/libhubbub.git
+[submodule "include\\libhubbub_parserutils"]
+	path = include\\libhubbub_parserutils
+	url = git://git.netsurf-browser.org/libparserutils.git

@@ -77,21 +77,25 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)target\test\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -168,9 +172,14 @@
     <ClCompile Include="cpp\command.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\include\libhubbub.vcxproj">
+      <Project>{71742811-24d5-44ad-96ef-8a0a0f25f2ec}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\include\parserutils.vcxproj">
+      <Project>{eef05afd-f036-490e-a289-bc532fb4f631}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\main\Feeds.vcxproj">
       <Project>{25fe42be-231f-4b98-9bc8-a775685cd309}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,8 +1,89 @@
 
 #include "FeedElement.h"
+#include <hubbub/parser.h>
 
 using std::pair;
 using std::wstring;
+
+bool isWhitespace(const wchar_t c) {
+	return c == L' ' || c == L'\t' || c == L'\n';
+}
+
+std::string hubbubstr2stdstr(const hubbub_string in) {
+	return std::string((char*) in.ptr, in.len);
+}
+
+// Because hubbub doesn't do whitespace collapsing
+template<class InputIterator> void appendCollapsingWhitespace(std::wstring* appendTo, InputIterator begin, InputIterator end) {
+	appendTo->reserve(appendTo->length() + (end - begin));
+	bool lastCharWasWhitespace = (appendTo->empty() ? TRUE : isWhitespace(appendTo->back()));
+	while (begin != end) {
+		bool thisCharIsWhitespace = isWhitespace(*begin);
+		if (!lastCharWasWhitespace || !thisCharIsWhitespace) {
+			appendTo->push_back((thisCharIsWhitespace ? L' ' : *begin));
+		}
+		lastCharWasWhitespace = thisCharIsWhitespace;
+		++begin;
+	}
+}
+
+
+hubbub_error AppendTokenContentsToWString(const hubbub_token *token, void *pw) {
+	std::wstring* out = (std::wstring*) pw;
+
+	switch (token->type) {
+		case HUBBUB_TOKEN_DOCTYPE: break;
+		case HUBBUB_TOKEN_START_TAG: {
+			std::string name(hubbubstr2stdstr(token->data.tag.name));
+
+			if (token->data.tag.ns == HUBBUB_NS_HTML && (name.compare("br") == 0)) {
+				out->append(L"\n");
+			}
+			if (token->data.tag.ns == HUBBUB_NS_HTML && (name.compare("img") == 0)) {
+				hubbub_string alttext;
+				alttext.len = 0;
+				alttext.ptr = (uint8_t*) "";
+
+				// find the image's alt text, then display the alt text
+				for (uint32_t i = 0; i < token->data.tag.n_attributes; i++) {
+					if (hubbubstr2stdstr(token->data.tag.attributes[i].name).compare("alt") == 0) {
+						alttext = token->data.tag.attributes[i].value;
+					}
+				}
+
+				int wstringBufferLen = MultiByteToWideChar(CP_UTF8, 0, (char*)alttext.ptr, alttext.len, NULL, 0);
+				LPWSTR wstr = new wchar_t[wstringBufferLen];
+				int wstringLen = MultiByteToWideChar(CP_UTF8, 0, (char*)alttext.ptr, alttext.len, wstr, wstringBufferLen);
+
+				appendCollapsingWhitespace(out, wstr, wstr + wstringLen);
+				delete[] wstr;
+			}
+		} break;
+		case HUBBUB_TOKEN_END_TAG: {
+			std::string name(hubbubstr2stdstr(token->data.tag.name));
+
+			if (token->data.tag.ns == HUBBUB_NS_HTML && (name.compare("p") == 0 || name.compare("ol") == 0 || name.compare("ul") == 0 || name.compare("h1") == 0 || name.compare("h2") == 0 || name.compare("table") == 0)) {
+				out->append(L"\n\n");
+			}
+			if (token->data.tag.ns == HUBBUB_NS_HTML && (name.compare("tr") == 0 || name.compare("li") == 0)) {
+				out->append(L"\n");
+			}
+
+		} break;
+		case HUBBUB_TOKEN_COMMENT: break;
+		case HUBBUB_TOKEN_CHARACTER: {
+			int wstringBufferLen = MultiByteToWideChar(CP_UTF8, 0, (char*) token->data.character.ptr, token->data.character.len, NULL,  0);
+			LPWSTR wstr = new wchar_t[wstringBufferLen];
+			int wstringLen = MultiByteToWideChar(CP_UTF8, 0, (char*)token->data.character.ptr, token->data.character.len, wstr, wstringBufferLen);
+
+			appendCollapsingWhitespace(out, wstr, wstr + wstringLen);
+			delete[] wstr;
+		} break;
+		case HUBBUB_TOKEN_EOF: break;
+	}
+
+	return HUBBUB_OK;
+}
 
 
 FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
@@ -148,7 +229,31 @@ void FeedItem::printDetails(std::wostream& out) const {
 	
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << str << std::endl << std::endl;
+		
+		int utf8StringBufferLen = WideCharToMultiByte(CP_UTF8, 0, str, SysStringLen(str), NULL, 0, NULL, NULL);
+		LPSTR utf8String = new char[utf8StringBufferLen];
+		int utf8StringLen = WideCharToMultiByte(CP_UTF8, 0, str, SysStringLen(str), utf8String, utf8StringBufferLen, NULL, NULL);
+
+		if (utf8StringLen != 0) {
+			wstring prettyOutput = wstring();
+			hubbub_parser* parser;
+			hubbub_error huberror;
+			
+			huberror = hubbub_parser_create("UTF-8", false, &parser);
+			if (huberror == HUBBUB_OK) {
+				hubbub_parser_optparams tokenCallback;
+				tokenCallback.token_handler.handler = *AppendTokenContentsToWString;
+				tokenCallback.token_handler.pw = &prettyOutput;
+				huberror = hubbub_parser_setopt(parser, HUBBUB_PARSER_TOKEN_HANDLER, &tokenCallback);
+				huberror = hubbub_parser_parse_chunk(parser, (uint8_t*) utf8String, utf8StringLen);
+				huberror = hubbub_parser_completed(parser);
+				huberror = hubbub_parser_destroy(parser);
+			}
+
+			out << prettyOutput << std::endl << std::endl;
+		}
+
+		delete[] utf8String;
 		SysFreeString(str);
 	}
 }

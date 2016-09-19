@@ -45,15 +45,21 @@
     <ClCompile Include="..\..\include\linenoise\src\wcwidth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cpp\command.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpp\tabComplete.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cpp\FeedElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cpp\SplitStringIterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpp\command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\linenoise\include\linenoise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

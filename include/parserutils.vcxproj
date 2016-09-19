@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EEF05AFD-F036-490E-A289-BC532FB4F631}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IntDir>$(SolutionDir)target\parserutils\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)target\parserutils\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)include\hijack;$(SolutionDir)include\libhubbub_parserutils\include;$(SolutionDir)include\libhubbub_parserutils\src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="libhubbub_parserutils\src\charset\aliases.c" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\aliases.inc" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codec.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_8859.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_ascii.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_ext8.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_utf16.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_utf8.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\encodings\utf16.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\encodings\utf8.c" />
+    <ClCompile Include="libhubbub_parserutils\src\input\filter.c" />
+    <ClCompile Include="libhubbub_parserutils\src\input\inputstream.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\buffer.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\errors.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\stack.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\vector.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\codec.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\mibenum.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\utf16.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\utf8.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\errors.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\functypes.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\input\inputstream.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\parserutils.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\types.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\utils\buffer.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\utils\stack.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\utils\vector.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\aliases.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\codecs\8859_tables.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\codecs\codec_impl.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\codecs\ext8_tables.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\encodings\utf8impl.h" />
+    <ClInclude Include="libhubbub_parserutils\src\input\filter.h" />
+    <ClInclude Include="libhubbub_parserutils\src\utils\endian.h" />
+    <ClInclude Include="libhubbub_parserutils\src\utils\utils.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

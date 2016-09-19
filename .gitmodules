@@ -4,6 +4,6 @@
 [submodule "include/libhubbub"]
 	path = include/libhubbub
 	url = git://git.netsurf-browser.org/libhubbub.git
-[submodule "include\\libhubbub_parserutils"]
-	path = include\\libhubbub_parserutils
+[submodule "include/libhubbub_parserutils"]
+	path = include/libhubbub_parserutils
 	url = git://git.netsurf-browser.org/libparserutils.git

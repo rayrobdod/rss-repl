@@ -24,29 +24,22 @@
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -66,29 +59,20 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <IntDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <OutDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)target\main\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,17 +123,17 @@
     <ClCompile Include="cpp\command.cpp" />
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\SplitStringIterator.cpp" />
-    <ClCompile Include="..\..\include\linenoise\src\linenoise.cpp" />
-    <ClCompile Include="..\..\include\linenoise\src\ConvertUTF.cpp" />
-    <ClCompile Include="..\..\include\linenoise\src\wcwidth.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\command.h" />
     <ClInclude Include="cpp\FeedElement.h" />
     <ClInclude Include="cpp\SplitStringIterator.h" />
-    <ClInclude Include="..\..\include\linenoise\include\linenoise.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\include\linenoise.vcxproj">
+      <Project>{02C7F026-FA38-409C-9477-AAD74CD905A6}</Project>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
     <ProjectReference Include="..\..\include\parserutils.vcxproj">
       <Project>{EEF05AFD-F036-490E-A289-BC532FB4F631}</Project>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>

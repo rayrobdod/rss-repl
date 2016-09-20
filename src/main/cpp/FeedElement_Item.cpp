@@ -409,37 +409,45 @@ HRESULT FeedItem::attachImageFromDescription() {
 				error = backing->get_Enclosure((IDispatch**) &enclosure);
 
 				if (S_FALSE == error) {
-					BSTR xml;
-					error = backing->Xml(FXIF_CF_EXTENSIONS, &xml);
+					BSTR thisXml;
+					error = backing->Xml(FXIF_CF_EXTENSIONS, &thisXml);
 					
 					if (SUCCEEDED(error)) {
 						IFeed* feed;
 						error = backing->get_Parent((IDispatch**)& feed);
 
 						if (SUCCEEDED(error)) {
-							wstring toMerge(L"<rss version=\"2.0\"><channel><item>");
-							toMerge.append(L"<enclosure url=\"");
-							toMerge.append(imgHref);
-							toMerge.append(L"\" />");
-							toMerge.append(xml + wcslen(L"<item>"));
-							toMerge.append(L"</channel></rss>");
+							BSTR feedXml;
+							error = feed->Xml(0, FXSP_PUBDATE, FXSO_ASCENDING, FXFF_ALL, FXIF_CF_EXTENSIONS, &feedXml);
 
-							BSTR securityUrl;
-							backing->get_DownloadUrl(&securityUrl);
+							if (SUCCEEDED(error)) {
+								UINT feedXmlLen = SysStringLen(feedXml);
 
-							BSTR toMerge2 = SysAllocString(toMerge.c_str());
-							BSTR toMerge3;
+								wstring toMerge;
+								toMerge.append(feedXml, feedXmlLen - wcslen(L"</channel></rss>"));
+								toMerge.append(L"<item><enclosure url=\"");
+								toMerge.append(imgHref);
+								toMerge.append(L"\" />");
+								toMerge.append(thisXml + wcslen(L"<item>"));
+								toMerge.append(L"</channel></rss>");
 
-							IFeedsManager* manager;
+								BSTR securityUrl;
+								backing->get_DownloadUrl(&securityUrl);
 
-							CoCreateInstance(
-								CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager,
-								(void**)&manager);
+								BSTR toMerge2 = SysAllocString(toMerge.c_str());
+								BSTR toMerge3;
 
-							manager->Normalize(toMerge2, &toMerge3);
-							manager->Release();
+								IFeedsManager* manager;
 
-							error = feed->Merge(toMerge3, securityUrl);
+								CoCreateInstance(
+									CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager,
+									(void**)&manager);
+
+								manager->Normalize(toMerge2, &toMerge3);
+								manager->Release();
+
+								error = feed->Merge(toMerge3, securityUrl);
+							}
 						}
 					}
 

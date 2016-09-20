@@ -73,9 +73,15 @@ class FeedElement {
 	virtual HRESULT markAsRead() = 0;
 	
 	/**
-	 * Find an image in this's description and make that image this file's attachment
+	 * Find an image in this's description and make that image this's attachment.
+	 * Will do nothing if this already has an attachment.
 	 */
 	virtual HRESULT attachImageFromDescription() = 0;
+	
+	/**
+	 * Start an asynchrounous download of this's attachments
+	 */
+	virtual HRESULT downloadAttachmentAsync() = 0;
  protected:
 	
 	/** 
@@ -107,6 +113,7 @@ class FeedFolder : public FeedElement {
 	
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
+	virtual HRESULT downloadAttachmentAsync();
  protected:
 	virtual FeedElement* getParent() const;
 	virtual FeedElement* getChild(const std::wstring name) const;
@@ -131,6 +138,7 @@ class FeedFeed : public FeedElement {
 	
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
+	virtual HRESULT downloadAttachmentAsync();
  protected:
 	virtual FeedElement* getParent() const;
 	virtual FeedElement* getChild(const std::wstring name) const;
@@ -155,6 +163,7 @@ class FeedItem : public FeedElement {
 	
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
+	virtual HRESULT downloadAttachmentAsync();
  protected:
 	virtual FeedElement* getParent() const;
 	virtual FeedElement* getChild(const std::wstring name) const;
@@ -179,6 +188,7 @@ class ErrorFeedElement : public FeedElement {
 	
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
+	virtual HRESULT downloadAttachmentAsync();
  protected:
 	virtual FeedElement* getParent() const;
 	virtual FeedElement* getChild(const std::wstring name) const;

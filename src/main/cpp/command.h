@@ -15,6 +15,7 @@
 #define FEED_INFO	L"info"
 #define MARK_READ	L"markAsRead"
 #define ATTACH_IMAGE	L"attachImageFromDescription"
+#define DOWNLOAD_ATTACHMENT	L"download_attachment"
 
 typedef std::tuple<bool, FeedElement*>
 	ProcessCommandReturnValue;

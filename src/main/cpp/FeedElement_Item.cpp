@@ -457,3 +457,15 @@ HRESULT FeedItem::attachImageFromDescription() {
 	return error;
 }
 
+HRESULT FeedItem::downloadAttachmentAsync() {
+	FEEDS_DOWNLOAD_STATUS status;
+	IFeedEnclosure* enclosure;
+	HRESULT result;
+	
+	result = backing->get_Enclosure((IDispatch**)&enclosure);
+	if (SUCCEEDED(result) && result != S_FALSE) {
+		result = enclosure->AsyncDownload();
+	}
+	return result;
+}
+

@@ -25,7 +25,7 @@ using std::vector;
 static const wchar_t* const commands[] = {
 	END_LOOP, SHOW_CONTENTS, OPEN_INTERNAL, OPEN_EXTERNAL,
 	OPEN_EXTERNAL_ATTACHMENT, CHANGE_DIRECTORY, MAKE_DIRECTORY, FEED_INFO,
-	MARK_READ, ATTACH_IMAGE
+	MARK_READ, ATTACH_IMAGE, DOWNLOAD_ATTACHMENT
 };
 
 
@@ -76,7 +76,7 @@ void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
 	}
 
 	// complete command
-	for (int i = 0; i < 10; ++i) {
+	for (int i = 0; i < 11; ++i) {
 		wstring command(commands[i]);
 		
 		if (prefix2.compare(command.substr(0, prefixLen)) == 0) {

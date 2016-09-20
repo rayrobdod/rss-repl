@@ -32,6 +32,7 @@ namespace Tests
 		bool isError() const {calls.push_back(L"isError"); return false;}
 		HRESULT markAsRead() { calls.push_back(L"markAsRead"); return S_OK; }
 		HRESULT attachImageFromDescription() { calls.push_back(L"attachImageFromDescription"); return S_OK; }
+		HRESULT downloadAttachmentAsync() { calls.push_back(L"downloadAttachmentAsync"); return S_OK; }
 	 protected:
 		FeedElement* getParent() const {calls.push_back(L"getParent"); return new StubFeedElement(*this);}
 		FeedElement* getChild(const std::wstring name) const {calls.push_back(L"getChild"); return new StubFeedElement(*this);}

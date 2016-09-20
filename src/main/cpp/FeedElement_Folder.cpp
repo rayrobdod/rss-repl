@@ -192,3 +192,5 @@ std::pair<HRESULT, std::wstring> FeedFolder::getUrl() const { return std::pair<H
 HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
 
 HRESULT FeedFolder::attachImageFromDescription() { return E_NOTIMPL; }
+
+HRESULT FeedFolder::downloadAttachmentAsync() { return E_NOTIMPL; }

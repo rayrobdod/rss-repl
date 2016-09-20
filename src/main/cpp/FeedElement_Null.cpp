@@ -44,3 +44,5 @@ std::pair<HRESULT, std::wstring> ErrorFeedElement::getUrl() const { return std::
 HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
 
 HRESULT ErrorFeedElement::attachImageFromDescription() { return E_NOTIMPL; }
+
+HRESULT ErrorFeedElement::downloadAttachmentAsync() { return E_NOTIMPL; }

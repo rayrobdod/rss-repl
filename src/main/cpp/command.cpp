@@ -100,6 +100,22 @@ ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const
 		}
 		delete targetFolder;
 		
+	} else if (command[0].compare(DOWNLOAD_ATTACHMENT) == 0) {
+		const wstring path = (command.size() > 1 ? command[1] : L".");
+		
+		FeedElement* targetFolder = currentFolder->followPath(path);
+		HRESULT result = targetFolder->downloadAttachmentAsync();
+		if (result == S_FALSE) {
+			out << "S_FALSE" << std::endl;
+		} else if (result == E_NOTIMPL) {
+			out << "E_NOTIMPL" << std::endl;
+		} else if (SUCCEEDED(result)) {
+			out << "started async download" << std::endl;
+		} else {
+			out << "failed" << std::endl;
+		}
+		delete targetFolder;
+		
 	} else if (command[0].compare(L"echo") == 0) {
 		for (size_t i = 0; i < command.size(); i++) {
 			out << "\t" << command[i] << std::endl;

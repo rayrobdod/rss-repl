@@ -35,7 +35,7 @@ wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status) {
 		case FDE_NOT_EXIST: return L"The feed no longer exists";
 		case FDE_UNSUPPORTED_MSXML: return L"UNSUPPORTED_MSXML";
 		case FDE_UNSUPPORTED_DTD: return L"Feed contains a DTD";
-		case FDE_DOWNLOAD_SIZE_LIMIT_EXCEEDED: "The XML source of the feed exceeds the maximum allowed size.";
+		case FDE_DOWNLOAD_SIZE_LIMIT_EXCEEDED: return L"The XML source of the feed exceeds the maximum allowed size.";
 		case FDE_ACCESS_DENIED: return L"ACCESS_DENIED";
 		case FDE_AUTH_FAILED: return L"AUTH_FAILED";
 		case FDE_INVALID_AUTH: return L"INVALID_AUTH";

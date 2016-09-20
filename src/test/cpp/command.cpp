@@ -27,10 +27,11 @@ namespace Tests
 		void printDetails(std::wostream& out) const {calls.push_back(L"getDetailsString"); }
 		void printContents(const bool filterUnread, std::wostream& out) const { calls.push_back(L"getContentsString"); }
 		std::vector<std::wstring> getContents() const {calls.push_back(L"getContents"); return std::vector<wstring>();}
-		HRESULT markAsRead() {calls.push_back(L"markAsRead"); return S_OK;}
 		std::pair<HRESULT, std::wstring> getAttachmentFile() const {calls.push_back(L"getAttachmentFile"); return std::make_pair(S_FALSE, L"");}
 		std::pair<HRESULT, std::wstring> getUrl() const {calls.push_back(L"getUrl"); return std::make_pair(S_FALSE, L"");}
 		bool isError() const {calls.push_back(L"isError"); return false;}
+		HRESULT markAsRead() { calls.push_back(L"markAsRead"); return S_OK; }
+		HRESULT attachImageFromDescription() { calls.push_back(L"attachImageFromDescription"); return S_OK; }
 	 protected:
 		FeedElement* getParent() const {calls.push_back(L"getParent"); return new StubFeedElement(*this);}
 		FeedElement* getChild(const std::wstring name) const {calls.push_back(L"getChild"); return new StubFeedElement(*this);}

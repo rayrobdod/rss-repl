@@ -85,6 +85,45 @@ hubbub_error AppendTokenContentsToWString(const hubbub_token *token, void *pw) {
 	return HUBBUB_OK;
 }
 
+hubbub_error FindFirstImgHrefToWString(const hubbub_token *token, void *pw) {
+	std::wstring* out = (std::wstring*) pw;
+
+	switch (token->type) {
+		case HUBBUB_TOKEN_DOCTYPE: break;
+		case HUBBUB_TOKEN_START_TAG: {
+			if (0 == out->size()) {
+				std::string name(hubbubstr2stdstr(token->data.tag.name));
+
+				if (token->data.tag.ns == HUBBUB_NS_HTML && (name.compare("img") == 0)) {
+					hubbub_string href;
+					href.len = 0;
+					href.ptr = (uint8_t*) "";
+
+					// find the image's alt text, then display the alt text
+					for (uint32_t i = 0; i < token->data.tag.n_attributes; i++) {
+						if (hubbubstr2stdstr(token->data.tag.attributes[i].name).compare("src") == 0) {
+							href = token->data.tag.attributes[i].value;
+						}
+					}
+
+					int wstringBufferLen = MultiByteToWideChar(CP_UTF8, 0, (char*)href.ptr, href.len, NULL, 0);
+					LPWSTR wstr = new wchar_t[wstringBufferLen];
+					int wstringLen = MultiByteToWideChar(CP_UTF8, 0, (char*)href.ptr, href.len, wstr, wstringBufferLen);
+
+					appendCollapsingWhitespace(out, wstr, wstr + wstringLen);
+					delete[] wstr;
+				}
+			}
+		} break;
+		case HUBBUB_TOKEN_END_TAG: break;
+		case HUBBUB_TOKEN_COMMENT: break;
+		case HUBBUB_TOKEN_CHARACTER:  break;
+		case HUBBUB_TOKEN_EOF: break;
+	}
+
+	return HUBBUB_OK;
+}
+
 
 FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
 
@@ -278,10 +317,6 @@ wstring FeedItem::getPath() const {
 
 bool FeedItem::isError() const { return false; }
 
-HRESULT FeedItem::markAsRead() {
-	return backing->put_IsRead(VARIANT_TRUE);
-}
-
 std::pair<HRESULT, std::wstring> FeedItem::getAttachmentFile() const {
 	FEEDS_DOWNLOAD_STATUS status;
 	IFeedEnclosure* enclosure;
@@ -331,3 +366,94 @@ std::pair<HRESULT, std::wstring> FeedItem::getUrl() const {
 		return std::pair<HRESULT, std::wstring>(result, L"");
 	}
 }
+
+HRESULT FeedItem::markAsRead() {
+	return backing->put_IsRead(VARIANT_TRUE);
+}
+
+HRESULT FeedItem::attachImageFromDescription() {
+	HRESULT error;
+	BSTR description;
+
+	error = backing->get_Description(&description);
+	if (SUCCEEDED(error) && error != S_FALSE) {
+
+		int utf8StringBufferLen = WideCharToMultiByte(CP_UTF8, 0, description, SysStringLen(description), NULL, 0, NULL, NULL);
+		LPSTR utf8String = new char[utf8StringBufferLen];
+		int utf8StringLen = WideCharToMultiByte(CP_UTF8, 0, description, SysStringLen(description), utf8String, utf8StringBufferLen, NULL, NULL);
+
+		if (0 == utf8StringLen) {
+			error = S_FALSE;
+		} else {
+			wstring imgHref;
+			hubbub_parser* parser;
+			hubbub_error huberror;
+
+			huberror = hubbub_parser_create("UTF-8", false, &parser);
+			if (huberror == HUBBUB_OK) {
+				hubbub_parser_optparams tokenCallback;
+				tokenCallback.token_handler.handler = *FindFirstImgHrefToWString;
+				tokenCallback.token_handler.pw = &imgHref;
+				huberror = hubbub_parser_setopt(parser, HUBBUB_PARSER_TOKEN_HANDLER, &tokenCallback);
+				huberror = hubbub_parser_parse_chunk(parser, (uint8_t*)utf8String, utf8StringLen);
+				huberror = hubbub_parser_completed(parser);
+				huberror = hubbub_parser_destroy(parser);
+			}
+
+			if (huberror != HUBBUB_OK) {
+				error = E_FAIL;
+			} else if (0 == imgHref.size()) {
+				error = S_FALSE;
+			} else {
+				IFeedEnclosure* enclosure;
+				error = backing->get_Enclosure((IDispatch**) &enclosure);
+
+				if (S_FALSE == error) {
+					BSTR xml;
+					error = backing->Xml(FXIF_CF_EXTENSIONS, &xml);
+					
+					if (SUCCEEDED(error)) {
+						IFeed* feed;
+						error = backing->get_Parent((IDispatch**)& feed);
+
+						if (SUCCEEDED(error)) {
+							wstring toMerge(L"<rss version=\"2.0\"><channel><item>");
+							toMerge.append(L"<enclosure url=\"");
+							toMerge.append(imgHref);
+							toMerge.append(L"\" />");
+							toMerge.append(xml + wcslen(L"<item>"));
+							toMerge.append(L"</channel></rss>");
+
+							BSTR securityUrl;
+							backing->get_DownloadUrl(&securityUrl);
+
+							BSTR toMerge2 = SysAllocString(toMerge.c_str());
+							BSTR toMerge3;
+
+							IFeedsManager* manager;
+
+							CoCreateInstance(
+								CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager,
+								(void**)&manager);
+
+							manager->Normalize(toMerge2, &toMerge3);
+							manager->Release();
+
+							error = feed->Merge(toMerge3, securityUrl);
+						}
+					}
+
+				} else if (SUCCEEDED(error)) {
+					enclosure->Release();
+					error = S_FALSE;
+				}
+			}
+		}
+
+		delete[] utf8String;
+		SysFreeString(description);
+	}
+
+	return error;
+}
+

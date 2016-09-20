@@ -185,8 +185,10 @@ wstring FeedFolder::getPath() const {
 
 bool FeedFolder::isError() const { return false; }
 
-HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
-
 std::pair<HRESULT, std::wstring> FeedFolder::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
 std::pair<HRESULT, std::wstring> FeedFolder::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+
+HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
+
+HRESULT FeedFolder::attachImageFromDescription() { return E_NOTIMPL; }

@@ -37,8 +37,10 @@ wstring ErrorFeedElement::getPath() const {
 
 bool ErrorFeedElement::isError() const { return true; }
 
-HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
-
 std::pair<HRESULT, std::wstring> ErrorFeedElement::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
 std::pair<HRESULT, std::wstring> ErrorFeedElement::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+
+HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
+
+HRESULT ErrorFeedElement::attachImageFromDescription() { return E_NOTIMPL; }

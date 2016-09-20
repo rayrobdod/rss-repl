@@ -14,6 +14,7 @@
 #define MAKE_DIRECTORY	L"md"
 #define FEED_INFO	L"info"
 #define MARK_READ	L"markAsRead"
+#define ATTACH_IMAGE	L"attachImageFromDescription"
 
 typedef std::tuple<bool, FeedElement*>
 	ProcessCommandReturnValue;

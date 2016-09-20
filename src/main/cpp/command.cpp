@@ -84,6 +84,22 @@ ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const
 		}
 		delete targetFolder;
 		
+	} else if (command[0].compare(ATTACH_IMAGE) == 0) {
+		const wstring path = (command.size() > 1 ? command[1] : L".");
+		
+		FeedElement* targetFolder = currentFolder->followPath(path);
+		HRESULT result = targetFolder->attachImageFromDescription();
+		if (result == S_FALSE) {
+			out << "No image found to attach" << std::endl;
+		} else if (result == E_NOTIMPL) {
+			out << "No attachments in this type of thing" << std::endl;
+		} else if (SUCCEEDED(result)) {
+			out << "Attachment succeeded" << std::endl;
+		} else {
+			out << "Attachment failed" << std::endl;
+		}
+		delete targetFolder;
+		
 	} else if (command[0].compare(L"echo") == 0) {
 		for (size_t i = 0; i < command.size(); i++) {
 			out << "\t" << command[i] << std::endl;

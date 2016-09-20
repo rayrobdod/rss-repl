@@ -244,8 +244,6 @@ wstring FeedFeed::getPath() const {
 
 bool FeedFeed::isError() const { return false; }
 
-HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
-
 std::pair<HRESULT, std::wstring> FeedFeed::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
 std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
@@ -262,3 +260,7 @@ std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
 		return std::pair<HRESULT, std::wstring>(result, L"");
 	}
 }
+
+HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
+
+HRESULT FeedFeed::attachImageFromDescription() { return E_NOTIMPL; }

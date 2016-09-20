@@ -118,6 +118,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cpp\FeedElement_Item.cpp" />
+    <ClCompile Include="cpp\FeedElement_Null.cpp" />
     <ClCompile Include="cpp\FeedElement_Shared.cpp" />
     <ClCompile Include="cpp\SplitStringIterator.cpp" />
     <ClCompile Include="cpp\command.cpp" />

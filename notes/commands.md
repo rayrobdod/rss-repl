@@ -1,6 +1,6 @@
 Question of the day: should it be possible to `cd` into a feed?
 
-The following is idealized and not neccessarily documentation of what acutalyl happens
+The following is idealized and not necessarily documentation of what actually happens
 
 ----
 
@@ -36,7 +36,7 @@ displayed.
 
 Creates a directory at the specified path. fails if something exists at that location.
 
-## subscribe (suscribe to a feed)
+## subscribe (subscribe to a feed)
 
     subscribe %abstract_path% %feed_url%
 
@@ -81,7 +81,7 @@ Does not mark that item as read
 
 ----
 
-`[]` indicates an optional paramter.
+`[]` indicates an optional parameter.
 
 `%abstract_path%` is a string representing a path. Either `/` or `\` may be used
 to separate elements in a path. The path is always relative to the current

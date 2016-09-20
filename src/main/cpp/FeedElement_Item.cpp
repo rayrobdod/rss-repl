@@ -464,7 +464,16 @@ HRESULT FeedItem::downloadAttachmentAsync() {
 	
 	result = backing->get_Enclosure((IDispatch**)&enclosure);
 	if (SUCCEEDED(result) && result != S_FALSE) {
-		result = enclosure->AsyncDownload();
+		FEEDS_DOWNLOAD_STATUS dlstatus;
+		result = enclosure->get_DownloadStatus(&dlstatus);
+		if (SUCCEEDED(result) && result != S_FALSE) {
+
+			if (dlstatus != FDS_NONE) {
+				result = S_FALSE;
+			} else {
+				result = enclosure->AsyncDownload();
+			}
+		}
 	}
 	return result;
 }

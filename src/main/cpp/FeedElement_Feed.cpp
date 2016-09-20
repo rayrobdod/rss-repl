@@ -263,6 +263,38 @@ std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
 
 HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
 
-HRESULT FeedFeed::attachImageFromDescription() { return E_NOTIMPL; }
+HRESULT FeedFeed::attachImageFromDescription() {
+	std::vector<wstring> childrenNames = this->getContents();
+	HRESULT finalResult = S_OK;
 
-HRESULT FeedFeed::downloadAttachmentAsync() { return E_NOTIMPL; }
+	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
+
+		FeedElement* child = this->getChild(*i);
+		HRESULT thisResult = child->attachImageFromDescription();
+		delete child;
+
+		if (SUCCEEDED(finalResult) && FAILED(thisResult)) {
+			finalResult = thisResult;
+		}
+	}
+
+	return finalResult;
+}
+
+HRESULT FeedFeed::downloadAttachmentAsync() {
+	std::vector<wstring> childrenNames = this->getContents();
+	HRESULT finalResult = S_OK;
+
+	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
+
+		FeedElement* child = this->getChild(*i);
+		HRESULT thisResult = child->downloadAttachmentAsync();
+		delete child;
+
+		if (SUCCEEDED(finalResult) && FAILED(thisResult)) {
+			finalResult = thisResult;
+		}
+	}
+
+	return finalResult;
+}

@@ -30,5 +30,16 @@
     <ClCompile Include="cpp\FeedElement_Null.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cpp\FeedElement_Feed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpp\SimpleFeedElems.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cpp\SimpleFeedElems.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

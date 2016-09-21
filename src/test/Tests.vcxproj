@@ -117,9 +117,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cpp\FeedElement_Feed.cpp" />
     <ClCompile Include="cpp\FeedElement_Item.cpp" />
     <ClCompile Include="cpp\FeedElement_Null.cpp" />
     <ClCompile Include="cpp\FeedElement_Shared.cpp" />
+    <ClCompile Include="cpp\SimpleFeedElems.cpp" />
     <ClCompile Include="cpp\SplitStringIterator.cpp" />
     <ClCompile Include="cpp\command.cpp" />
   </ItemGroup>
@@ -140,6 +142,9 @@
       <Project>{25fe42be-231f-4b98-9bc8-a775685cd309}</Project>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cpp\SimpleFeedElems.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

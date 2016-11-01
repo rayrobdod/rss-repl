@@ -59,19 +59,29 @@ FeedElement* currentFolder;
 
 // NOTE: prefix contains at most one word, so there is no way to tell whether the line already has a command or not
 void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
-	const size_t prefixLen(strlen(prefix));
-	const wstring prefix2(prefix, prefix + prefixLen);
-	SplitStringIterator prefixSplit(prefix2, (wstring)L" \n\t", (wstring)L"\"");
-
+	const int wstringBufferLen = MultiByteToWideChar(CP_UTF8, 0, prefix, strlen(prefix), NULL, 0);
+	const LPWSTR wstr = new wchar_t[wstringBufferLen];
+	const int wstrLen = MultiByteToWideChar(CP_UTF8, 0, prefix, strlen(prefix), wstr, wstringBufferLen);
+	
+	const wstring prefix2(wstr, wstrLen);
 	// directories
 	vector<wstring> values = currentFolder->getContents();
 	for (auto i = values.cbegin(); i != values.cend(); i++) {
-		if ((*prefixSplit).compare(i->substr(0, prefixLen)) == 0) {
-			std::string command2(i->cbegin(), i->cend());
-			// could bother to check whether the dir has spaces in it, but effort.
-			command2.insert(0, "\"");
-			command2.append("\"");
+		if (prefix2.compare(i->substr(0, prefix2.length())) == 0) {
+			int utf8StringBufferLen = WideCharToMultiByte(CP_UTF8, 0, i->c_str(), i->length(), NULL, 0, NULL, NULL);
+			LPSTR utf8String = new char[utf8StringBufferLen];
+			int utf8StringLen = WideCharToMultiByte(CP_UTF8, 0, i->c_str(), i->length(), utf8String, utf8StringBufferLen, NULL, NULL);
+			std::string command2(utf8String, utf8StringLen);
+			
+			if (command2.rfind(L' ') != wstring::npos
+					|| command2.rfind(L'\n') != wstring::npos
+					|| command2.rfind(L'\t') != wstring::npos) {
+				command2.insert(0, "\"");
+				command2.append("\"");
+			}
 			linenoiseAddCompletion(lc, command2.c_str());
+			
+			delete[] utf8String;
 		}
 	}
 
@@ -79,11 +89,12 @@ void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
 	for (int i = 0; i < 11; ++i) {
 		wstring command(commands[i]);
 		
-		if (prefix2.compare(command.substr(0, prefixLen)) == 0) {
+		if (prefix2.compare(command.substr(0, prefix2.length())) == 0) {
 			std::string command2(command.cbegin(), command.cend());
 			linenoiseAddCompletion(lc, command2.c_str());
 		}
 	}
+	delete[] wstr;
 }
 
 
@@ -107,14 +118,24 @@ int main(int argc, char** argv) {
 	while (! exit) {
 		wstring input;
 		{
-			char prompt[STR_BUFFER_SIZE];
-			snprintf(prompt, STR_BUFFER_SIZE, "%%Feeds%%\\%ls> ", currentFolder->getPath().c_str());
-			char* const input_n = linenoise(prompt);
-			std::string input_ns(input_n);
-			input = wstring(input_ns.cbegin(), input_ns.cend());
+			int utf8StringBufferLen = WideCharToMultiByte(CP_UTF8, 0, currentFolder->getPath().c_str(), currentFolder->getPath().length(), NULL, 0, NULL, NULL);
+			LPSTR utf8String = new char[utf8StringBufferLen];
+			int utf8StringLen = WideCharToMultiByte(CP_UTF8, 0, currentFolder->getPath().c_str(), currentFolder->getPath().length(), utf8String, utf8StringBufferLen, NULL, NULL);
+			std::string prompt("%Feeds%\\");
+			prompt.append(utf8String, utf8StringLen);
+			prompt.append("> ");
+			
+			char* const input_n = linenoise(prompt.c_str());
+			
+			int input_w_buflen = MultiByteToWideChar(CP_UTF8, 0, input_n, strlen(input_n), NULL, 0);
+			LPWSTR input_w = new wchar_t[input_w_buflen];
+			int input_wlen = MultiByteToWideChar(CP_UTF8, 0, input_n, strlen(input_n), input_w, input_w_buflen);
+			input = wstring(input_w, input_wlen);
 			
 			linenoiseHistoryAdd(input_n);
 			free(input_n);
+			delete[] utf8String;
+			delete[] input_w;
 		}
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());

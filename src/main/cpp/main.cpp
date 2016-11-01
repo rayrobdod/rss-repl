@@ -29,27 +29,27 @@ static const wchar_t* const commands[] = {
 };
 
 
-class FilteringOutputStreambuf : public std::wstreambuf {
+class WindowsConsoleOutputStreamBuf : public std::wstreambuf {
  public:
-	FilteringOutputStreambuf(std::wstreambuf* backing) : backing(backing) {}
-	virtual ~FilteringOutputStreambuf() {};
+	WindowsConsoleOutputStreamBuf(HANDLE console) : console(console) {};
+	virtual ~WindowsConsoleOutputStreamBuf() {};
 	virtual int_type overflow(int_type ch) {
-		int result(EOF);
-		if (ch == EOF) {
-			return sync();
-		} else if (backing != NULL) {
-			const int_type newChar = (ch > 0x7E ? '?' : ch);
-			return backing->sputc(newChar);			
-		} else {
+		if (ch == traits_type::eof()) {
 			return traits_type::eof();
+		} else {
+			BOOL errorResult;
+			DWORD charsWritten;
+			errorResult = WriteConsole(console, &ch, 1, &charsWritten, NULL);
+			if (0 == errorResult) { return traits_type::eof(); }
+			return ch;
 		}
 	}
-	virtual int_type underflow() { return traits_type::eof(); }
-	virtual int sync() { return backing->pubsync(); }
-	virtual std::wstreambuf* setbuf(wchar_t* p, int len) { return backing->pubsetbuf(p, len); }
 
  private:
-	std::wstreambuf* backing;
+	WindowsConsoleOutputStreamBuf(const WindowsConsoleOutputStreamBuf&);
+	WindowsConsoleOutputStreamBuf& operator=(const WindowsConsoleOutputStreamBuf&);
+ private:
+	const HANDLE console;
 };
 
 
@@ -99,6 +99,9 @@ int main(int argc, char** argv) {
 	linenoiseInstallWindowChangeHandler();
 	linenoiseSetCompletionCallback(lineNoiseCompletionHook);
 	
+	WindowsConsoleOutputStreamBuf myOutStreamBuf(GetStdHandle(STD_OUTPUT_HANDLE));
+	std::wostream myOutStream(&myOutStreamBuf);
+	
 	currentFolder = getRootFolder();
 	
 	while (! exit) {
@@ -116,8 +119,7 @@ int main(int argc, char** argv) {
 		
 		std::vector<std::wstring> param(SplitStringIterator(input, (wstring) L" \n\t", (wstring) L"\""), ::SplitStringIterator::end());
 		
-		FilteringOutputStreambuf buf(std::wcout.rdbuf());
-		auto result = processCommand(currentFolder, param, std::wostream(&buf));
+		auto result = processCommand(currentFolder, param, myOutStream);
 		std::tie (exit, currentFolder) = result;
 	}
 	

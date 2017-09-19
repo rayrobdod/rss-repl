@@ -26,6 +26,7 @@
   <PropertyGroup Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -33,6 +34,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
@@ -57,12 +59,29 @@
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <CompileAsManaged>false</CompileAsManaged>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -72,17 +91,23 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-    </ClCompile>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <CompileAsManaged>false</CompileAsManaged>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libhubbub_parserutils\src\charset\aliases.c" />

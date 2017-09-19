@@ -15,5 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="linenoise\src\linenoise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="linenoise\src\ConvertUTF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="linenoise\src\wcwidth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="linenoise\include\linenoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="linenoise\src\ConvertUTF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -102,7 +102,8 @@ namespace Tests
 			ChildrenFeedFeed backing(items);
 			::FeedFeed dut(&backing);
 			std::vector<wstring> res = dut.getContents();
-			Assert::AreEqual(3U, res.size());
+			size_t EXPECTED_SIZE(3);
+			Assert::AreEqual(EXPECTED_SIZE, res.size());
 			Assert::AreEqual(L"24", res[0].c_str());
 			Assert::AreEqual(L"25", res[1].c_str());
 			Assert::AreEqual(L"26", res[2].c_str());

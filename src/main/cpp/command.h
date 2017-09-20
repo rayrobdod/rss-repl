@@ -5,22 +5,11 @@
 #include <iostream>
 #include "FeedElement.h"
 
-#define END_LOOP	L"exit"
-#define SHOW_CONTENTS	L"dir"
-#define OPEN_INTERNAL	L"print"
-#define OPEN_EXTERNAL	L"open"
-#define OPEN_EXTERNAL_ATTACHMENT	L"open_attachment"
-#define CHANGE_DIRECTORY	L"cd"
-#define MAKE_DIRECTORY	L"md"
-#define FEED_INFO	L"info"
-#define MARK_READ	L"markAsRead"
-#define ATTACH_IMAGE	L"attachImageFromDescription"
-#define DOWNLOAD_ATTACHMENT	L"download_attachment"
-
 typedef std::tuple<bool, FeedElement*>
 	ProcessCommandReturnValue;
 
 /**
+ * Perform an operation based on the commandstring
  * @param currentFolder the folder to act upon. This method will then own the pointer.
  * @param command the entered command
  * @param out the output stream to print output to
@@ -32,5 +21,10 @@ ProcessCommandReturnValue processCommand(
 	const std::vector<std::wstring> command,
 	std::wostream& out
 );
+
+/**
+ * Returns the names of the avaliable commands
+ */
+std::vector<std::wstring> commandNames();
 
 #endif        //  #ifndef COMMAND_H

@@ -75,7 +75,7 @@ namespace Tests
 			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
-			command.push_back(END_LOOP);
+			command.push_back(L"exit");
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
@@ -89,7 +89,7 @@ namespace Tests
 			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
-			command.push_back(SHOW_CONTENTS);
+			command.push_back(L"dir");
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -104,7 +104,7 @@ namespace Tests
 			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
-			command.push_back(SHOW_CONTENTS);
+			command.push_back(L"dir");
 			command.push_back(L"12345");
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
@@ -121,7 +121,7 @@ namespace Tests
 			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
-			command.push_back(OPEN_INTERNAL);
+			command.push_back(L"print");
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -136,7 +136,7 @@ namespace Tests
 			wostringstream out;
 			StubFeedElement elem;
 			vector<wstring> command;
-			command.push_back(MARK_READ);
+			command.push_back(L"markAsRead");
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());

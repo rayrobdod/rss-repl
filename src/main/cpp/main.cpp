@@ -22,13 +22,6 @@ using std::vector;
 #define _CRT_STDIO_ISO_WIDE_SPECIFIERS
 
 
-static const wchar_t* const commands[] = {
-	END_LOOP, SHOW_CONTENTS, OPEN_INTERNAL, OPEN_EXTERNAL,
-	OPEN_EXTERNAL_ATTACHMENT, CHANGE_DIRECTORY, MAKE_DIRECTORY, FEED_INFO,
-	MARK_READ, ATTACH_IMAGE, DOWNLOAD_ATTACHMENT
-};
-
-
 class WindowsConsoleOutputStreamBuf : public std::wstreambuf {
  public:
 	WindowsConsoleOutputStreamBuf(HANDLE console) : console(console) {};
@@ -86,11 +79,12 @@ void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
 	}
 
 	// complete command
-	for (int i = 0; i < 11; ++i) {
-		wstring command(commands[i]);
+	auto commandNames2 = commandNames();
+	for (auto i = commandNames2.cbegin(); i != commandNames2.cend(); ++i) {
+		wstring commandName(*i);
 		
-		if (prefix2.compare(command.substr(0, prefix2.length())) == 0) {
-			std::string command2(command.cbegin(), command.cend());
+		if (prefix2.compare(commandName.substr(0, prefix2.length())) == 0) {
+			std::string command2(commandName.cbegin(), commandName.cend());
 			linenoiseAddCompletion(lc, command2.c_str());
 		}
 	}

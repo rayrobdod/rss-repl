@@ -9,11 +9,14 @@
 class SplitStringIterator : public std::iterator<std::input_iterator_tag, std::wstring> {
 public:
 	/**
+	* @tparam collection_d an arbitrary collection of wchar_t
 	* @param back the string to split into substrings
 	* @param delim the delimiters to split the string by
 	*/
 	template<class collection_d> SplitStringIterator(const std::wstring back, const collection_d delim);
 	/**
+	* @tparam collection_d an arbitrary collection of wchar_t
+	* @tparam collection_q an arbitrary collection of wchar_t
 	* @param back the string to split into substrings
 	* @param delim the delimiters to split the string by
 	* @param q quote characters

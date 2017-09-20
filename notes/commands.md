@@ -56,7 +56,7 @@ Mark an item or feed as read
 
 ## move (move)
 
-    markAsRead %abstract_path% %abstract_path%
+    move %abstract_path% %abstract_path%
 
 The first parameter is the source; the second parameter is the destination
 

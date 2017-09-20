@@ -66,9 +66,7 @@ namespace Tests
 		}
 
 		TEST_METHOD(multipleDelimiters) {
-			std::vector<wchar_t> delims;
-			delims.push_back(L',');
-			delims.push_back(L';');
+			const std::vector<wchar_t> delims{ L',', L';' };
 			::SplitStringIterator dut(L"12,34,56;78;90,21", delims);
 			std::vector<std::wstring> vals(dut, ::SplitStringIterator::end());
 

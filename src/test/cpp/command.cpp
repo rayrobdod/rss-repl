@@ -25,7 +25,11 @@ namespace Tests
 		StubFeedElement(const StubFeedElement& other) {}
 		std::wstring getPath() const {calls.push_back(L"getPath"); return L"";}
 		void printDetails(std::wostream& out) const {calls.push_back(L"getDetailsString"); }
-		void printContents(const bool filterUnread, std::wostream& out) const { calls.push_back(L"getContentsString"); }
+		void printContents(const bool filterUnread, std::wostream& out) const {
+			wchar_t buffer[50];
+			swprintf(buffer, 50, L"printContents(%s)", (filterUnread ? L"true" : L"false"));
+			calls.push_back(wstring(buffer));
+		}
 		std::vector<std::wstring> getContents() const {calls.push_back(L"getContents"); return std::vector<wstring>();}
 		std::pair<HRESULT, std::wstring> getAttachmentFile() const {calls.push_back(L"getAttachmentFile"); return std::make_pair(S_FALSE, L"");}
 		std::pair<HRESULT, std::wstring> getUrl() const {calls.push_back(L"getUrl"); return std::make_pair(S_FALSE, L"");}
@@ -47,7 +51,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
+			const vector<wstring> command;
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
@@ -60,8 +64,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"");
+			const vector<wstring> command{ L"" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
@@ -74,8 +77,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"exit");
+			const vector<wstring> command{ L"exit" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
@@ -88,13 +90,26 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"dir");
+			const vector<wstring> command{ L"dir" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
 			Assert::AreEqual(L"clone", calls[0].c_str());
-			Assert::AreEqual(L"getContentsString", calls[1].c_str());
+			Assert::AreEqual(L"printContents(false)", calls[1].c_str());
 			
+			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
+			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+		}
+
+		TEST_METHOD(whenShowContentsNewOnly) {
+			calls.clear();
+			wostringstream out;
+			StubFeedElement elem;
+			const vector<wstring> command{ L"dir", L"-n" };
+			auto res = ::processCommand(&elem, command, out);
+			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
+			Assert::AreEqual(L"clone", calls[0].c_str());
+			Assert::AreEqual(L"printContents(true)", calls[1].c_str());
+
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
@@ -103,15 +118,43 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"dir");
-			command.push_back(L"12345");
+			const vector<wstring> command{ L"dir", L"12345" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getChild", calls[1].c_str());
-			Assert::AreEqual(L"getContentsString", calls[2].c_str());
+			Assert::AreEqual(L"printContents(false)", calls[2].c_str());
 			
+			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
+			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+		}
+
+		TEST_METHOD(whenShowContentsWithSubdirAndNewOnly) {
+			calls.clear();
+			wostringstream out;
+			StubFeedElement elem;
+			const vector<wstring> command{ L"dir", L"12345", L"-n" };
+			auto res = ::processCommand(&elem, command, out);
+			Assert::AreEqual<size_t>(3, calls.size());
+			Assert::AreEqual(L"clone", calls[0].c_str());
+			Assert::AreEqual(L"getChild", calls[1].c_str());
+			Assert::AreEqual(L"printContents(true)", calls[2].c_str());
+
+			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
+			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+		}
+
+		TEST_METHOD(whenShowContentsWithSubdirAndNewOnlyReversed) {
+			calls.clear();
+			wostringstream out;
+			StubFeedElement elem;
+			const vector<wstring> command{ L"dir", L"-n", L"12345" };
+			auto res = ::processCommand(&elem, command, out);
+			Assert::AreEqual<size_t>(3, calls.size());
+			Assert::AreEqual(L"clone", calls[0].c_str());
+			Assert::AreEqual(L"getChild", calls[1].c_str());
+			Assert::AreEqual(L"printContents(true)", calls[2].c_str());
+
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
@@ -120,8 +163,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"print");
+			const vector<wstring> command{ L"print" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -135,8 +177,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"markAsRead");
+			const vector<wstring> command{ L"markAsRead" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -150,14 +191,21 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			vector<wstring> command;
-			command.push_back(L"ARGLEBARGLE");
+			const vector<wstring> command{ L"ARGLEBARGLE" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size());
 			
 			Assert::AreNotEqual(wstring::npos, out.str().find(L"Unknown Command"));
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+		}
+	};
+
+	TEST_CLASS(commandNames) {
+	public:
+		TEST_METHOD(containsExit) {
+			auto cn = ::commandNames();
+			Assert::IsTrue(std::count(cn.begin(), cn.end(), wstring(L"exit")) > 0);
 		}
 	};
 }

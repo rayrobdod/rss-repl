@@ -94,10 +94,7 @@ namespace Tests
 
 		TEST_METHOD(FeedFeed_GetContents_NonEmpty) {
 			LocalIdFeedItem first(24), second(25), third(26);
-			std::vector<IFeedItem*> items;
-			items.push_back(&first);
-			items.push_back(&second);
-			items.push_back(&third);
+			const std::vector<IFeedItem*> items{ &first, &second, &third };
 
 			ChildrenFeedFeed backing(items);
 			::FeedFeed dut(&backing);

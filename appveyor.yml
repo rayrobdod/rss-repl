@@ -20,4 +20,4 @@ test_script:
     }
 artifacts:
 - path: target\main\$(platform)\$(configuration)\Feeds.exe
-  name: Feeds.exe
+  name: Feeds_$(platform).exe

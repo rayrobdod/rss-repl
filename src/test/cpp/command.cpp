@@ -104,7 +104,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			const vector<wstring> command{ L"dir", L"-n" };
+			const vector<wstring> command{ L"dir", L"/n" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -133,7 +133,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			const vector<wstring> command{ L"dir", L"12345", L"-n" };
+			const vector<wstring> command{ L"dir", L"12345", L"/n" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -148,7 +148,7 @@ namespace Tests
 			calls.clear();
 			wostringstream out;
 			StubFeedElement elem;
-			const vector<wstring> command{ L"dir", L"-n", L"12345" };
+			const vector<wstring> command{ L"dir", L"/n", L"12345" };
 			auto res = ::processCommand(&elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
@@ -183,6 +183,19 @@ namespace Tests
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"markAsRead", calls[1].c_str());
 			
+			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
+			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+		}
+
+		TEST_METHOD(whenFlagsButNoPositional) {
+			// Mostly just make sure this doesn't crash.
+			calls.clear();
+			wostringstream out;
+			StubFeedElement elem;
+			const vector<wstring> command{ L"/flag:blah" };
+			auto res = ::processCommand(&elem, command, out);
+			Assert::AreEqual<size_t>(0, calls.size());
+
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
 			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}

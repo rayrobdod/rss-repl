@@ -7,7 +7,7 @@ using std::wstring;
 using std::vector;
 
 struct CommandString {
-	std::unordered_set<wstring> flags;
+	std::unordered_map<wstring, wstring> flags;
 	std::vector<wstring> positional;
 };
 
@@ -15,23 +15,27 @@ typedef ProcessCommandReturnValue(*CommandFunction)(FeedElement* const currentFo
 
 // Determine which arguments are flags and which are positional arguments
 CommandString extractFlags(const vector<wstring> command) {
-	std::unordered_set<wstring> flags;
+	std::unordered_map<wstring, wstring> flags;
 	std::vector<wstring> positional;
 	
 	for (auto i = command.cbegin(); i != command.cend(); ++i) {
-		if (i->size() > 0 && L'-' == i->at(0)) {
-			if (i->size() > 1 && L'-' == i->at(1)) {
-				flags.insert( i->substr(2) );
+		if (i->size() > 0 && L'/' == i->at(0)) {
+			size_t splitIndex = i->find(':');
+			if (splitIndex != std::string::npos) {
+				// +/- 1 is to exclude the ':' from the parsed result
+				flags.insert({ i->substr(1, splitIndex - 1), i->substr(splitIndex + 1) });
 			} else {
-				for (auto c = i->cbegin() + 1; c != i->cend(); ++c) {
-					wstring c2(c, c + 1);
-					flags.insert( c2 );
-				}
+				flags.insert({ i->substr(1), i->substr(1) });
 			}
 		} else {
 			wstring i2 = *i;
 			positional.push_back( i2 );
 		}
+	}
+	
+	if (positional.empty()) {
+		wstring a = L"help";
+		positional.push_back(a);
 	}
 	
 	return CommandString{ flags = flags, positional = positional };
@@ -154,7 +158,7 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 	std::make_pair(L"echo", std::make_tuple(L"Echo arguments to command line", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
 		out << "Flags:" << std::endl;
 		for (auto i = command.flags.cbegin(); i != command.flags.cend(); ++i) {
-			out << "\t" << *i << std::endl;
+			out << "\t" << i->first << " -> " << i->second << std::endl;
 		}
 		out << "Positional:" << std::endl;
 		for (auto i = command.positional.cbegin(); i != command.positional.cend(); ++i) {

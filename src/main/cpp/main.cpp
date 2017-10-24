@@ -141,6 +141,7 @@ int main(int argc, char** argv) {
 	linenoiseHistoryFree();
 	delete currentFolder;
 	SetConsoleOutputCP(oldcp);
+	CoUninitialize();
 	
 	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
 	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );

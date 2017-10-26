@@ -19,20 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{25FE42BE-231F-4B98-9BC8-A775685CD309}</ProjectGuid>
+    <ProjectGuid>{02C7F026-FA38-409C-9477-AAD74CD905A6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Linenoise</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <!-- Making the output directory match MSBuild's input makes appveyor's build matrix much moremanageable. The Default "Win32" != "x86" -->
-    <RrdTargetPathPlatform>$(Platform)</RrdTargetPathPlatform>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)'=='Win32'" Label="Configuration">
-    <RrdTargetPathPlatform>x86</RrdTargetPathPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
     <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -50,13 +46,13 @@
   </ImportGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <IntDir>$(SolutionDir)target\main\$(RrdTargetPathPlatform)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)target\main\$(RrdTargetPathPlatform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)target\linenoise\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)target\linenoise\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)include\linenoise\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -68,7 +64,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <OptimizeReferences>false</OptimizeReferences>
@@ -76,7 +72,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -88,7 +84,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -110,38 +106,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cpp\FeedElement_Feed.cpp" />
-    <ClCompile Include="cpp\FeedElement_Folder.cpp" />
-    <ClCompile Include="cpp\FeedElement_Item.cpp" />
-    <ClCompile Include="cpp\FeedElement_Null.cpp" />
-    <ClCompile Include="cpp\FeedElement_Shared.cpp" />
-    <ClCompile Include="cpp\command.cpp" />
-    <ClCompile Include="cpp\main.cpp" />
-    <ClCompile Include="cpp\SplitStringIterator.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="cpp\command.h" />
-    <ClInclude Include="cpp\FeedElement.h" />
-    <ClInclude Include="cpp\SplitStringIterator.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\include\linenoise.vcxproj">
-      <Project>{02C7F026-FA38-409C-9477-AAD74CD905A6}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="..\..\include\parserutils.vcxproj">
-      <Project>{EEF05AFD-F036-490E-A289-BC532FB4F631}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="..\..\include\libhubbub.vcxproj">
-      <Project>{71742811-24D5-44AD-96EF-8A0A0F25F2EC}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="resource\info.rc" />
+    <ClCompile Include="linenoise\src\linenoise.cpp" />
+    <ClCompile Include="linenoise\src\ConvertUTF.cpp" />
+    <ClCompile Include="linenoise\src\wcwidth.cpp" />
+    <ClInclude Include="linenoise\include\linenoise.h" />
+    <ClInclude Include="linenoise\src\ConvertUTF.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
 </Project>

@@ -15,31 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cpp\FeedElement_Item.cpp">
+    <ClCompile Include="linenoise\src\linenoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cpp\FeedElement_Shared.cpp">
+    <ClCompile Include="linenoise\src\ConvertUTF.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cpp\SplitStringIterator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpp\command.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpp\FeedElement_Null.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpp\FeedElement_Feed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpp\SimpleFeedElems.cpp">
+    <ClCompile Include="linenoise\src\wcwidth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpp\SimpleFeedElems.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="linenoise\include\linenoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="linenoise\src\ConvertUTF.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
 
-#include <sstream>
 #include "FeedElement.h"
 
 using std::pair;
@@ -41,23 +40,22 @@ FeedElement* FeedFeed::clone() const {
 	return new FeedFeed(this->backing);
 }
 
-wstring FeedFeed::getContentsString(const bool filterUnread) const {
+void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const {
 	IFeedsEnum* items;
 	BSTR name;
 	LONG localId;
 	DATE pubDate;
 	HRESULT error;
 	VARIANT_BOOL isRead;
-	std::wostringstream retVal;
 	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	// The feed name
 	error = backing->get_Name(&name);
 	if (SUCCEEDED(error)) {
-		retVal << " Feed: " << name << std::endl << std::endl;
+		out << " Feed: " << name << std::endl << std::endl;
 		SysFreeString(name);
 	} else {
-		retVal << " Feed: " << "???" << std::endl << std::endl;
+		out << " Feed: " << "???" << std::endl << std::endl;
 	}
 	
 	// the feed items
@@ -83,25 +81,23 @@ wstring FeedFeed::getContentsString(const bool filterUnread) const {
 						const wchar_t* const isReadMessage = (isRead ? L"" : L"<NEW>");
 
 						swprintf(inbetween, STR_BUFFER_SIZE, L"%4ld %5ls %ls", localId, isReadMessage, (wchar_t *)name);
-						retVal << inbetween << std::endl;
+						out << inbetween << std::endl;
 
 						SysFreeString(name);
 					} else {
-						retVal << "???? COULD NOT READ ITEM" << std::endl;
+						out << "???? COULD NOT READ ITEM" << std::endl;
 					}
 				}
 
 				curItem->Release();
 			}
 		} else {
-			retVal << "ERROR: could not read item count" << std::endl;
+			out << "ERROR: could not read item count" << std::endl;
 		}
 		items->Release();
 	} else {
-		retVal << "ERROR: could not read feed items" << std::endl;
+		out << "ERROR: could not read feed items" << std::endl;
 	}
-	
-	return retVal.str();
 }
 
 std::vector<wstring> FeedFeed::getContents() const {
@@ -139,54 +135,53 @@ std::vector<wstring> FeedFeed::getContents() const {
 	return retVal;
 }
 
-wstring FeedFeed::getDetailsString() const {
+void FeedFeed::printDetails(std::wostream& out) const {
 	BSTR str;
 	LONG number;
 	FEEDS_DOWNLOAD_STATUS dlstatus;
 	FEEDS_DOWNLOAD_ERROR dlerror;
 	DATE pubDate;
-	std::wostringstream retVal;
 	HRESULT error;
 
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << std::endl << str << std::endl << std::endl;
+		out << std::endl << str << std::endl << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_UnreadItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Unread Item Count: " << number << std::endl;
+		out << INDENT << "Unread Item Count: " << number << std::endl;
 	}
 
 	error = backing->get_ItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Item Count: " << number << std::endl;
+		out << INDENT << "Item Count: " << number << std::endl;
 	}
 
 	error = backing->get_MaxItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Max Item Count: " << number << std::endl;
+		out << INDENT << "Max Item Count: " << number << std::endl;
 	}
 
 	error = backing->get_DownloadStatus(&dlstatus);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
+		out << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
 	}
 
 	error = backing->get_LastDownloadError(&dlerror);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
+		out << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
 	}
 
 	error = backing->get_PubDate(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			retVal << INDENT << "Published: " << str << std::endl;
+			out << INDENT << "Published: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			retVal << INDENT << "Published: " << "ERROR" << std::endl;
+			out << INDENT << "Published: " << "ERROR" << std::endl;
 		}
 	}
 
@@ -194,10 +189,10 @@ wstring FeedFeed::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			retVal << INDENT << "Built: " << str << std::endl;
+			out << INDENT << "Built: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			retVal << INDENT << "Built: " << "ERROR" << std::endl;
+			out << INDENT << "Built: " << "ERROR" << std::endl;
 		}
 	}
 
@@ -205,40 +200,38 @@ wstring FeedFeed::getDetailsString() const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			retVal << INDENT << "Downloaded: " << str << std::endl;
+			out << INDENT << "Downloaded: " << str << std::endl;
 			SysFreeString(str);
 		} else {
-			retVal << INDENT << "Downloaded: " << "ERROR" << std::endl;
+			out << INDENT << "Downloaded: " << "ERROR" << std::endl;
 		}
 	}
 
 	error = backing->get_Image(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Image: " << str << std::endl;
+		out << INDENT << "Image: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Link: " << str << std::endl;
+		out << INDENT << "Link: " << str << std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_DownloadUrl(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << INDENT << "Download Url: " << str << std::endl;
+		out << INDENT << "Download Url: " << str << std::endl;
 		SysFreeString(str);
 	}
 
-	retVal << std::endl;
+	out << std::endl;
 
 	error = backing->get_Description(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		retVal << str << std::endl;
+		out << str << std::endl;
 		SysFreeString(str);
 	}
-
-	return retVal.str();
 }
 
 wstring FeedFeed::getPath() const {
@@ -250,8 +243,6 @@ wstring FeedFeed::getPath() const {
 }
 
 bool FeedFeed::isError() const { return false; }
-
-HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
 
 std::pair<HRESULT, std::wstring> FeedFeed::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
@@ -268,4 +259,42 @@ std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
 	} else {
 		return std::pair<HRESULT, std::wstring>(result, L"");
 	}
+}
+
+HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
+
+HRESULT FeedFeed::attachImageFromDescription() {
+	std::vector<wstring> childrenNames = this->getContents();
+	HRESULT finalResult = S_OK;
+
+	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
+
+		FeedElement* child = this->getChild(*i);
+		HRESULT thisResult = child->attachImageFromDescription();
+		delete child;
+
+		if (SUCCEEDED(finalResult) && FAILED(thisResult)) {
+			finalResult = thisResult;
+		}
+	}
+
+	return finalResult;
+}
+
+HRESULT FeedFeed::downloadAttachmentAsync() {
+	std::vector<wstring> childrenNames = this->getContents();
+	HRESULT finalResult = S_OK;
+
+	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
+
+		FeedElement* child = this->getChild(*i);
+		HRESULT thisResult = child->downloadAttachmentAsync();
+		delete child;
+
+		if (SUCCEEDED(finalResult) && FAILED(thisResult)) {
+			finalResult = thisResult;
+		}
+	}
+
+	return finalResult;
 }

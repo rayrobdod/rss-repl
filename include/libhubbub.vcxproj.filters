@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libhubbub\src\charset\detect.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\tokeniser\entities.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\tokeniser\tokeniser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\after_after_body.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\after_after_frameset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\after_body.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\after_frameset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\after_head.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\before_head.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\before_html.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\generic_rcdata.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_body.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_caption.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_cell.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_column_group.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_foreign_content.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_frameset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_head.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_head_noscript.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_row.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_select.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_select_in_table.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_table.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\in_table_body.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\initial.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\treebuilder\treebuilder.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\utils\errors.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\utils\string.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libhubbub\src\parser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libhubbub\include\hubbub\errors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\include\hubbub\functypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\include\hubbub\hubbub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\include\hubbub\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\include\hubbub\tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\include\hubbub\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\charset\detect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\tokeniser\entities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\tokeniser\tokeniser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\treebuilder\internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\treebuilder\modes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\treebuilder\treebuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\utils\parserutilserror.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\utils\string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libhubbub\src\utils\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

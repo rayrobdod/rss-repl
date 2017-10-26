@@ -19,16 +19,16 @@ FeedElement* ErrorFeedElement::clone() const {
 	return new ErrorFeedElement(this->message);
 }
 
-wstring ErrorFeedElement::getContentsString(const bool filterUnread) const {
-	return this->message;
+void ErrorFeedElement::printContents(const bool filterUnread, std::wostream& out) const {
+	out << this->message;
 }
 
 std::vector<wstring> ErrorFeedElement::getContents() const {
 	return std::vector<wstring>();
 }
 
-wstring ErrorFeedElement::getDetailsString() const {
-	return this->message;
+void ErrorFeedElement::printDetails(std::wostream& out) const {
+	out << this->message;
 }
 
 wstring ErrorFeedElement::getPath() const {
@@ -37,8 +37,12 @@ wstring ErrorFeedElement::getPath() const {
 
 bool ErrorFeedElement::isError() const { return true; }
 
-HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
-
 std::pair<HRESULT, std::wstring> ErrorFeedElement::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
 std::pair<HRESULT, std::wstring> ErrorFeedElement::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+
+HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
+
+HRESULT ErrorFeedElement::attachImageFromDescription() { return E_NOTIMPL; }
+
+HRESULT ErrorFeedElement::downloadAttachmentAsync() { return E_NOTIMPL; }

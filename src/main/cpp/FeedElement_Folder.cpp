@@ -1,5 +1,4 @@
 
-#include <sstream>
 #include "FeedElement.h"
 
 using std::pair;
@@ -51,11 +50,10 @@ FeedElement* FeedFolder::clone() const {
 	return new FeedFolder(this->backing);
 }
 
-wstring FeedFolder::getContentsString(const bool filterUnread) const {
+void FeedFolder::printContents(const bool filterUnread, std::wostream& out) const {
 	IFeedsEnum* currentFeeds;
 	BSTR name;
 	HRESULT error;
-	std::wostringstream retVal;
 	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	
@@ -72,14 +70,14 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 			error = currentFeed->get_Name(&name);
 			if (SUCCEEDED(error)) {
 				swprintf(inbetween, STR_BUFFER_SIZE, L"%ls/", (wchar_t *)name);
-				retVal << inbetween << std::endl;
+				out << inbetween << std::endl;
 				SysFreeString(name);
 			} else {
-				retVal << "ERROR" << std::endl;
+				out << "ERROR" << std::endl;
 			}
 			currentFeed->Release();
 		} else {
-			retVal << "ERROR" << std::endl;
+			out << "ERROR" << std::endl;
 		}
 	}
 	currentFeeds->Release();
@@ -100,23 +98,21 @@ wstring FeedFolder::getContentsString(const bool filterUnread) const {
 				error = currentFeed->get_UnreadItemCount(&unreadCount);
 				if (SUCCEEDED(error)) {
 					swprintf(inbetween, STR_BUFFER_SIZE, L"%ls (%ld)", (wchar_t *)name, unreadCount);
-					retVal << inbetween << std::endl;
+					out << inbetween << std::endl;
 				} else {
 					swprintf(inbetween, STR_BUFFER_SIZE, L"%ls (???)", (wchar_t *)name);
-					retVal << inbetween << std::endl;
+					out << inbetween << std::endl;
 				}
 			} else {
-				retVal << "ERROR" << std::endl;
+				out << "ERROR" << std::endl;
 			}
 			SysFreeString(name);
 			currentFeed->Release();
 		} else {
-			retVal << "ERROR" << std::endl;
+			out << "ERROR" << std::endl;
 		}
 	}
 	currentFeeds->Release();
-	
-	return retVal.str();
 }
 
 std::vector<wstring> FeedFolder::getContents() const {
@@ -124,7 +120,6 @@ std::vector<wstring> FeedFolder::getContents() const {
 	BSTR name;
 	HRESULT error;
 	std::vector<std::wstring> retVal;
-	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	
 	// folders
@@ -176,8 +171,8 @@ std::vector<wstring> FeedFolder::getContents() const {
 	return retVal;
 }
 
-wstring FeedFolder::getDetailsString() const {
-	return L"No details about a folder";
+void FeedFolder::printDetails(std::wostream& out) const {
+	out << L"No details about a folder" << std::endl;
 }
 
 wstring FeedFolder::getPath() const {
@@ -190,8 +185,12 @@ wstring FeedFolder::getPath() const {
 
 bool FeedFolder::isError() const { return false; }
 
-HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
-
 std::pair<HRESULT, std::wstring> FeedFolder::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
 std::pair<HRESULT, std::wstring> FeedFolder::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+
+HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
+
+HRESULT FeedFolder::attachImageFromDescription() { return E_NOTIMPL; }
+
+HRESULT FeedFolder::downloadAttachmentAsync() { return E_NOTIMPL; }

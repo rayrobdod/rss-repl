@@ -19,28 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{25FE42BE-231F-4B98-9BC8-A775685CD309}</ProjectGuid>
+    <ProjectGuid>{EEF05AFD-F036-490E-A289-BC532FB4F631}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <!-- Making the output directory match MSBuild's input makes appveyor's build matrix much moremanageable. The Default "Win32" != "x86" -->
-    <RrdTargetPathPlatform>$(Platform)</RrdTargetPathPlatform>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)'=='Win32'" Label="Configuration">
-    <RrdTargetPathPlatform>x86</RrdTargetPathPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
-    <WholeProgramOptimization>false</WholeProgramOptimization>
     <UseDebugLibraries>true</UseDebugLibraries>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <UseDebugLibraries>false</UseDebugLibraries>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -49,14 +41,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup>
-    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <IntDir>$(SolutionDir)target\main\$(RrdTargetPathPlatform)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)target\main\$(RrdTargetPathPlatform)\$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)include\linenoise\include;$(SolutionDir)include\libhubbub\include;$(SolutionDir)include\libhubbub_parserutils\include;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)target\parserutils\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)target\parserutils\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(SolutionDir)include\hijack;$(SolutionDir)include\libhubbub_parserutils\include;$(SolutionDir)include\libhubbub_parserutils\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -76,7 +67,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -110,38 +101,44 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cpp\FeedElement_Feed.cpp" />
-    <ClCompile Include="cpp\FeedElement_Folder.cpp" />
-    <ClCompile Include="cpp\FeedElement_Item.cpp" />
-    <ClCompile Include="cpp\FeedElement_Null.cpp" />
-    <ClCompile Include="cpp\FeedElement_Shared.cpp" />
-    <ClCompile Include="cpp\command.cpp" />
-    <ClCompile Include="cpp\main.cpp" />
-    <ClCompile Include="cpp\SplitStringIterator.cpp" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\aliases.c" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\aliases.inc" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codec.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_8859.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_ascii.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_ext8.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_utf16.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\codecs\codec_utf8.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\encodings\utf16.c" />
+    <ClCompile Include="libhubbub_parserutils\src\charset\encodings\utf8.c" />
+    <ClCompile Include="libhubbub_parserutils\src\input\filter.c" />
+    <ClCompile Include="libhubbub_parserutils\src\input\inputstream.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\buffer.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\errors.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\stack.c" />
+    <ClCompile Include="libhubbub_parserutils\src\utils\vector.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpp\command.h" />
-    <ClInclude Include="cpp\FeedElement.h" />
-    <ClInclude Include="cpp\SplitStringIterator.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\include\linenoise.vcxproj">
-      <Project>{02C7F026-FA38-409C-9477-AAD74CD905A6}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="..\..\include\parserutils.vcxproj">
-      <Project>{EEF05AFD-F036-490E-A289-BC532FB4F631}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
-    <ProjectReference Include="..\..\include\libhubbub.vcxproj">
-      <Project>{71742811-24D5-44AD-96EF-8A0A0F25F2EC}</Project>
-      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="resource\info.rc" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\codec.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\mibenum.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\utf16.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\charset\utf8.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\errors.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\functypes.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\input\inputstream.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\parserutils.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\types.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\utils\buffer.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\utils\stack.h" />
+    <ClInclude Include="libhubbub_parserutils\include\parserutils\utils\vector.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\aliases.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\codecs\8859_tables.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\codecs\codec_impl.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\codecs\ext8_tables.h" />
+    <ClInclude Include="libhubbub_parserutils\src\charset\encodings\utf8impl.h" />
+    <ClInclude Include="libhubbub_parserutils\src\input\filter.h" />
+    <ClInclude Include="libhubbub_parserutils\src\utils\endian.h" />
+    <ClInclude Include="libhubbub_parserutils\src\utils\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
 </Project>

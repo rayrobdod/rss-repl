@@ -4,7 +4,7 @@
 using std::pair;
 using std::wstring;
 
-FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
+FeedFolder::FeedFolder(CComPtr<IFeedFolder> backing) : backing(backing) {}
 
 /*
  0x80070003 // ERROR_PATH_NOT_FOUND
@@ -12,7 +12,7 @@ FeedFolder::FeedFolder(IFeedFolder* backing) : backing(backing) {}
 */
 FeedElement* FeedFolder::getParent() const {
 	HRESULT error;
-	IFeedFolder* result;
+	CComPtr<IFeedFolder> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
 		return new ErrorFeedElement(L"Already top level; no parent to cd to");
@@ -32,11 +32,11 @@ FeedElement* FeedFolder::getChild(const wstring name2) const {
 	error = backing->ExistsSubfolder(name, &folderExists);
 	
 	if (feedExists == VARIANT_TRUE) {
-		IFeed* result;
+		CComPtr<IFeed> result;
 		error = backing->GetFeed(name, (IDispatch**)&result);
 		iterationStep = new FeedFeed(result);
 	} else if (folderExists == VARIANT_TRUE) {
-		IFeedFolder* result;
+		CComPtr<IFeedFolder> result;
 		error = backing->GetSubfolder(name, (IDispatch**)&result);
 		iterationStep = new FeedFolder(result);
 	} else {
@@ -51,20 +51,21 @@ FeedElement* FeedFolder::clone() const {
 }
 
 void FeedFolder::printContents(const bool filterUnread, std::wostream& out) const {
-	IFeedsEnum* currentFeeds;
+	CComPtr<IFeedsEnum> subfolders;
+	CComPtr<IFeedsEnum> subfeeds;
 	BSTR name;
 	HRESULT error;
 	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	
 	// folders
-	backing->get_Subfolders((IDispatch**)&currentFeeds);
+	backing->get_Subfolders((IDispatch**)&subfolders);
 	
 	LONG feedCount;
-	currentFeeds->get_Count(&feedCount);
+	subfolders->get_Count(&feedCount);
 	for (int i = 0; i < feedCount; i++) {
-		IFeedFolder* currentFeed;
-		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+		CComPtr<IFeedFolder> currentFeed;
+		error = subfolders->Item(i, (IDispatch**)&currentFeed);
 		
 		if (SUCCEEDED(error)) {
 			error = currentFeed->get_Name(&name);
@@ -75,22 +76,20 @@ void FeedFolder::printContents(const bool filterUnread, std::wostream& out) cons
 			} else {
 				out << "ERROR" << std::endl;
 			}
-			currentFeed->Release();
 		} else {
 			out << "ERROR" << std::endl;
 		}
 	}
-	currentFeeds->Release();
 	
 	
 	// not folders; feeds
-	backing->get_Feeds((IDispatch**)&currentFeeds);
+	backing->get_Feeds((IDispatch**)&subfeeds);
 	
-	currentFeeds->get_Count(&feedCount);
+	subfeeds->get_Count(&feedCount);
 	for (int i = 0; i < feedCount; i++) {
-		IFeed* currentFeed;
+		CComPtr<IFeed> currentFeed;
 		LONG unreadCount;
-		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+		error = subfeeds->Item(i, (IDispatch**)&currentFeed);
 
 		if (SUCCEEDED(error)) {
 			error = currentFeed->get_Name(&name);
@@ -107,29 +106,28 @@ void FeedFolder::printContents(const bool filterUnread, std::wostream& out) cons
 				out << "ERROR" << std::endl;
 			}
 			SysFreeString(name);
-			currentFeed->Release();
 		} else {
 			out << "ERROR" << std::endl;
 		}
 	}
-	currentFeeds->Release();
 }
 
 std::vector<wstring> FeedFolder::getContents() const {
-	IFeedsEnum* currentFeeds;
+	CComPtr<IFeedsEnum> subfolders;
+	CComPtr<IFeedsEnum> subfeeds;
 	BSTR name;
 	HRESULT error;
 	std::vector<std::wstring> retVal;
 	
 	
 	// folders
-	backing->get_Subfolders((IDispatch**)&currentFeeds);
+	backing->get_Subfolders((IDispatch**)&subfolders);
 	
 	LONG feedCount;
-	currentFeeds->get_Count(&feedCount);
+	subfolders->get_Count(&feedCount);
 	for (int i = 0; i < feedCount; i++) {
-		IFeedFolder* currentFeed;
-		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+		CComPtr<IFeedFolder> currentFeed;
+		error = subfolders->Item(i, (IDispatch**)&currentFeed);
 		
 		if (SUCCEEDED(error)) {
 			error = currentFeed->get_Name(&name);
@@ -138,21 +136,19 @@ std::vector<wstring> FeedFolder::getContents() const {
 			} else {
 			}
 			SysFreeString(name);
-			currentFeed->Release();
 		} else {
 		}
 	}
-	currentFeeds->Release();
 	
 	
 	// not folders; feeds
-	backing->get_Feeds((IDispatch**)&currentFeeds);
+	backing->get_Feeds((IDispatch**)&subfeeds);
 	
-	currentFeeds->get_Count(&feedCount);
+	subfeeds->get_Count(&feedCount);
 	for (int i = 0; i < feedCount; i++) {
-		IFeed* currentFeed;
+		CComPtr<IFeed> currentFeed;
 		LONG unreadCount;
-		error = currentFeeds->Item(i, (IDispatch**)&currentFeed);
+		error = subfeeds->Item(i, (IDispatch**)&currentFeed);
 
 		if (SUCCEEDED(error)) {
 			error = currentFeed->get_Name(&name);
@@ -161,12 +157,9 @@ std::vector<wstring> FeedFolder::getContents() const {
 			} else {
 			}
 			SysFreeString(name);
-			currentFeed->Release();
 		} else {
 		}
 	}
-	currentFeeds->Release();
-	
 	
 	return retVal;
 }

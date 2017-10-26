@@ -6,6 +6,7 @@
 #include <utility> /** std::pair */
 #include <vector>
 #include <iostream>
+#include <atlcomcli.h>
 
 const size_t STR_BUFFER_SIZE = 1024;
 const std::wstring INDENT = L"    ";
@@ -102,7 +103,7 @@ class FeedFolder : public FeedElement {
 	/** 
 	 * @ref This takes possession of the IFeedFolder
 	 */
-	FeedFolder(IFeedFolder*);
+	FeedFolder(CComPtr<IFeedFolder>);
 	virtual std::wstring getPath() const;
 	virtual void printDetails(std::wostream& out) const;
 	virtual void printContents(const bool filterUnread, std::wostream& out) const;
@@ -119,7 +120,7 @@ class FeedFolder : public FeedElement {
 	virtual FeedElement* getChild(const std::wstring name) const;
 	virtual FeedElement* clone() const;
  private:
-	IFeedFolder* const backing;
+	CComPtr<IFeedFolder> const backing;
 };
 
 class FeedFeed : public FeedElement {
@@ -127,7 +128,7 @@ class FeedFeed : public FeedElement {
 	 /**
 	  * @ref This takes possession of the IFeedFolder
 	  */
-	FeedFeed(IFeed*);
+	FeedFeed(CComPtr<IFeed>);
 	virtual std::wstring getPath() const;
 	virtual void printDetails(std::wostream& out) const;
 	virtual void printContents(const bool filterUnread, std::wostream& out) const;
@@ -144,7 +145,7 @@ class FeedFeed : public FeedElement {
 	virtual FeedElement* getChild(const std::wstring name) const;
 	virtual FeedElement* clone() const;
  private:
-	IFeed* const backing;
+	CComPtr<IFeed> backing;
 };
 
 class FeedItem : public FeedElement {
@@ -152,7 +153,7 @@ class FeedItem : public FeedElement {
 	/** 
 	 * @ref This takes possession of the IFeedFolder
 	 */
-	FeedItem(IFeedItem*);
+	FeedItem(CComPtr<IFeedItem>);
 	virtual std::wstring getPath() const;
 	virtual void printDetails(std::wostream& out) const;
 	virtual void printContents(const bool filterUnread, std::wostream& out) const;
@@ -169,7 +170,7 @@ class FeedItem : public FeedElement {
 	virtual FeedElement* getChild(const std::wstring name) const;
 	virtual FeedElement* clone() const;
  private:
-	IFeedItem* const backing;
+	CComPtr<IFeedItem> backing;
 };
 
 /**

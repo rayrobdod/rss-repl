@@ -5,12 +5,12 @@ using std::pair;
 using std::wstring;
 
 
-FeedFeed::FeedFeed(IFeed* backing) : backing(backing) {}
+FeedFeed::FeedFeed(CComPtr<IFeed> backing) : backing(backing) {}
 
 
 FeedElement* FeedFeed::getParent() const {
 	HRESULT error;
-	IFeedFolder* result;
+	CComPtr<IFeedFolder> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
 		return new ErrorFeedElement(L"Already top level; no parent to cd to");
@@ -24,7 +24,7 @@ FeedElement* FeedFeed::getChild(const wstring name) const {
 
 	try {
 		LONG id = stoi(name);
-		IFeedItem* result;
+		CComPtr<IFeedItem> result;
 		error = backing->GetItem(id, (IDispatch**)&result);
 		if (error) {
 			return new ErrorFeedElement(L"Unknown feed item number");
@@ -41,7 +41,7 @@ FeedElement* FeedFeed::clone() const {
 }
 
 void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const {
-	IFeedsEnum* items;
+	CComPtr<IFeedsEnum> items;
 	BSTR name;
 	LONG localId;
 	DATE pubDate;
@@ -66,7 +66,7 @@ void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const 
 		error = items->get_Count(&feedCount);
 		if (SUCCEEDED(error)) {
 			for (int i = 0; i < feedCount; i++) {
-				IFeedItem* curItem;
+				CComPtr<IFeedItem> curItem;
 				items->Item(i, (IDispatch**)&curItem);
 				curItem->get_IsRead(&isRead);
 
@@ -88,20 +88,17 @@ void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const 
 						out << "???? COULD NOT READ ITEM" << std::endl;
 					}
 				}
-
-				curItem->Release();
 			}
 		} else {
 			out << "ERROR: could not read item count" << std::endl;
 		}
-		items->Release();
 	} else {
 		out << "ERROR: could not read feed items" << std::endl;
 	}
 }
 
 std::vector<wstring> FeedFeed::getContents() const {
-	IFeedsEnum* items;
+	CComPtr<IFeedsEnum> items;
 	LONG localId;
 	HRESULT error;
 	std::vector<wstring> retVal;
@@ -115,7 +112,7 @@ std::vector<wstring> FeedFeed::getContents() const {
 		error = items->get_Count(&feedCount);
 		if (SUCCEEDED(error)) {
 			for (int i = 0; i < feedCount; i++) {
-				IFeedItem* curItem;
+				CComPtr<IFeedItem> curItem;
 				error = items->Item(i, (IDispatch**)&curItem);
 				if (SUCCEEDED(error)) {
 					error = curItem->get_LocalId(&localId);
@@ -123,11 +120,9 @@ std::vector<wstring> FeedFeed::getContents() const {
 						swprintf(inbetween, STR_BUFFER_SIZE, L"%ld", localId);
 						retVal.push_back(inbetween);
 					}
-					curItem->Release();
 				}
 			}
 		}
-		items->Release();
 	}
 	else {
 	}

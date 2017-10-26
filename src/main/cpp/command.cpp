@@ -212,7 +212,7 @@ ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const
 			
 		} else {
 			out << "Unknown Command" << std::endl;
-			return std::make_tuple(false, currentFolder);
+			return std::make_tuple(true, currentFolder);
 		}
 	}
 }

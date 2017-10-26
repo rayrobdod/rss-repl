@@ -1,7 +1,6 @@
 
 #include "FeedElement.h"
 #include "SplitStringIterator.h"
-#include <atlcomcli.h>
 
 using std::wstring;
 using std::pair;
@@ -44,7 +43,7 @@ wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status) {
 
 FeedFolder* getRootFolder() {
 	CComPtr<IFeedsManager> manager;
-	IFeedFolder* backing;
+	CComPtr<IFeedFolder> backing;
 	
 	manager.CoCreateInstance(CLSID_FeedsManager);
 	manager->get_RootFolder((IDispatch**)&backing);

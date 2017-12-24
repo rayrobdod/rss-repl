@@ -59,6 +59,7 @@ FeedFolder* getRootFolder() {
 
 
 FeedElement::FeedElement() {}
+FeedElement::~FeedElement() {}
 
 FeedElement* FeedElement::followPath(const wstring path) const {
 	const wstring CD_PARENT = L"..";

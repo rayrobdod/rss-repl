@@ -25,6 +25,7 @@ std::wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status);
 class FeedElement {
  public:
 	FeedElement();
+	virtual ~FeedElement();
 	
 	/** 
 	 * Returns the FeedElement obtained by starting at `base` and following `path`.

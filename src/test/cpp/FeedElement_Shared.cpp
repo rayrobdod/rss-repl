@@ -12,15 +12,13 @@ namespace Tests
 	public:
 
 		TEST_METHOD(getRootFolder) {
-			FeedElement* res = ::getRootFolder();
+			auto res = ::getRootFolder();
 			
 			Assert::AreEqual<wstring>(L"", res->getPath());
 			Assert::IsFalse(res->isError());
 			
-			FeedElement* parent = res->followPath(L"..");
+			auto parent = res->followPath(L"..");
 			Assert::IsTrue(parent->isError());
-			delete parent;
-			delete res;
 		}
 		
 		TEST_METHOD(downloadStatus2String) {

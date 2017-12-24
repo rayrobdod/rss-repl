@@ -10,19 +10,19 @@ FeedFolder::FeedFolder(CComPtr<IFeedFolder> backing) : backing(backing) {}
  0x80070003 // ERROR_PATH_NOT_FOUND
  0x80070005 // ERROR_ACCESS_DENIED
 */
-FeedElement* FeedFolder::getParent() const {
+std::shared_ptr<FeedElement> FeedFolder::getParent() const {
 	HRESULT error;
 	CComPtr<IFeedFolder> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return new ErrorFeedElement(L"Already top level; no parent to cd to");
+		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
 	} else {
-		return new FeedFolder(result);
+		return std::make_shared<FeedFolder>(result);
 	}
 }
 
-FeedElement* FeedFolder::getChild(const wstring name2) const {
-	FeedElement* iterationStep;
+std::shared_ptr<FeedElement> FeedFolder::getChild(const wstring name2) const {
+	std::shared_ptr<FeedElement> iterationStep;
 	HRESULT error;
 	VARIANT_BOOL feedExists;
 	VARIANT_BOOL folderExists;
@@ -34,20 +34,20 @@ FeedElement* FeedFolder::getChild(const wstring name2) const {
 	if (feedExists == VARIANT_TRUE) {
 		CComPtr<IFeed> result;
 		error = backing->GetFeed(name, (IDispatch**)&result);
-		iterationStep = new FeedFeed(result);
+		iterationStep = std::make_shared<FeedFeed>(result);
 	} else if (folderExists == VARIANT_TRUE) {
 		CComPtr<IFeedFolder> result;
 		error = backing->GetSubfolder(name, (IDispatch**)&result);
-		iterationStep = new FeedFolder(result);
+		iterationStep = std::make_shared<FeedFolder>(result);
 	} else {
-		iterationStep = new ErrorFeedElement(L"No such element");
+		iterationStep = std::make_shared<ErrorFeedElement>(L"No such element");
 	}
 	SysFreeString(name);
 	return iterationStep;
 }
 
-FeedElement* FeedFolder::clone() const {
-	return new FeedFolder(this->backing);
+std::shared_ptr<FeedElement> FeedFolder::clone() const {
+	return std::make_shared<FeedFolder>(this->backing);
 }
 
 void FeedFolder::printContents(const bool filterUnread, std::wostream& out) const {

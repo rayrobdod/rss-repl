@@ -41,25 +41,25 @@ wstring downloadError2String(const FEEDS_DOWNLOAD_ERROR status) {
 	}
 }
 
-FeedFolder* getRootFolder() {
+std::shared_ptr<FeedElement> getRootFolder() {
 	CComPtr<IFeedsManager> manager;
 	CComPtr<IFeedFolder> backing;
 	
 	manager.CoCreateInstance(CLSID_FeedsManager);
 	manager->get_RootFolder((IDispatch**)&backing);
 	
-	return new FeedFolder(backing);
+	return std::make_shared<FeedFolder>(backing);
 }
 
 
 FeedElement::FeedElement() {}
 
-FeedElement* FeedElement::followPath(const wstring path) const {
+std::shared_ptr<FeedElement> FeedElement::followPath(const wstring path) const {
 	const wstring CD_PARENT = L"..";
 	const wstring CD_SELF = L".";
 	const wstring SEPARATORS = L"/\\";
 
-	FeedElement* current;
+	std::shared_ptr<FeedElement> current;
 	if (find(SEPARATORS.cbegin(), SEPARATORS.cend(), path[0]) != SEPARATORS.cend()) {
 		current = getRootFolder();
 	} else {
@@ -70,13 +70,9 @@ FeedElement* FeedElement::followPath(const wstring path) const {
 		if (*i == CD_SELF) {
 			// do nothing
 		} else if (*i == CD_PARENT) {
-			FeedElement* next = current->getParent();
-			delete current;
-			current = next;
+			current = current->getParent();
 		} else {
-			FeedElement* next = current->getChild(*i);
-			delete current;
-			current = next;
+			current = current->getChild(*i);
 		}
 	}
 	return current;

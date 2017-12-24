@@ -59,27 +59,23 @@ namespace Tests {
 		TEST_METHOD(FeedError_getParent) {
 			std::wstring exp(L"Error Message");
 			::ErrorFeedElement dut(exp);
-			::FeedElement* res = dut.followPath(L"..");
+			auto res = dut.followPath(L"..");
 			std::wostringstream buffer1, buffer2;
 			dut.printDetails(buffer1);
 			res->printDetails(buffer2);
 
 			Assert::AreEqual(buffer1.str(), buffer2.str());
-
-			delete res;
 		}
 
 		TEST_METHOD(FeedError_getChild) {
 			std::wstring exp(L"Error Message");
 			::ErrorFeedElement dut(exp);
-			::FeedElement* res = dut.followPath(L"asdfsdf");
+			auto res = dut.followPath(L"asdfsdf");
 			std::wostringstream buffer1, buffer2;
 			dut.printDetails(buffer1);
 			res->printDetails(buffer2);
 
 			Assert::AreEqual(buffer1.str(), buffer2.str());
-
-			delete res;
 		}
 
 	};

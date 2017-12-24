@@ -5,6 +5,7 @@
 #include <string>
 #include <utility> /** std::pair */
 #include <vector>
+#include <memory>
 #include <iostream>
 #include <atlcomcli.h>
 
@@ -30,7 +31,7 @@ class FeedElement {
 	/** 
 	 * Returns the FeedElement obtained by starting at `base` and following `path`.
 	 */
-	FeedElement* followPath(const std::wstring path) const;
+	std::shared_ptr<FeedElement> followPath(const std::wstring path) const;
 	
 	/** 
 	 * Returns the object's path
@@ -88,14 +89,14 @@ class FeedElement {
 	/** 
 	 * Returns the parent object
 	 */
-	virtual FeedElement* getParent() const = 0;
+	virtual std::shared_ptr<FeedElement> getParent() const = 0;
 	
 	/** 
 	 * Returns the child object with the specified name
 	 */
-	virtual FeedElement* getChild(const std::wstring name) const = 0;
+	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const = 0;
 	
-	virtual FeedElement* clone() const = 0;
+	virtual std::shared_ptr<FeedElement> clone() const = 0;
 };
 
 class FeedFolder : public FeedElement {
@@ -116,9 +117,9 @@ class FeedFolder : public FeedElement {
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
  protected:
-	virtual FeedElement* getParent() const;
-	virtual FeedElement* getChild(const std::wstring name) const;
-	virtual FeedElement* clone() const;
+	virtual std::shared_ptr<FeedElement> getParent() const;
+	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const;
+	virtual std::shared_ptr<FeedElement> clone() const;
  private:
 	CComPtr<IFeedFolder> const backing;
 };
@@ -141,9 +142,9 @@ class FeedFeed : public FeedElement {
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
  protected:
-	virtual FeedElement* getParent() const;
-	virtual FeedElement* getChild(const std::wstring name) const;
-	virtual FeedElement* clone() const;
+	virtual std::shared_ptr<FeedElement> getParent() const;
+	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const;
+	virtual std::shared_ptr<FeedElement> clone() const;
  private:
 	CComPtr<IFeed> backing;
 };
@@ -166,9 +167,9 @@ class FeedItem : public FeedElement {
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
  protected:
-	virtual FeedElement* getParent() const;
-	virtual FeedElement* getChild(const std::wstring name) const;
-	virtual FeedElement* clone() const;
+	virtual std::shared_ptr<FeedElement> getParent() const;
+	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const;
+	virtual std::shared_ptr<FeedElement> clone() const;
  private:
 	CComPtr<IFeedItem> backing;
 };
@@ -191,9 +192,9 @@ class ErrorFeedElement : public FeedElement {
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
  protected:
-	virtual FeedElement* getParent() const;
-	virtual FeedElement* getChild(const std::wstring name) const;
-	virtual FeedElement* clone() const;
+	virtual std::shared_ptr<FeedElement> getParent() const;
+	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const;
+	virtual std::shared_ptr<FeedElement> clone() const;
  private:
 	const std::wstring message;
 };
@@ -201,7 +202,7 @@ class ErrorFeedElement : public FeedElement {
 /**
  * Returns the global root folder in the feeds hierarchy
  */
-FeedFolder* getRootFolder();
+std::shared_ptr<FeedElement> getRootFolder();
 
 
 #endif        //  #ifndef FEED_ELEMENT_H

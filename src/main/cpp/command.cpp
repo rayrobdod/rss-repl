@@ -11,7 +11,7 @@ struct CommandString {
 	std::vector<wstring> positional;
 };
 
-typedef ProcessCommandReturnValue(*CommandFunction)(FeedElement* const currentFolder, CommandString command, std::wostream& out);
+typedef ProcessCommandReturnValue(*CommandFunction)(std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out);
 
 // Determine which arguments are flags and which are positional arguments
 CommandString extractFlags(const vector<wstring> command) {
@@ -42,32 +42,30 @@ CommandString extractFlags(const vector<wstring> command) {
 }
 
 const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replCommands{
-	std::make_pair(L"exit", std::make_tuple(L"Exit the program", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"exit", std::make_tuple(L"Exit the program", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		return std::make_tuple(true, currentFolder);
 	})),
-	std::make_pair(L"dir", std::make_tuple(L"Show the contents of the current directory", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"dir", std::make_tuple(L"Show the contents of the current directory", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 		const bool filterNew = (command.flags.count(L"n") > 0 ? true : false);
 
-		FeedElement* targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		targetFolder->printContents(filterNew, out);
 		out << std::endl;
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"print", std::make_tuple(L"Print details about the specified item", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"print", std::make_tuple(L"Print details about the specified item", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* const targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		targetFolder->printDetails(out);
 		out << std::endl;
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"open_attachment", std::make_tuple(L"Open the attachment in an extermal program", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"open_attachment", std::make_tuple(L"Open the attachment in an extermal program", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		if (targetFolder->isError()) {
 			out << "No such element" << std::endl;
 		} else {
@@ -83,13 +81,12 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 				out << "Failed to open attachment" << std::endl;
 			}
 		}
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"open", std::make_tuple(L"Print the contents of an item", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"open", std::make_tuple(L"Print the contents of an item", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		if (targetFolder->isError()) {
 			out << "No such element" << std::endl;
 		} else {
@@ -105,26 +102,24 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 				out << "Failed to open attachment" << std::endl;
 			}
 		}
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"markAsRead", std::make_tuple(L"Mark an item as read", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"markAsRead", std::make_tuple(L"Mark an item as read", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		HRESULT result = targetFolder->markAsRead();
 		if (SUCCEEDED(result)) {
 			out << "Mark as read succeeded" << std::endl;
 		} else {
 			out << "Mark as read failed" << std::endl;
 		}
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"attachImageFromDescription", std::make_tuple(L"If the item's html includes a <img>, make that image an attachment", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"attachImageFromDescription", std::make_tuple(L"If the item's html includes a <img>, make that image an attachment", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		HRESULT result = targetFolder->attachImageFromDescription();
 		if (result == S_FALSE) {
 			out << "No image found to attach" << std::endl;
@@ -135,13 +130,12 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 		} else {
 			out << "Attachment failed" << std::endl;
 		}
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"download_attachment", std::make_tuple(L"Asynchronously download the item's attachment", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"download_attachment", std::make_tuple(L"Asynchronously download the item's attachment", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* targetFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
 		HRESULT result = targetFolder->downloadAttachmentAsync();
 		if (result == S_FALSE) {
 			out << "S_FALSE" << std::endl;
@@ -152,10 +146,9 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 		} else {
 			out << "failed" << std::endl;
 		}
-		delete targetFolder;
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"echo", std::make_tuple(L"Echo arguments to command line", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"echo", std::make_tuple(L"Echo arguments to command line", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		out << "Flags:" << std::endl;
 		for (auto i = command.flags.cbegin(); i != command.flags.cend(); ++i) {
 			out << "\t" << i->first << " -> " << i->second << std::endl;
@@ -166,21 +159,19 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 		}
 		return std::make_tuple(false, currentFolder);
 	})),
-	std::make_pair(L"cd", std::make_tuple(L"Change directory", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"cd", std::make_tuple(L"Change directory", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
 
-		FeedElement* newFolder = currentFolder->followPath(path);
+		std::shared_ptr<FeedElement> newFolder = currentFolder->followPath(path);
 		if (newFolder->isError()) {
 			newFolder->printDetails(out);
 			out << std::endl;
-			delete newFolder;
 			return std::make_tuple(false, currentFolder);
 		} else {
-			delete currentFolder;
 			return std::make_tuple(false, newFolder);
 		}
 	})),
-	std::make_pair(L"help", std::make_tuple(L"Print a list of commands", [](FeedElement* const currentFolder, CommandString command, std::wostream& out) {
+	std::make_pair(L"help", std::make_tuple(L"Print a list of commands", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		for (auto i = replCommands.cbegin(); i != replCommands.cend(); ++i) {
 			auto name = i->first;
 			auto description = std::get<0>(i->second);
@@ -195,7 +186,7 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 	}))
 };
 
-ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const std::vector<std::wstring> commandString, std::wostream& out) {
+ProcessCommandReturnValue processCommand(std::shared_ptr<FeedElement> currentFolder, const std::vector<std::wstring> commandString, std::wostream& out) {
 
 	if (commandString.size() == 0 || commandString[0].compare(L"") == 0) {
 		// do nothing
@@ -212,7 +203,7 @@ ProcessCommandReturnValue processCommand(FeedElement* const currentFolder, const
 			
 		} else {
 			out << "Unknown Command" << std::endl;
-			return std::make_tuple(true, currentFolder);
+			return std::make_tuple(false, currentFolder);
 		}
 	}
 }

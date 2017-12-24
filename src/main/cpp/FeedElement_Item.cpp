@@ -128,23 +128,23 @@ hubbub_error FindFirstImgHrefToWString(const hubbub_token *token, void *pw) {
 FeedItem::FeedItem(CComPtr<IFeedItem> backing) : backing(backing) {}
 
 
-FeedElement* FeedItem::getParent() const {
+std::shared_ptr<FeedElement> FeedItem::getParent() const {
 	HRESULT error;
 	CComPtr<IFeed> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return new ErrorFeedElement(L"Already top level; no parent to cd to");
+		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
 	} else {
-		return new FeedFeed(result);
+		return std::make_shared<FeedFeed>(result);
 	}
 }
 
-FeedElement* FeedItem::getChild(const wstring name) const {
-	return new ErrorFeedElement(L"No subelements of a feed item");
+std::shared_ptr<FeedElement> FeedItem::getChild(const wstring name) const {
+	return std::make_shared<ErrorFeedElement>(L"No subelements of a feed item");
 }
 
-FeedElement* FeedItem::clone() const {
-	return new FeedItem(this->backing);
+std::shared_ptr<FeedElement> FeedItem::clone() const {
+	return std::make_shared<FeedItem>(this->backing);
 }
 
 void FeedItem::printContents(const bool filterUnread, std::wostream& out) const {

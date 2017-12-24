@@ -47,7 +47,7 @@ class WindowsConsoleOutputStreamBuf : public std::wstreambuf {
 
 
 // set in main; read in main and lineNoiseCompletionHook
-FeedElement* currentFolder;
+std::shared_ptr<FeedElement> currentFolder;
 
 
 // NOTE: prefix contains at most one word, so there is no way to tell whether the line already has a command or not
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
 	}
 	
 	linenoiseHistoryFree();
-	delete currentFolder;
+	currentFolder.reset();
 	SetConsoleOutputCP(oldcp);
 	CoUninitialize();
 	

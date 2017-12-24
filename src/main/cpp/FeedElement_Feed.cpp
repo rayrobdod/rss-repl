@@ -8,18 +8,18 @@ using std::wstring;
 FeedFeed::FeedFeed(CComPtr<IFeed> backing) : backing(backing) {}
 
 
-FeedElement* FeedFeed::getParent() const {
+std::shared_ptr<FeedElement> FeedFeed::getParent() const {
 	HRESULT error;
 	CComPtr<IFeedFolder> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return new ErrorFeedElement(L"Already top level; no parent to cd to");
+		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
 	} else {
-		return new FeedFolder(result);
+		return std::make_shared<FeedFolder>(result);
 	}
 }
 
-FeedElement* FeedFeed::getChild(const wstring name) const {
+std::shared_ptr<FeedElement> FeedFeed::getChild(const wstring name) const {
 	HRESULT error;
 
 	try {
@@ -27,17 +27,17 @@ FeedElement* FeedFeed::getChild(const wstring name) const {
 		CComPtr<IFeedItem> result;
 		error = backing->GetItem(id, (IDispatch**)&result);
 		if (error) {
-			return new ErrorFeedElement(L"Unknown feed item number");
+			return std::make_shared<ErrorFeedElement>(L"Unknown feed item number");
 		} else {
-			return new FeedItem(result);
+			return std::make_shared<FeedItem>(result);
 		}
 	} catch (const std::invalid_argument& e) {
-		return new ErrorFeedElement(L"FeedItem names are integers");
+		return std::make_shared<ErrorFeedElement>(L"FeedItem names are integers");
 	}
 }
 
-FeedElement* FeedFeed::clone() const {
-	return new FeedFeed(this->backing);
+std::shared_ptr<FeedElement> FeedFeed::clone() const {
+	return std::make_shared<FeedFeed>(this->backing);
 }
 
 void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const {
@@ -264,9 +264,8 @@ HRESULT FeedFeed::attachImageFromDescription() {
 
 	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
 
-		FeedElement* child = this->getChild(*i);
+		std::shared_ptr<FeedElement> child = this->getChild(*i);
 		HRESULT thisResult = child->attachImageFromDescription();
-		delete child;
 
 		if (SUCCEEDED(finalResult) && FAILED(thisResult)) {
 			finalResult = thisResult;
@@ -282,9 +281,8 @@ HRESULT FeedFeed::downloadAttachmentAsync() {
 
 	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
 
-		FeedElement* child = this->getChild(*i);
+		std::shared_ptr<FeedElement> child = this->getChild(*i);
 		HRESULT thisResult = child->downloadAttachmentAsync();
-		delete child;
 
 		if (SUCCEEDED(finalResult) && FAILED(thisResult)) {
 			finalResult = thisResult;

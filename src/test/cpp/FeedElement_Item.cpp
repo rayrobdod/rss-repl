@@ -70,9 +70,8 @@ namespace Tests
 		TEST_METHOD(FeedItem_ChildIsError) {
 			NotimplFeedItem backing;
 			::FeedItem dut(& backing);
-			::FeedElement* child = dut.followPath(L"asdasd");
+			auto child = dut.followPath(L"asdasd");
 			Assert::IsTrue(child->isError());
-			delete child;
 		}
 
 		TEST_METHOD(FeedItem_GetUrlWhenError) {

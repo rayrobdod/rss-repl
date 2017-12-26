@@ -5,7 +5,7 @@
 #include <iostream>
 #include "FeedElement.h"
 
-typedef std::tuple<bool, FeedElement*>
+typedef std::tuple<bool, std::shared_ptr<FeedElement>>
 	ProcessCommandReturnValue;
 
 /**
@@ -17,7 +17,7 @@ typedef std::tuple<bool, FeedElement*>
  * @return [1] the new folder to act upon
  */
 ProcessCommandReturnValue processCommand(
-	FeedElement* const currentFolder,
+	std::shared_ptr<FeedElement> currentFolder,
 	const std::vector<std::wstring> command,
 	std::wostream& out
 );

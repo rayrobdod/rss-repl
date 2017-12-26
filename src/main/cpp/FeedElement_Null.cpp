@@ -7,16 +7,16 @@ using std::wstring;
 
 ErrorFeedElement::ErrorFeedElement(const wstring message) : message(message) {}
 
-FeedElement* ErrorFeedElement::getParent() const {
-	return new ErrorFeedElement(this->message);
+std::shared_ptr<FeedElement> ErrorFeedElement::getParent() const {
+	return std::make_shared<ErrorFeedElement>(this->message);
 }
 
-FeedElement* ErrorFeedElement::getChild(const wstring name) const {
-	return new ErrorFeedElement(this->message);
+std::shared_ptr<FeedElement> ErrorFeedElement::getChild(const wstring name) const {
+	return std::make_shared<ErrorFeedElement>(this->message);
 }
 
-FeedElement* ErrorFeedElement::clone() const {
-	return new ErrorFeedElement(this->message);
+std::shared_ptr<FeedElement> ErrorFeedElement::clone() const {
+	return std::make_shared<ErrorFeedElement>(this->message);
 }
 
 void ErrorFeedElement::printContents(const bool filterUnread, std::wostream& out) const {

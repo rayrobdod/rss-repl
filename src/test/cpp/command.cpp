@@ -38,9 +38,9 @@ namespace Tests
 		HRESULT attachImageFromDescription() { calls.push_back(L"attachImageFromDescription"); return S_OK; }
 		HRESULT downloadAttachmentAsync() { calls.push_back(L"downloadAttachmentAsync"); return S_OK; }
 	 protected:
-		FeedElement* getParent() const {calls.push_back(L"getParent"); return new StubFeedElement(*this);}
-		FeedElement* getChild(const std::wstring name) const {calls.push_back(L"getChild"); return new StubFeedElement(*this);}
-		FeedElement* clone() const {calls.push_back(L"clone"); return new StubFeedElement(*this);}
+		std::shared_ptr<FeedElement> getParent() const {calls.push_back(L"getParent"); return std::make_shared<StubFeedElement>(*this);}
+		std::shared_ptr<FeedElement> getChild(const std::wstring name) const {calls.push_back(L"getChild"); return std::make_shared<StubFeedElement>(*this);}
+		std::shared_ptr<FeedElement> clone() const {calls.push_back(L"clone"); return std::make_shared<StubFeedElement>(*this);}
 	};
 
 	TEST_CLASS(processCommand)
@@ -50,167 +50,167 @@ namespace Tests
 		TEST_METHOD(whenEmptyVector_thenElemNotTouched) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command;
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
 			Assert::AreEqual(L"", out.str().c_str());
 			Assert::IsFalse(std::get<0>(res), L"return[0] was true");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 		
 		TEST_METHOD(whenEmptyCommand_thenElemNotTouched) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
 			Assert::AreEqual(L"", out.str().c_str());
 			Assert::IsFalse(std::get<0>(res), L"return[0] was true");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenExitCommand_thenElemNotTouched) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"exit" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size(), L"elem recieved method calls");
 			
 			Assert::AreEqual(L"", out.str().c_str());
 			Assert::IsTrue(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenShowContents) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"dir" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"printContents(false)", calls[1].c_str());
 			
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenShowContentsNewOnly) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"dir", L"/n" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size(), L"elem recieved method calls");
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"printContents(true)", calls[1].c_str());
 
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenShowContentsWithSubdir) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"dir", L"12345" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getChild", calls[1].c_str());
 			Assert::AreEqual(L"printContents(false)", calls[2].c_str());
 			
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenShowContentsWithSubdirAndNewOnly) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"dir", L"12345", L"/n" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getChild", calls[1].c_str());
 			Assert::AreEqual(L"printContents(true)", calls[2].c_str());
 
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenShowContentsWithSubdirAndNewOnlyReversed) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"dir", L"/n", L"12345" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(3, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getChild", calls[1].c_str());
 			Assert::AreEqual(L"printContents(true)", calls[2].c_str());
 
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenOpenInternal) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"print" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"getDetailsString", calls[1].c_str());
 			
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenMarkAsRead) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"markAsRead" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(2, calls.size());
 			Assert::AreEqual(L"clone", calls[0].c_str());
 			Assert::AreEqual(L"markAsRead", calls[1].c_str());
 			
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
 		TEST_METHOD(whenFlagsButNoPositional) {
 			// Mostly just make sure this doesn't crash.
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"/flag:blah" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size());
 
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 
-		TEST_METHOD(whenUnkown) {
+		TEST_METHOD(whenUnknown) {
 			calls.clear();
 			wostringstream out;
-			StubFeedElement elem;
+			auto elem = std::make_shared<StubFeedElement>();
 			const vector<wstring> command{ L"ARGLEBARGLE" };
-			auto res = ::processCommand(&elem, command, out);
+			auto res = ::processCommand(elem, command, out);
 			Assert::AreEqual<size_t>(0, calls.size());
 			
 			Assert::AreNotEqual(wstring::npos, out.str().find(L"Unknown Command"));
 			Assert::IsFalse(std::get<0>(res), L"return[0] was false");
-			Assert::IsTrue(&elem == std::get<1>(res), L"return[1] was not input feedelem");
+			Assert::IsTrue(elem == std::get<1>(res), L"return[1] was not input feedelem");
 		}
 	};
 

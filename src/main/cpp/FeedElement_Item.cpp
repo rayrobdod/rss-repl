@@ -125,26 +125,26 @@ hubbub_error FindFirstImgHrefToWString(const hubbub_token *token, void *pw) {
 }
 
 
-FeedItem::FeedItem(IFeedItem* backing) : backing(backing) {}
+FeedItem::FeedItem(CComPtr<IFeedItem> backing) : backing(backing) {}
 
 
-FeedElement* FeedItem::getParent() const {
+std::shared_ptr<FeedElement> FeedItem::getParent() const {
 	HRESULT error;
-	IFeed* result;
+	CComPtr<IFeed> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return new ErrorFeedElement(L"Already top level; no parent to cd to");
+		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
 	} else {
-		return new FeedFeed(result);
+		return std::make_shared<FeedFeed>(result);
 	}
 }
 
-FeedElement* FeedItem::getChild(const wstring name) const {
-	return new ErrorFeedElement(L"No subelements of a feed item");
+std::shared_ptr<FeedElement> FeedItem::getChild(const wstring name) const {
+	return std::make_shared<ErrorFeedElement>(L"No subelements of a feed item");
 }
 
-FeedElement* FeedItem::clone() const {
-	return new FeedItem(this->backing);
+std::shared_ptr<FeedElement> FeedItem::clone() const {
+	return std::make_shared<FeedItem>(this->backing);
 }
 
 void FeedItem::printContents(const bool filterUnread, std::wostream& out) const {
@@ -159,7 +159,7 @@ void FeedItem::printDetails(std::wostream& out) const {
 	BSTR str;
 	DATE pubDate;
 	VARIANT_BOOL isRead;
-	IFeedEnclosure* enclosure;
+	CComPtr<IFeedEnclosure> enclosure;
 	HRESULT error;
 	
 	error = backing->get_Title(&str);
@@ -237,9 +237,6 @@ void FeedItem::printDetails(std::wostream& out) const {
 			out << INDENT << INDENT << "Download Url: " << str << std::endl;
 			SysFreeString(str);
 		}
-
-
- 		enclosure->Release();
  	}
 	
 	error = backing->get_PubDate(&pubDate);
@@ -298,7 +295,7 @@ void FeedItem::printDetails(std::wostream& out) const {
 }
 
 wstring FeedItem::getPath() const {
-	IFeed* parent;
+	CComPtr<IFeed> parent;
 	backing->get_Parent((IDispatch**)&parent);
 	
 	BSTR  parentPath;
@@ -310,7 +307,6 @@ wstring FeedItem::getPath() const {
 	wchar_t retVal[STR_BUFFER_SIZE];
 	swprintf(retVal, STR_BUFFER_SIZE, L"%ls\\%d", (wchar_t *)parentPath, localid);
 	
-	parent->Release();
 	SysFreeString(parentPath);
 	return retVal;
 }
@@ -319,7 +315,7 @@ bool FeedItem::isError() const { return false; }
 
 std::pair<HRESULT, std::wstring> FeedItem::getAttachmentFile() const {
 	FEEDS_DOWNLOAD_STATUS status;
-	IFeedEnclosure* enclosure;
+	CComPtr<IFeedEnclosure> enclosure;
 	HRESULT result;
 	
 	result = backing->get_Enclosure((IDispatch**)&enclosure);
@@ -405,7 +401,7 @@ HRESULT FeedItem::attachImageFromDescription() {
 			} else if (0 == imgHref.size()) {
 				error = S_FALSE;
 			} else {
-				IFeedEnclosure* enclosure;
+				CComPtr<IFeedEnclosure> enclosure;
 				error = backing->get_Enclosure((IDispatch**) &enclosure);
 
 				if (S_FALSE == error) {
@@ -413,7 +409,7 @@ HRESULT FeedItem::attachImageFromDescription() {
 					error = backing->Xml(FXIF_CF_EXTENSIONS, &thisXml);
 					
 					if (SUCCEEDED(error)) {
-						IFeed* feed;
+						CComPtr<IFeed> feed;
 						error = backing->get_Parent((IDispatch**)& feed);
 
 						if (SUCCEEDED(error)) {
@@ -437,14 +433,9 @@ HRESULT FeedItem::attachImageFromDescription() {
 								BSTR toMerge2 = SysAllocString(toMerge.c_str());
 								BSTR toMerge3;
 
-								IFeedsManager* manager;
-
-								CoCreateInstance(
-									CLSID_FeedsManager, NULL, CLSCTX_ALL, IID_IFeedsManager,
-									(void**)&manager);
-
+								CComPtr<IFeedsManager> manager;
+								manager.CoCreateInstance(CLSID_FeedsManager);
 								manager->Normalize(toMerge2, &toMerge3);
-								manager->Release();
 
 								error = feed->Merge(toMerge3, securityUrl);
 							}
@@ -452,7 +443,6 @@ HRESULT FeedItem::attachImageFromDescription() {
 					}
 
 				} else if (SUCCEEDED(error)) {
-					enclosure->Release();
 					error = S_FALSE;
 				}
 			}
@@ -467,7 +457,7 @@ HRESULT FeedItem::attachImageFromDescription() {
 
 HRESULT FeedItem::downloadAttachmentAsync() {
 	FEEDS_DOWNLOAD_STATUS status;
-	IFeedEnclosure* enclosure;
+	CComPtr<IFeedEnclosure> enclosure;
 	HRESULT result;
 	
 	result = backing->get_Enclosure((IDispatch**)&enclosure);

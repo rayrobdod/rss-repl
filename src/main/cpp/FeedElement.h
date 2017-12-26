@@ -96,14 +96,13 @@ class FeedElement {
 	 */
 	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const = 0;
 	
+	// Yes, I'm using smart pointers everywhere. That does not mean that
+	// `FeedElement::followPath` has access to that smart pointer.
 	virtual std::shared_ptr<FeedElement> clone() const = 0;
 };
 
 class FeedFolder : public FeedElement {
  public:
-	/** 
-	 * @ref This takes possession of the IFeedFolder
-	 */
 	FeedFolder(CComPtr<IFeedFolder>);
 	virtual std::wstring getPath() const;
 	virtual void printDetails(std::wostream& out) const;
@@ -126,9 +125,6 @@ class FeedFolder : public FeedElement {
 
 class FeedFeed : public FeedElement {
  public:
-	 /**
-	  * @ref This takes possession of the IFeedFolder
-	  */
 	FeedFeed(CComPtr<IFeed>);
 	virtual std::wstring getPath() const;
 	virtual void printDetails(std::wostream& out) const;
@@ -151,9 +147,6 @@ class FeedFeed : public FeedElement {
 
 class FeedItem : public FeedElement {
  public:
-	/** 
-	 * @ref This takes possession of the IFeedFolder
-	 */
 	FeedItem(CComPtr<IFeedItem>);
 	virtual std::wstring getPath() const;
 	virtual void printDetails(std::wostream& out) const;

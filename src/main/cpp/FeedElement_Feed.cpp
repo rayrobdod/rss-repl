@@ -1,8 +1,10 @@
 
 #include "FeedElement.h"
+#include <regex>
 
 using std::pair;
 using std::wstring;
+using std::literals::string_literals::operator""s;
 
 
 FeedFeed::FeedFeed(CComPtr<IFeed> backing) : backing(backing) {}
@@ -20,19 +22,38 @@ std::shared_ptr<FeedElement> FeedFeed::getParent() const {
 }
 
 std::shared_ptr<FeedElement> FeedFeed::getChild(const wstring name) const {
+	const std::wregex item(L"\\d{1,6}"s);
+	const std::wregex range(L"(\\d{1,6})\\-(\\d{1,6})"s);
+	std::wcmatch results;
 	HRESULT error;
 
-	try {
-		LONG id = stoi(name);
+	if (std::regex_match(name.c_str(), results, item)) {
+		LONG id = stoi(results[0]);
 		CComPtr<IFeedItem> result;
 		error = backing->GetItem(id, (IDispatch**)&result);
-		if (error) {
-			return std::make_shared<ErrorFeedElement>(L"Unknown feed item number");
-		} else {
+		if (SUCCEEDED(error)) {
 			return std::make_shared<FeedItem>(result);
+		} else {
+			return std::make_shared<ErrorFeedElement>(L"Unknown feed item number");
 		}
-	} catch (const std::invalid_argument& e) {
-		return std::make_shared<ErrorFeedElement>(L"FeedItem names are integers");
+
+	} else if (std::regex_match(name.c_str(), results, range)) {
+		LONG low = stoi(results[1]);
+		LONG high = stoi(results[2]);
+		std::vector<LONG> range;
+		for (LONG i = low; i <= high; ++i) {
+			CComPtr<IFeedItem> result;
+			error = backing->GetItem(i, (IDispatch**)&result);
+			if (SUCCEEDED(error)) {
+				range.push_back(i);
+			} else {
+				// don't include item if item does not exist
+			}
+		}
+		return std::make_shared<FeedItemGroup>(backing, range);
+
+	} else {
+		return std::make_shared<ErrorFeedElement>(L"Child element not found");
 	}
 }
 
@@ -239,7 +260,9 @@ wstring FeedFeed::getPath() const {
 
 bool FeedFeed::isError() const { return false; }
 
-std::pair<HRESULT, std::wstring> FeedFeed::getAttachmentFile() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
+std::pair<HRESULT, std::wstring> FeedFeed::getAttachmentFile() const {
+	return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L"");
+}
 
 std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
 	HRESULT result;
@@ -263,7 +286,6 @@ HRESULT FeedFeed::attachImageFromDescription() {
 	HRESULT finalResult = S_OK;
 
 	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
-
 		std::shared_ptr<FeedElement> child = this->getChild(*i);
 		HRESULT thisResult = child->attachImageFromDescription();
 
@@ -280,7 +302,6 @@ HRESULT FeedFeed::downloadAttachmentAsync() {
 	HRESULT finalResult = S_OK;
 
 	for (auto i = childrenNames.cbegin(); i < childrenNames.cend(); ++i) {
-
 		std::shared_ptr<FeedElement> child = this->getChild(*i);
 		HRESULT thisResult = child->downloadAttachmentAsync();
 

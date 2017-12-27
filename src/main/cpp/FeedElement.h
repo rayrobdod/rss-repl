@@ -35,7 +35,7 @@ class FeedElement {
 	std::shared_ptr<FeedElement> followPath(const std::wstring path) const;
 	
 	/** 
-	 * Returns the object's path
+	 * Returns the object's path in the program's file system
 	 */
 	virtual std::wstring getPath() const = 0;
 	
@@ -82,7 +82,7 @@ class FeedElement {
 	virtual HRESULT attachImageFromDescription() = 0;
 	
 	/**
-	 * Start an asynchrounous download of this's attachments
+	 * Start an asynchronous download of this's attachments
 	 */
 	virtual HRESULT downloadAttachmentAsync() = 0;
  protected:
@@ -166,6 +166,29 @@ class FeedItem : public FeedElement {
 	virtual std::shared_ptr<FeedElement> clone() const;
  private:
 	CComPtr<IFeedItem> backing;
+};
+
+class FeedItemGroup : public FeedElement {
+ public:
+	FeedItemGroup(CComPtr<IFeed>, std::vector<LONG>);
+	virtual std::wstring getPath() const;
+	virtual void printDetails(std::wostream& out) const;
+	virtual void printContents(const bool filterUnread, std::wostream& out) const;
+	virtual std::vector<std::wstring> getContents() const;
+	virtual std::pair<HRESULT, std::wstring> getAttachmentFile() const;
+	virtual std::pair<HRESULT, std::wstring> getUrl() const;
+	virtual bool isError() const;
+	
+	virtual HRESULT markAsRead();
+	virtual HRESULT attachImageFromDescription();
+	virtual HRESULT downloadAttachmentAsync();
+ protected:
+	virtual std::shared_ptr<FeedElement> getParent() const;
+	virtual std::shared_ptr<FeedElement> getChild(const std::wstring name) const;
+	virtual std::shared_ptr<FeedElement> clone() const;
+ private:
+	CComPtr<IFeed> const backing;
+	std::vector<LONG> const indexes;
 };
 
 /**

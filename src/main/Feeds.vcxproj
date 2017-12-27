@@ -113,6 +113,7 @@
     <ClCompile Include="cpp\FeedElement_Feed.cpp" />
     <ClCompile Include="cpp\FeedElement_Folder.cpp" />
     <ClCompile Include="cpp\FeedElement_Item.cpp" />
+    <ClCompile Include="cpp\FeedElement_ItemGroup.cpp" />
     <ClCompile Include="cpp\FeedElement_Null.cpp" />
     <ClCompile Include="cpp\FeedElement_Shared.cpp" />
     <ClCompile Include="cpp\command.cpp" />

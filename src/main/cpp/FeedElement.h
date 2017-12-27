@@ -221,5 +221,10 @@ class ErrorFeedElement : public FeedElement {
  */
 std::shared_ptr<FeedElement> getRootFolder();
 
+/**
+ * Creates and returns a line describing the FeedItem, for use in other
+ * FeedElement's `printContents` methods
+ */
+std::wstring get_dir_line(CComPtr<IFeedItem>);
 
 #endif        //  #ifndef FEED_ELEMENT_H

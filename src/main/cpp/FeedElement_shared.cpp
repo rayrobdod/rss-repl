@@ -4,6 +4,7 @@
 
 using std::wstring;
 using std::pair;
+using std::literals::string_literals::operator""s;
 
 
 /** Returns a string that representing the status */
@@ -77,4 +78,33 @@ std::shared_ptr<FeedElement> FeedElement::followPath(const wstring path) const {
 		}
 	}
 	return current;
+}
+
+std::wstring get_dir_line(CComPtr<IFeedItem> item) {
+	BSTR name;
+	LONG localId;
+	VARIANT_BOOL isRead;
+	wchar_t retval[STR_BUFFER_SIZE];
+
+	HRESULT e1 = item->get_IsRead(&isRead);
+	HRESULT e2 = item->get_Title(&name);
+	HRESULT e3 = item->get_LocalId(&localId);
+	if (SUCCEEDED(e1) && SUCCEEDED(e2) && SUCCEEDED(e3)) {
+		const wchar_t* const isReadMessage = (isRead ? L"" : L"<NEW>");
+
+		wstring name_normalized; {
+			SplitStringIterator name_normalizer((wstring)(wchar_t*)name, L" \n\t"s);
+			for (auto i = name_normalizer; i != SplitStringIterator::end(); ++i) {
+				name_normalized += *i;
+				name_normalized += L" ";
+			}
+		}
+
+		swprintf(retval, STR_BUFFER_SIZE, L"%5ld %5ls %ls", localId, isReadMessage, name_normalized.c_str());
+	} else {
+		swprintf(retval, STR_BUFFER_SIZE, L"%5ls %5ls %ls", L"????", L"", L"COULD NOT READ ITEM");
+	}
+
+	if (SUCCEEDED(e2)) {SysFreeString(name);}
+	return retval;
 }

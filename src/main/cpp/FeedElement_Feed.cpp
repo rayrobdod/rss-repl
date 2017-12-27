@@ -64,11 +64,8 @@ std::shared_ptr<FeedElement> FeedFeed::clone() const {
 void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const {
 	CComPtr<IFeedsEnum> items;
 	BSTR name;
-	LONG localId;
-	DATE pubDate;
 	HRESULT error;
 	VARIANT_BOOL isRead;
-	wchar_t inbetween[STR_BUFFER_SIZE];
 	
 	// The feed name
 	error = backing->get_Name(&name);
@@ -92,22 +89,7 @@ void FeedFeed::printContents(const bool filterUnread, std::wostream& out) const 
 				curItem->get_IsRead(&isRead);
 
 				if (!filterUnread || (isRead == VARIANT_FALSE)) {
-					HRESULT error2;
-					HRESULT error3;
-
-					error = curItem->get_Title(&name);
-					error2 = curItem->get_PubDate(&pubDate);
-					error3 = curItem->get_LocalId(&localId);
-					if (SUCCEEDED(error3) && SUCCEEDED(error)) {
-						const wchar_t* const isReadMessage = (isRead ? L"" : L"<NEW>");
-
-						swprintf(inbetween, STR_BUFFER_SIZE, L"%4ld %5ls %ls", localId, isReadMessage, (wchar_t *)name);
-						out << inbetween << std::endl;
-
-						SysFreeString(name);
-					} else {
-						out << "???? COULD NOT READ ITEM" << std::endl;
-					}
+					out << get_dir_line(curItem) << std::endl;
 				}
 			}
 		} else {

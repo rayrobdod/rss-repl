@@ -39,6 +39,9 @@
     <ClCompile Include="cpp\command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cpp\FeedElement_ItemGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\FeedElement.h">

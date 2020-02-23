@@ -1,14 +1,14 @@
 LOCATE_TARGET ?= target ;
 RC ?= rc ;
 MSVCDIR ?= C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827 ;
+MSVCUNIT ?= C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2017\\Community\\VC\\Auxiliary\\VS\\UnitTest ;
 WINKIT_LIB ?= C:\\Program\ Files\ (x86)\\Windows\ Kits\\10\\lib\\10.0.16299.0 ;
 WINKIT_INCLUDE ?= C:\\Program\ Files\ (x86)\\Windows\ Kits\\10\\include\\10.0.16299.0 ;
 
 CCFLAGS += /EHsc ;
-CCFLAGS += /D _UNICODE /D UNICODE ;
-CCFLAGS += /D WITHOUT_ICONV_FILTER ;
+DEFINES += _UNICODE UNICODE ;
+DEFINES += WITHOUT_ICONV_FILTER ;
 C++FLAGS += /EHsc ;
-C++FLAGS += /D _UNICODE /D UNICODE ;
 
 LINKLIBS =
 	kernel32.lib
@@ -39,13 +39,16 @@ LINKFLAGS +=
 	/LIBPATH:\"$(WINKIT_LIB)\\ucrt\\x86\"
 	/LIBPATH:\"$(WINKIT_LIB)\\um\\x86\"
 	;
-SEARCH_SOURCE =
+HDRS =
 	\"$(MSVCDIR)\\ATLMFC\\include\"
 	\"$(MSVCDIR)\\include\"
+	\"$(MSVCUNIT)\\include\"
 	\"$(WINKIT_INCLUDE)\\ucrt\"
 	\"$(WINKIT_INCLUDE)\\shared\"
 	\"$(WINKIT_INCLUDE)\\um\"
 	\"$(WINKIT_INCLUDE)\\winrt\"
+	;
+SEARCH_SOURCE =
 	include\\hijack
 	include\\linenoise\\include
 	include\\libhubbub\\include
@@ -53,18 +56,17 @@ SEARCH_SOURCE =
 	include\\libhubbub_parserutils\\include
 	include\\libhubbub_parserutils\\src
 	;
-
 RCFLAGS ?= ;
-RCHDRS ?= /i$(SEARCH_SOURCE) ;
 
 
 rule Rc {
 	Depends $(<) : $(>) ;
+	Clean clean : $(<) ;
 	SUFOBJ on $(>) = .res ; # currently has no effect; only global SUFOBJ is used. Thankfully, link doesn't care.
 }
 
 actions Rc {
-	$(RC) /nologo /fo$(<) $(RCFLAGS) $(RCHDRS) $(>)
+	$(RC) /nologo /fo$(<) $(RCFLAGS) /i$(HDRS) $(>)
 }
 
 rule UserObject {
@@ -157,3 +159,48 @@ Depends include\\libhubbub_parserutils\\src\\charset\\encodings\\utf16.c : $(LOC
 Depends include\\libhubbub_parserutils\\src\\charset\\encodings\\utf8.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\encodings ;
 Depends [ Glob include\\libhubbub_parserutils\\src\\input : *.c ] : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\input ;
 Depends [ Glob include\\libhubbub_parserutils\\src\\utils : *.c ] : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\utils ;
+
+
+Depends all : tests ;
+NotFile runtests ;
+
+rule VsTest {
+	local _t ;
+	_t = [ FAppendSuffix $(<) : .dll ] ;
+	Depends tests : $(_t) ;
+	if $(_t) != $(<) {
+	    Depends $(<) : $(_t) ;
+	    NotFile $(<) ;
+	}
+	LINKFLAGS on $(_t) = $(LINKFLAGS) /DLL /LIBPATH:\"$(MSVCUNIT)\\lib\" ;
+	Main $(_t) : $(>) ;
+
+	# also set up a rule to run the built tests
+	NotFile $(_t:G=runtests) ;
+	Always $(_t:G=runtests) ;
+	Depends runtests : $(_t:G=runtests) ;
+	Depends $(_t:G=runtests) : $(_t) ;
+	RunVsTest1 $(_t:G=runtests) ;
+}
+
+actions RunVsTest1 {
+	vstest.console.exe $(LOCATE_TARGET)\$(<:G=) /logger:trx /Platform:x86 /ResultsDirectory:$(LOCATE_TARGET)\TestResults
+}
+
+VsTest tests :
+	[ Glob src\\test\\cpp : *.cpp ]
+	[ Glob include\\libhubbub\\src : *.c ]
+	[ Glob include\\libhubbub\\src\\charset : *.c ]
+	[ Glob include\\libhubbub\\src\\tokeniser : *.c ]
+	[ Glob include\\libhubbub\\src\\treebuilder : *.c ]
+	[ Glob include\\libhubbub\\src\\utils : *.c ]
+	[ Glob include\\hijack : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\charset : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\charset\\codecs : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\charset\\encodings : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\input : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\utils : *.c ]
+	;
+
+MkDir $(LOCATE_TARGET)\\src\\test\\cpp ;
+Depends [ Glob src\\test\\cpp : *.cpp ] : $(LOCATE_TARGET)\\src\\test\\cpp ;

@@ -1,13 +1,14 @@
+include Jamrules ;
+
 LOCATE_TARGET ?= target ;
-RC ?= rc ;
 MSVCDIR ?= C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827 ;
 MSVCUNIT ?= C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2017\\Community\\VC\\Auxiliary\\VS\\UnitTest ;
 WINKIT_LIB ?= C:\\Program\ Files\ (x86)\\Windows\ Kits\\10\\lib\\10.0.16299.0 ;
 WINKIT_INCLUDE ?= C:\\Program\ Files\ (x86)\\Windows\ Kits\\10\\include\\10.0.16299.0 ;
 
-CCFLAGS += /EHsc ;
 DEFINES += _UNICODE UNICODE ;
 DEFINES += WITHOUT_ICONV_FILTER ;
+CCFLAGS += /EHsc ;
 C++FLAGS += /EHsc ;
 
 LINKLIBS =
@@ -56,27 +57,24 @@ SEARCH_SOURCE =
 	include\\libhubbub_parserutils\\include
 	include\\libhubbub_parserutils\\src
 	;
-RCFLAGS ?= ;
 
 
-rule Rc {
-	Depends $(<) : $(>) ;
-	Clean clean : $(<) ;
-	SUFOBJ on $(>) = .res ; # currently has no effect; only global SUFOBJ is used. Thankfully, link doesn't care.
-}
+LIBRARYSOURCES =
+	[ Glob include\\linenoise\\src : *.cpp ]
+	[ Glob include\\libhubbub\\src\\charset : *.c ]
+	[ Glob include\\libhubbub\\src\\tokeniser : *.c ]
+	[ Glob include\\libhubbub\\src\\treebuilder : *.c ]
+	[ Glob include\\libhubbub\\src\\utils : *.c ]
+	[ Glob include\\libhubbub\\src : *.c ]
+	[ Glob include\\hijack : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\charset : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\charset\\codecs : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\charset\\encodings : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\input : *.c ]
+	[ Glob include\\libhubbub_parserutils\\src\\utils : *.c ]
+	;
 
-actions Rc {
-	$(RC) /nologo /fo$(<) $(RCFLAGS) /i$(HDRS) $(>)
-}
-
-rule UserObject {
-	switch $(>:S) {
-		case .rc : Rc $(<) : $(>) ;
-		case * : Exit "Unknown suffix on" $(>) ;
-	}
-}
-
-Main FeedsRepl :
+MAINSOURCES =
 	src\\main\\resource\\info.rc
 	src\\main\\cpp\\FeedElement_Feed.cpp
 	src\\main\\cpp\\FeedElement_Folder.cpp
@@ -87,120 +85,19 @@ Main FeedsRepl :
 	src\\main\\cpp\\SplitStringIterator.cpp
 	src\\main\\cpp\\command.cpp
 	src\\main\\cpp\\main.cpp
-	include\\linenoise\\src\\ConvertUTF.cpp
-	include\\linenoise\\src\\linenoise.cpp
-	include\\linenoise\\src\\wcwidth.cpp
-	include\\libhubbub\\src\\charset\\detect.c
-	include\\libhubbub\\src\\tokeniser\\entities.c
-	include\\libhubbub\\src\\tokeniser\\tokeniser.c
-	[ Glob include\\libhubbub\\src\\treebuilder : *.c ]
-	include\\libhubbub\\src\\utils\\errors.c
-	include\\libhubbub\\src\\utils\\string.c
-	include\\libhubbub\\src\\parser.c
-	include\\hijack\\strings.c
-	include\\libhubbub_parserutils\\src\\charset\\aliases.c
-	include\\libhubbub_parserutils\\src\\charset\\codec.c
-	include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_8859.c
-	include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_ascii.c
-	include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_ext8.c
-	include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_utf16.c
-	include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_utf8.c
-	include\\libhubbub_parserutils\\src\\charset\\encodings\\utf16.c
-	include\\libhubbub_parserutils\\src\\charset\\encodings\\utf8.c
-	include\\libhubbub_parserutils\\src\\input\\filter.c
-	include\\libhubbub_parserutils\\src\\input\\inputstream.c
-	[ Glob include\\libhubbub_parserutils\\src\\utils : *.c ]
 	;
 
-# Mkdirs due to my insistence on using a target directory
-MkDir $(LOCATE_TARGET)\\src\\main\\cpp ;
-MkDir $(LOCATE_TARGET)\\src\\main\\resource ;
-MkDir $(LOCATE_TARGET)\\include\\linenoise\\src ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub\\src\\charset ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub\\src\\tokeniser ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub\\src\\treebuilder ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub\\src\\utils ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub\\src ;
-MkDir $(LOCATE_TARGET)\\include\\hijack ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\codecs ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\encodings ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\input ;
-MkDir $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\utils ;
-Depends src\\main\\cpp\\FeedElement_Feed.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\FeedElement_Folder.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\FeedElement_Item.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\FeedElement_ItemGroup.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\FeedElement_Null.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\FeedElement_shared.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\SplitStringIterator.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\command.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\cpp\\main.cpp : $(LOCATE_TARGET)\\src\\main\\cpp ;
-Depends src\\main\\resource\\info.rc : $(LOCATE_TARGET)\\src\\main\\resource ;
-Depends include\\linenoise\\src\\ConvertUTF.cpp : $(LOCATE_TARGET)\\include\\linenoise\\src ;
-Depends include\\linenoise\\src\\linenoise.cpp : $(LOCATE_TARGET)\\include\\linenoise\\src ;
-Depends include\\linenoise\\src\\wcwidth.cpp : $(LOCATE_TARGET)\\include\\linenoise\\src ;
-Depends include\\libhubbub\\src\\charset\\detect.c : $(LOCATE_TARGET)\\include\\libhubbub\\src\\charset ;
-Depends include\\libhubbub\\src\\tokeniser\\entities.c : $(LOCATE_TARGET)\\include\\libhubbub\\src\\tokeniser ;
-Depends include\\libhubbub\\src\\tokeniser\\tokeniser.c : $(LOCATE_TARGET)\\include\\libhubbub\\src\\tokeniser ;
-Depends [ Glob include\\libhubbub\\src\\treebuilder : *.c ] : $(LOCATE_TARGET)\\include\\libhubbub\\src\\treebuilder ;
-Depends include\\libhubbub\\src\\utils\\errors.c : $(LOCATE_TARGET)\\include\\libhubbub\\src\\utils ;
-Depends include\\libhubbub\\src\\utils\\string.c : $(LOCATE_TARGET)\\include\\libhubbub\\src\\utils ;
-Depends include\\libhubbub\\src\\parser.c : $(LOCATE_TARGET)\\include\\libhubbub\\src ;
-Depends include\\hijack\\strings.c : $(LOCATE_TARGET)\\include\\hijack ;
-Depends include\\libhubbub_parserutils\\src\\charset\\aliases.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset ;
-Depends include\\libhubbub_parserutils\\src\\charset\\codec.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset ;
-Depends include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_8859.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\codecs ;
-Depends include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_ascii.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\codecs ;
-Depends include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_ext8.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\codecs ;
-Depends include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_utf16.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\codecs ;
-Depends include\\libhubbub_parserutils\\src\\charset\\codecs\\codec_utf8.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\codecs ;
-Depends include\\libhubbub_parserutils\\src\\charset\\encodings\\utf16.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\encodings ;
-Depends include\\libhubbub_parserutils\\src\\charset\\encodings\\utf8.c : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\charset\\encodings ;
-Depends [ Glob include\\libhubbub_parserutils\\src\\input : *.c ] : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\input ;
-Depends [ Glob include\\libhubbub_parserutils\\src\\utils : *.c ] : $(LOCATE_TARGET)\\include\\libhubbub_parserutils\\src\\utils ;
-
-
-Depends all : tests ;
-NotFile runtests ;
-
-rule VsTest {
-	local _t ;
-	_t = [ FAppendSuffix $(<) : .dll ] ;
-	Depends tests : $(_t) ;
-	if $(_t) != $(<) {
-	    Depends $(<) : $(_t) ;
-	    NotFile $(<) ;
-	}
-	LINKFLAGS on $(_t) = $(LINKFLAGS) /DLL /LIBPATH:\"$(MSVCUNIT)\\lib\" ;
-	Main $(_t) : $(>) ;
-
-	# also set up a rule to run the built tests
-	NotFile $(_t:G=runtests) ;
-	Always $(_t:G=runtests) ;
-	Depends runtests : $(_t:G=runtests) ;
-	Depends $(_t:G=runtests) : $(_t) ;
-	RunVsTest1 $(_t:G=runtests) ;
-}
-
-actions RunVsTest1 {
-	vstest.console.exe $(LOCATE_TARGET)\$(<:G=) /logger:trx /Platform:x86 /ResultsDirectory:$(LOCATE_TARGET)\TestResults
-}
-
-VsTest tests :
+TESTSOURCES =
 	[ Glob src\\test\\cpp : *.cpp ]
-	[ Glob include\\libhubbub\\src : *.c ]
-	[ Glob include\\libhubbub\\src\\charset : *.c ]
-	[ Glob include\\libhubbub\\src\\tokeniser : *.c ]
-	[ Glob include\\libhubbub\\src\\treebuilder : *.c ]
-	[ Glob include\\libhubbub\\src\\utils : *.c ]
-	[ Glob include\\hijack : *.c ]
-	[ Glob include\\libhubbub_parserutils\\src\\charset : *.c ]
-	[ Glob include\\libhubbub_parserutils\\src\\charset\\codecs : *.c ]
-	[ Glob include\\libhubbub_parserutils\\src\\charset\\encodings : *.c ]
-	[ Glob include\\libhubbub_parserutils\\src\\input : *.c ]
-	[ Glob include\\libhubbub_parserutils\\src\\utils : *.c ]
 	;
 
-MkDir $(LOCATE_TARGET)\\src\\test\\cpp ;
-Depends [ Glob src\\test\\cpp : *.cpp ] : $(LOCATE_TARGET)\\src\\test\\cpp ;
+
+Main FeedsRepl : $(MAINSOURCES) $(LIBRARYSOURCES) ;
+VsTest FeedsReplTests : $(TESTSOURCES) $(LIBRARYSOURCES) ;
+
+for srcfile in $(MAINSOURCES) $(TESTSOURCES) $(LIBRARYSOURCES) {
+	local _tardir ;
+	tardir = $(LOCATE_TARGET)\\$(srcfile:P) ;
+	MkDir $(tardir) ;
+	Depends $(srcfile) : $(tardir) ;
+}

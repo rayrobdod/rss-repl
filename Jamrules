@@ -1,0 +1,55 @@
+# Compiling other objects
+
+## Resource Compiler
+RC ?= rc ;
+RCFLAGS ?= ;
+
+rule Rc {
+	Depends $(<) : $(>) ;
+	Clean clean : $(<) ;
+	SUFOBJ on $(>) = .res ; # currently has no effect; only global SUFOBJ is used. Thankfully, link doesn't care.
+}
+
+actions Rc {
+	$(RC) /nologo /fo$(<) $(RCFLAGS) /i$(HDRS) $(>)
+}
+
+## UserObject using the above
+
+rule UserObject {
+	switch $(>:S) {
+		case .rc : Rc $(<) : $(>) ;
+		case * : Exit "Unknown suffix on" $(>) ;
+	}
+}
+
+# Test Run
+
+NotFile tests ;
+NotFile runtests ;
+
+Depends all : tests ;
+
+rule VsTest {
+	local _t ;
+	_t = [ FAppendSuffix $(<) : .dll ] ;
+	Depends tests : $(_t) ;
+	if $(_t) != $(<) {
+	    Depends $(<) : $(_t) ;
+	    NotFile $(<) ;
+	}
+	LINKFLAGS on $(_t) = $(LINKFLAGS) /DLL /LIBPATH:\"$(MSVCUNIT)\\lib\" ;
+	Main $(_t) : $(>) ;
+
+	# also set up a rule to run the built tests
+	NotFile $(_t:G=runtests) ;
+	Always $(_t:G=runtests) ;
+	Depends runtests : $(_t:G=runtests) ;
+	Depends $(_t:G=runtests) : $(_t) ;
+	RunVsTest1 $(_t:G=runtests) ;
+}
+
+actions RunVsTest1 {
+	vstest.console.exe $(LOCATE_TARGET)\$(<:G=) /logger:trx /Platform:x86 /ResultsDirectory:$(LOCATE_TARGET)\TestResults
+}
+

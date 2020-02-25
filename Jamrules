@@ -50,6 +50,5 @@ rule VsTest {
 }
 
 actions RunVsTest1 {
-	vstest.console.exe $(LOCATE_TARGET)\$(<:G=) /logger:trx /Platform:x86 /ResultsDirectory:$(LOCATE_TARGET)\TestResults
+	vstest.console.exe $(LOCATE)\$(<:G=) /logger:trx /Platform:x86 /ResultsDirectory:$(LOCATE)\TestResults
 }
-

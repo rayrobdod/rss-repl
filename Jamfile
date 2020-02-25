@@ -48,8 +48,6 @@ HDRS =
 	\"$(WINKIT_INCLUDE)\\shared\"
 	\"$(WINKIT_INCLUDE)\\um\"
 	\"$(WINKIT_INCLUDE)\\winrt\"
-	;
-SEARCH_SOURCE =
 	include\\hijack
 	include\\linenoise\\include
 	include\\libhubbub\\include
@@ -96,8 +94,9 @@ Main FeedsRepl : $(MAINSOURCES) $(LIBRARYSOURCES) ;
 VsTest FeedsReplTests : $(TESTSOURCES) $(LIBRARYSOURCES) ;
 
 for srcfile in $(MAINSOURCES) $(TESTSOURCES) $(LIBRARYSOURCES) {
-	local _tardir ;
-	tardir = $(LOCATE_TARGET)\\$(srcfile:P) ;
-	MkDir $(tardir) ;
-	Depends $(srcfile) : $(tardir) ;
+	local _tardir _locate ;
+	_locate = [ GetTargetVar $(srcfile:S=$(SUFOBJ)) : LOCATE ] ;
+	_tardir = $(_locate)\\$(srcfile:P) ;
+	MkDir $(_tardir) ;
+	Depends $(srcfile) : $(_tardir) ;
 }

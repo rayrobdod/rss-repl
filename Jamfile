@@ -92,11 +92,3 @@ TESTSOURCES =
 
 Main FeedsRepl : $(MAINSOURCES) $(LIBRARYSOURCES) ;
 VsTest FeedsReplTests : $(TESTSOURCES) $(LIBRARYSOURCES) ;
-
-for srcfile in $(MAINSOURCES) $(TESTSOURCES) $(LIBRARYSOURCES) {
-	local _tardir _locate ;
-	_locate = [ GetTargetVar $(srcfile:S=$(SUFOBJ)) : LOCATE ] ;
-	_tardir = $(_locate)\\$(srcfile:P) ;
-	MkDir $(_tardir) ;
-	Depends $(srcfile) : $(_tardir) ;
-}

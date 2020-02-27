@@ -1,3 +1,16 @@
+# Override Jambase rules to allow sources to specify a directory part and a
+# LOCATE_TARGET simultaneously.
+rule MakeLocate {
+	local _d ;
+	if $(<:D) { _d = \\$(<:D) ; } else { _d = "" ; }
+	local _finaldir = $(>[1]:E=.)$(_d) ;
+	if $(>) {
+		LOCATE on $(<) = $(>) ;
+		Depends $(<) : $(_finaldir:G=dir) ;
+		MkDir $(_finaldir:G=dir) ;
+	}
+}
+
 # Compiling other objects
 
 ## Resource Compiler
@@ -46,6 +59,7 @@ rule VsTest {
 	Always $(_t:G=runtests) ;
 	Depends runtests : $(_t:G=runtests) ;
 	Depends $(_t:G=runtests) : $(_t) ;
+	LOCATE on $(_t:G=runtests) = [ GetTargetVar $(_t) : LOCATE ] ;
 	RunVsTest1 $(_t:G=runtests) ;
 }
 

@@ -1,5 +1,6 @@
 include Jamrules ;
 
+OPTIM = /O2 ;
 LOCATE_TARGET ?= target ;
 MSVCDIR ?= C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2017\\Community\\VC\\Tools\\MSVC\\14.12.25827 ;
 MSVCUNIT ?= C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\\2017\\Community\\VC\\Auxiliary\\VS\\UnitTest ;

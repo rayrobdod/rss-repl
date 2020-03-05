@@ -11,6 +11,12 @@ rule MakeLocate {
 	}
 }
 
+# Override Jambase rules to get rid of the grist=subdir thing
+rule FGrist { return $(<) ; }
+rule FGristFiles { return $(<) ; }
+rule FGristSourceFiles { return $(<) ; }
+
+
 # Compiling other objects
 
 ## Resource Compiler

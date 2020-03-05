@@ -32,8 +32,41 @@ class WindowsConsoleOutputStreamBuf : public std::wstreambuf {
 		} else {
 			BOOL errorResult;
 			DWORD charsWritten;
-			errorResult = WriteConsole(console, &ch, 1, &charsWritten, NULL);
-			if (0 == errorResult) { return traits_type::eof(); }
+			if (0xD800 <= ch && ch < 0xE000) {
+				if (first_half_of_surrogate_pair == 0) {
+					first_half_of_surrogate_pair = ch;
+					errorResult = 1;
+				} else {
+					wchar_t buf[2] = {first_half_of_surrogate_pair, ch};
+					errorResult = WriteConsole(console, buf, 2, &charsWritten, NULL);
+					first_half_of_surrogate_pair = 0;
+				}
+			} else {
+				errorResult = WriteConsole(console, &ch, 1, &charsWritten, NULL);
+			}
+#ifdef DEBUG
+			if (0 == errorResult) {
+				// complain loudly and explicitly
+				LPVOID lpMsgBuf;
+				DWORD dw = GetLastError();
+
+				FormatMessage(
+					FORMAT_MESSAGE_ALLOCATE_BUFFER |
+					FORMAT_MESSAGE_FROM_SYSTEM |
+					FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					dw,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					(LPTSTR) &lpMsgBuf,
+					0, NULL );
+
+				wchar_t lpDisplayBuf[256] = {0};
+				swprintf(lpDisplayBuf, 256,
+					L"%ls failed with error %d: %s",
+					L"WriteConsole", dw, lpMsgBuf);
+				MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
+			}
+#endif
 			return ch;
 		}
 	}
@@ -43,6 +76,7 @@ class WindowsConsoleOutputStreamBuf : public std::wstreambuf {
 	WindowsConsoleOutputStreamBuf& operator=(const WindowsConsoleOutputStreamBuf&);
  private:
 	const HANDLE console;
+	int_type first_half_of_surrogate_pair;
 };
 
 

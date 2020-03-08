@@ -1,5 +1,7 @@
 
 #include "FeedElement.h"
+#include "loadResources.h"
+#include "..\\resource\\string_table_keys.h"
 #include <hubbub/parser.h>
 
 using std::pair;
@@ -133,14 +135,14 @@ std::shared_ptr<FeedElement> FeedItem::getParent() const {
 	CComPtr<IFeed> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
+		return std::make_shared<ErrorFeedElement>(LoadStringRrdStlW(IDS_ERR_TOP_LEVEL));
 	} else {
 		return std::make_shared<FeedFeed>(result);
 	}
 }
 
 std::shared_ptr<FeedElement> FeedItem::getChild(const wstring name) const {
-	return std::make_shared<ErrorFeedElement>(L"No subelements of a feed item");
+	return std::make_shared<ErrorFeedElement>(LoadStringRrdStlW(IDS_ERR_ITEM_CONTENTS));
 }
 
 std::shared_ptr<FeedElement> FeedItem::clone() const {
@@ -148,7 +150,7 @@ std::shared_ptr<FeedElement> FeedItem::clone() const {
 }
 
 void FeedItem::printContents(const bool filterUnread, std::wostream& out) const {
-	out << L"No contents inside an item";
+	out << LoadStringRrdStlW(IDS_ERR_ITEM_CONTENTS);
 }
 
 std::vector<wstring> FeedItem::getContents() const {
@@ -161,6 +163,7 @@ void FeedItem::printDetails(std::wostream& out) const {
 	VARIANT_BOOL isRead;
 	CComPtr<IFeedEnclosure> enclosure;
 	HRESULT error;
+	const std::wstring kvsep = LoadStringRrdStlW(IDS_KEY_VALUE_SEPARATOR);
 	
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
@@ -170,25 +173,41 @@ void FeedItem::printDetails(std::wostream& out) const {
 	
 	error = backing->get_Author(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Author: " << str << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_ITEM_AUTHOR)
+			<< kvsep
+			<< str
+			<< std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Url: " << str << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_ITEM_LINK)
+			<< kvsep
+			<< str
+			<< std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Comments(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Comments: " << str << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_ITEM_COMMENTS)
+			<< kvsep
+			<< str
+			<< std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_IsRead(&isRead);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Read: " << (isRead ? "TRUE" : "FALSE") << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_ITEM_ISREAD)
+			<< kvsep
+			<< (isRead ? "TRUE" : "FALSE")
+			<< std::endl;
 	}
 	
 	error = backing->get_Enclosure((IDispatch**) &enclosure);
@@ -196,45 +215,73 @@ void FeedItem::printDetails(std::wostream& out) const {
 		FEEDS_DOWNLOAD_STATUS dlstatus;
 		FEEDS_DOWNLOAD_ERROR dlerror;
 
-		out << INDENT << "Enclosure:" << std::endl;
+		out << INDENT << LoadStringRrdStlW(IDS_DETAILS_ITEM_ENCLOSURE) << std::endl;
 
 		error = enclosure->get_Type(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Type: " << str << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_TYPE)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_Url(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Url: " << str << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_URL)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadStatus(&dlstatus);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_DOWNLOADSTATUS)
+				<< kvsep
+				<< downloadStatus2String(dlstatus)
+				<< std::endl;
 		}
 
 		error = enclosure->get_LocalPath(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Local Path: " << str << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_LOCALPATH)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_LastDownloadError(&dlerror);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_LASTDOWNLOADERROR)
+				<< kvsep
+				<< downloadError2String(dlerror)
+				<< std::endl;
 		}
 
 		error = enclosure->get_DownloadMimeType(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Download Type: " << str << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_DOWNLOADMIMETYPE)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		}
 
 		error = enclosure->get_DownloadUrl(&str);
 		if (SUCCEEDED(error) && error != S_FALSE) {
-			out << INDENT << INDENT << "Download Url: " << str << std::endl;
+			out << INDENT << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ENCLOSURE_DOWNLOADURL)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		}
  	}
@@ -243,10 +290,18 @@ void FeedItem::printDetails(std::wostream& out) const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			out << INDENT << "Published: " << str << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ITEM_PUBDATE)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		} else {
-			out << INDENT << "Published: " << "ERROR" << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ITEM_PUBDATE)
+				<< kvsep
+				<< LoadStringRrdStlW(IDS_ERROR)
+				<< std::endl;
 		}
 	}
 	
@@ -254,10 +309,18 @@ void FeedItem::printDetails(std::wostream& out) const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			out << INDENT << "Modified: " << str << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ITEM_MODIFIED)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		} else {
-			out << INDENT << "Modified: " << "ERROR" << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_ITEM_MODIFIED)
+				<< kvsep
+				<< LoadStringRrdStlW(IDS_ERROR)
+				<< std::endl;
 		}
 	}
 

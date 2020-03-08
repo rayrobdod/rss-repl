@@ -109,6 +109,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
+
   <ItemGroup>
     <ClCompile Include="cpp\FeedElement_Feed.cpp" />
     <ClCompile Include="cpp\FeedElement_Folder.cpp" />
@@ -117,13 +118,19 @@
     <ClCompile Include="cpp\FeedElement_Null.cpp" />
     <ClCompile Include="cpp\FeedElement_Shared.cpp" />
     <ClCompile Include="cpp\command.cpp" />
+    <ClCompile Include="cpp\loadResources.cpp" />
     <ClCompile Include="cpp\main.cpp" />
     <ClCompile Include="cpp\SplitStringIterator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpp\command.h" />
+    <ClInclude Include="cpp\loadResources.h" />
     <ClInclude Include="cpp\FeedElement.h" />
     <ClInclude Include="cpp\SplitStringIterator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource\info.rc" />
+    <ClInclude Include="resource\string_table_keys.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\include\linenoise.vcxproj">
@@ -138,9 +145,6 @@
       <Project>{71742811-24D5-44AD-96EF-8A0A0F25F2EC}</Project>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="resource\info.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

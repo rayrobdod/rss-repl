@@ -1,5 +1,7 @@
 
 #include "FeedElement.h"
+#include "loadResources.h"
+#include "..\\resource\\string_table_keys.h"
 #include <regex>
 
 using std::pair;

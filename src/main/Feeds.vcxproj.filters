@@ -18,6 +18,9 @@
     <ClCompile Include="cpp\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClInclude Include="cpp\loadResources.cpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClCompile Include="cpp\FeedElement_Feed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,6 +54,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cpp\command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpp\loadResources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\string_table_keys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

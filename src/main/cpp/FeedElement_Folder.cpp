@@ -1,5 +1,7 @@
 
 #include "FeedElement.h"
+#include "loadResources.h"
+#include "..\\resource\\string_table_keys.h"
 
 using std::pair;
 using std::wstring;
@@ -15,7 +17,7 @@ std::shared_ptr<FeedElement> FeedFolder::getParent() const {
 	CComPtr<IFeedFolder> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
+		return std::make_shared<ErrorFeedElement>(LoadStringRrdStlW(IDS_ERR_TOP_LEVEL));
 	} else {
 		return std::make_shared<FeedFolder>(result);
 	}
@@ -40,7 +42,7 @@ std::shared_ptr<FeedElement> FeedFolder::getChild(const wstring name2) const {
 		error = backing->GetSubfolder(name, (IDispatch**)&result);
 		iterationStep = std::make_shared<FeedFolder>(result);
 	} else {
-		iterationStep = std::make_shared<ErrorFeedElement>(L"No such element");
+		iterationStep = std::make_shared<ErrorFeedElement>(LoadStringRrdStlW(IDS_ERR_NO_SUCH_CHILD));
 	}
 	SysFreeString(name);
 	return iterationStep;
@@ -74,10 +76,10 @@ void FeedFolder::printContents(const bool filterUnread, std::wostream& out) cons
 				out << inbetween << std::endl;
 				SysFreeString(name);
 			} else {
-				out << "ERROR" << std::endl;
+				out << LoadStringRrdStlW(ERROR) << std::endl;
 			}
 		} else {
-			out << "ERROR" << std::endl;
+			out << LoadStringRrdStlW(ERROR) << std::endl;
 		}
 	}
 	
@@ -103,11 +105,11 @@ void FeedFolder::printContents(const bool filterUnread, std::wostream& out) cons
 					out << inbetween << std::endl;
 				}
 			} else {
-				out << "ERROR" << std::endl;
+				out << LoadStringRrdStlW(ERROR) << std::endl;
 			}
 			SysFreeString(name);
 		} else {
-			out << "ERROR" << std::endl;
+			out << LoadStringRrdStlW(ERROR) << std::endl;
 		}
 	}
 }
@@ -165,7 +167,7 @@ std::vector<wstring> FeedFolder::getContents() const {
 }
 
 void FeedFolder::printDetails(std::wostream& out) const {
-	out << L"No details about a folder" << std::endl;
+	out << LoadStringRrdStlW(IDS_ERR_FOLDER_DETAILS_UNKNOWN) << std::endl;
 }
 
 wstring FeedFolder::getPath() const {

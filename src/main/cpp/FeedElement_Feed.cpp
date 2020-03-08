@@ -1,5 +1,7 @@
 
 #include "FeedElement.h"
+#include "loadResources.h"
+#include "..\\resource\\string_table_keys.h"
 #include <regex>
 
 using std::pair;
@@ -15,7 +17,8 @@ std::shared_ptr<FeedElement> FeedFeed::getParent() const {
 	CComPtr<IFeedFolder> result;
 	error = backing->get_Parent((IDispatch**)&result);
 	if (error) {
-		return std::make_shared<ErrorFeedElement>(L"Already top level; no parent to cd to");
+		std::wstring msg = LoadStringRrdStlW(IDS_ERR_TOP_LEVEL);
+		return std::make_shared<ErrorFeedElement>(msg);
 	} else {
 		return std::make_shared<FeedFolder>(result);
 	}
@@ -34,7 +37,7 @@ std::shared_ptr<FeedElement> FeedFeed::getChild(const wstring name) const {
 		if (SUCCEEDED(error)) {
 			return std::make_shared<FeedItem>(result);
 		} else {
-			return std::make_shared<ErrorFeedElement>(L"Unknown feed item number");
+			return std::make_shared<ErrorFeedElement>(LoadStringRrdStlW(IDS_ERR_NO_ITEM_WITH_NUMBER));
 		}
 
 	} else if (std::regex_match(name.c_str(), results, range)) {
@@ -53,7 +56,7 @@ std::shared_ptr<FeedElement> FeedFeed::getChild(const wstring name) const {
 		return std::make_shared<FeedItemGroup>(backing, range);
 
 	} else {
-		return std::make_shared<ErrorFeedElement>(L"Child element not found");
+		return std::make_shared<ErrorFeedElement>(LoadStringRrdStlW(IDS_ERR_NO_SUCH_CHILD));
 	}
 }
 
@@ -140,6 +143,7 @@ void FeedFeed::printDetails(std::wostream& out) const {
 	FEEDS_DOWNLOAD_ERROR dlerror;
 	DATE pubDate;
 	HRESULT error;
+	const std::wstring kvsep = LoadStringRrdStlW(IDS_KEY_VALUE_SEPARATOR);
 
 	error = backing->get_Title(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
@@ -149,37 +153,65 @@ void FeedFeed::printDetails(std::wostream& out) const {
 
 	error = backing->get_UnreadItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Unread Item Count: " << number << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_UNREADITEMCOUNT)
+			<< kvsep
+			<< number
+			<< std::endl;
 	}
 
 	error = backing->get_ItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Item Count: " << number << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_ITEMCOUNT)
+			<< kvsep
+			<< number
+			<< std::endl;
 	}
 
 	error = backing->get_MaxItemCount(&number);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Max Item Count: " << number << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_MAXITEMCOUNT)
+			<< kvsep
+			<< number
+			<< std::endl;
 	}
 
 	error = backing->get_DownloadStatus(&dlstatus);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Download Status: " << downloadStatus2String(dlstatus) << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_DOWNLOADSTATUS)
+			<< kvsep
+			<< downloadStatus2String(dlstatus)
+			<< std::endl;
 	}
 
 	error = backing->get_LastDownloadError(&dlerror);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Download Error: " << downloadError2String(dlerror) << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_LASTDOWNLOADERROR)
+			<< kvsep
+			<< downloadError2String(dlerror)
+			<< std::endl;
 	}
 
 	error = backing->get_PubDate(&pubDate);
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			out << INDENT << "Published: " << str << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_FEED_PUBDATE)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		} else {
-			out << INDENT << "Published: " << "ERROR" << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_FEED_PUBDATE)
+				<< kvsep
+				<< LoadStringRrdStlW(IDS_ERROR)
+				<< std::endl;
 		}
 	}
 
@@ -187,10 +219,18 @@ void FeedFeed::printDetails(std::wostream& out) const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			out << INDENT << "Built: " << str << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_FEED_LASTBUILDDATE)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		} else {
-			out << INDENT << "Built: " << "ERROR" << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_FEED_LASTBUILDDATE)
+				<< kvsep
+				<< LoadStringRrdStlW(IDS_ERROR)
+				<< std::endl;
 		}
 	}
 
@@ -198,28 +238,48 @@ void FeedFeed::printDetails(std::wostream& out) const {
 	if (SUCCEEDED(error) && error != S_FALSE) {
 		error = VarBstrFromDate(pubDate, GetSystemDefaultLCID(), VAR_FOURDIGITYEARS, &str);
 		if (SUCCEEDED(error)) {
-			out << INDENT << "Downloaded: " << str << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_FEED_LASTDOWNLOADTIME)
+				<< kvsep
+				<< str
+				<< std::endl;
 			SysFreeString(str);
 		} else {
-			out << INDENT << "Downloaded: " << "ERROR" << std::endl;
+			out << INDENT
+				<< LoadStringRrdStlW(IDS_DETAILS_FEED_LASTDOWNLOADTIME)
+				<< kvsep
+				<< LoadStringRrdStlW(IDS_ERROR)
+				<< std::endl;
 		}
 	}
 
 	error = backing->get_Image(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Image: " << str << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_IMAGE)
+			<< kvsep
+			<< str
+			<< std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_Link(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Link: " << str << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_LINK)
+			<< kvsep
+			<< str
+			<< std::endl;
 		SysFreeString(str);
 	}
 
 	error = backing->get_DownloadUrl(&str);
 	if (SUCCEEDED(error) && error != S_FALSE) {
-		out << INDENT << "Download Url: " << str << std::endl;
+		out << INDENT
+			<< LoadStringRrdStlW(IDS_DETAILS_FEED_DOWNLOADURL)
+			<< kvsep
+			<< str
+			<< std::endl;
 		SysFreeString(str);
 	}
 

@@ -15,6 +15,8 @@
 #include "SplitStringIterator.h"
 #include "linenoise.h"
 #include "command.h"
+#include "loadResources.h"
+#include "..\\resource\\string_table_keys.h"
 
 using std::wstring;
 using std::vector;
@@ -130,7 +132,7 @@ void lineNoiseCompletionHook(char const* prefix, linenoiseCompletions* lc) {
 int main(int argc, char** argv) {
 	bool exit = false;
 	
-	SetConsoleTitle(TEXT("RSS REPL"));
+	SetConsoleTitle(LoadStringRrdLpcT(IDS_TITLE));
 	const UINT oldcp = GetConsoleOutputCP();
 	SetConsoleOutputCP(CP_UTF8);
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
@@ -149,7 +151,8 @@ int main(int argc, char** argv) {
 			int utf8StringBufferLen = WideCharToMultiByte(CP_UTF8, 0, currentFolder->getPath().c_str(), currentFolder->getPath().length(), NULL, 0, NULL, NULL);
 			LPSTR utf8String = new char[utf8StringBufferLen];
 			int utf8StringLen = WideCharToMultiByte(CP_UTF8, 0, currentFolder->getPath().c_str(), currentFolder->getPath().length(), utf8String, utf8StringBufferLen, NULL, NULL);
-			std::string prompt("%Feeds%\\");
+			std::string prompt(LoadStringRrdStlA(IDS_PROMPT));
+			prompt.append("\\");
 			prompt.append(utf8String, utf8StringLen);
 			prompt.append("> ");
 			

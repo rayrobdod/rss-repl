@@ -321,6 +321,13 @@ std::pair<HRESULT, std::wstring> FeedFeed::getUrl() const {
 	}
 }
 
+HRESULT FeedFeed::delet() {
+	HRESULT result;
+
+	result = backing->Delete();
+	return result;
+}
+
 HRESULT FeedFeed::markAsRead() { return E_NOTIMPL; }
 
 HRESULT FeedFeed::attachImageFromDescription() {

@@ -68,6 +68,12 @@ class FeedElement {
 	 * True if this is to be treated as the error object
 	 */
 	virtual bool isError() const = 0;
+
+	/**
+	 * Attempts to delete an element
+	 * @return S_OK if succeeded; E_NOTIMPL if the item cannot be deleted; maybe others
+	 */
+	virtual HRESULT delet() = 0;
 	
 	/**
 	 * Attempts to mark the item as read
@@ -113,6 +119,7 @@ class FeedFolder : public FeedElement {
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 	
+	virtual HRESULT delet();
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
@@ -135,6 +142,7 @@ class FeedFeed : public FeedElement {
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 	
+	virtual HRESULT delet();
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
@@ -157,6 +165,7 @@ class FeedItem : public FeedElement {
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 	
+	virtual HRESULT delet();
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
@@ -179,6 +188,7 @@ class FeedItemGroup : public FeedElement {
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 	
+	virtual HRESULT delet();
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();
@@ -205,6 +215,7 @@ class ErrorFeedElement : public FeedElement {
 	virtual std::pair<HRESULT, std::wstring> getUrl() const;
 	virtual bool isError() const;
 	
+	virtual HRESULT delet();
 	virtual HRESULT markAsRead();
 	virtual HRESULT attachImageFromDescription();
 	virtual HRESULT downloadAttachmentAsync();

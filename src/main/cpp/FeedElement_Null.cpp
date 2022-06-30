@@ -41,6 +41,8 @@ std::pair<HRESULT, std::wstring> ErrorFeedElement::getAttachmentFile() const { r
 
 std::pair<HRESULT, std::wstring> ErrorFeedElement::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
+HRESULT ErrorFeedElement::delet() { return E_NOTIMPL; }
+
 HRESULT ErrorFeedElement::markAsRead() { return E_NOTIMPL; }
 
 HRESULT ErrorFeedElement::attachImageFromDescription() { return E_NOTIMPL; }

@@ -184,6 +184,8 @@ std::pair<HRESULT, std::wstring> FeedFolder::getAttachmentFile() const { return 
 
 std::pair<HRESULT, std::wstring> FeedFolder::getUrl() const { return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L""); }
 
+HRESULT FeedFolder::delet() { return E_NOTIMPL; }
+
 HRESULT FeedFolder::markAsRead() { return E_NOTIMPL; }
 
 HRESULT FeedFolder::attachImageFromDescription() { return E_NOTIMPL; }

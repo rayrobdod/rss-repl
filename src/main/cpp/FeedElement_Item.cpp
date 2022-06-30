@@ -426,6 +426,8 @@ std::pair<HRESULT, std::wstring> FeedItem::getUrl() const {
 	}
 }
 
+HRESULT FeedItem::delet() { return E_NOTIMPL; }
+
 HRESULT FeedItem::markAsRead() {
 	return backing->put_IsRead(VARIANT_TRUE);
 }

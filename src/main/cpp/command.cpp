@@ -148,6 +148,18 @@ const std::unordered_map<wstring, std::tuple<wstring, CommandFunction>> replComm
 		}
 		return std::make_tuple(false, currentFolder);
 	})),
+	std::make_pair(L"delete", std::make_tuple(L"delete an item", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
+		const wstring path = (command.positional.size() > 1 ? command.positional[1] : L".");
+
+		std::shared_ptr<FeedElement> targetFolder = currentFolder->followPath(path);
+		HRESULT result = targetFolder->delet();
+		if (SUCCEEDED(result)) {
+			out << "Delete succeeded" << std::endl;
+		} else {
+			out << "Delete failed" << std::endl;
+		}
+		return std::make_tuple(false, currentFolder);
+	})),
 	std::make_pair(L"echo", std::make_tuple(L"Echo arguments to command line", [](std::shared_ptr<FeedElement> currentFolder, CommandString command, std::wostream& out) {
 		out << "Flags:" << std::endl;
 		for (auto i = command.flags.cbegin(); i != command.flags.cend(); ++i) {

@@ -124,6 +124,8 @@ std::pair<HRESULT, std::wstring> FeedItemGroup::getUrl() const {
 	return std::pair<HRESULT, std::wstring>(E_NOTIMPL, L"");
 }
 
+HRESULT FeedItemGroup::delet() { return E_NOTIMPL; }
+
 HRESULT FeedItemGroup::markAsRead() {
 	std::vector<wstring> childrenNames = this->getContents();
 	HRESULT finalResult = S_OK;

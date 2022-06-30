@@ -1,5 +1,5 @@
 version: yml.{build}
-image: Visual Studio 2019
+image: Visual Studio 2022
 build:
   verbosity: minimal
 platform:
